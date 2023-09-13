@@ -9,6 +9,7 @@ import { RadioRooms } from '../Screens/RadioRooms'
 import { Profile } from '../Screens/Profile'
 import { Login } from '../Screens/Login'
 import { useAuthStore } from '../Store/useAuthStore'
+import {Fragment} from "react";
 
 const Stack = createNativeStackNavigator()
 
@@ -39,7 +40,7 @@ export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
 
   return (
-    <NavigationContainer>
+    <Fragment>
       <Stack.Navigator
         screenOptions={{
           headerBackTitleVisible: false,
@@ -53,6 +54,6 @@ export const Navigation = () => {
           <Stack.Screen name='Auth' component={AuthStack} />
         )}
       </Stack.Navigator>
-    </NavigationContainer>
+    </Fragment>
   )
 }
