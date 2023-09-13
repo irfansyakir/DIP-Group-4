@@ -1,7 +1,5 @@
-import * as React from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import {makeRedirectUri, ResponseType, useAuthRequest} from 'expo-auth-session';
-import { Button } from 'react-native';
 import {useEffect} from "react";
 import * as Linking from "expo-linking";
 import {useAuthStore} from "../../Store/useAuthStore";
@@ -14,14 +12,19 @@ const discovery = {
 };
 
 const clientId = process.env.EXPO_PUBLIC_SPOTIFY_API_CLIENT_ID
-const redirectUri = Linking.createURL('/');
+// const redirectUri = Linking.createURL('/');
 
 //Todo
 //Add logout function
 //add refresh token function
 
-export default function SpotifyApiAuth(){
+export function useSpotifyApi(){
     const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
+    const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
+
+    // const changeCode = useAuthStore((state) => state.changeCode)
+    // const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
+    // const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
 
     const [request, response, promptAsync] = useAuthRequest(
         {
@@ -33,18 +36,25 @@ export default function SpotifyApiAuth(){
             // this must be set to false
             usePKCE: false,
             redirectUri: makeRedirectUri({
-                scheme: 'radioroom'
+                scheme: 'radioroom',
+                path: 'redirect'
             }),
             // redirectUri: 'exp://127.0.0.1:8081/--/'
+
+
+            // The redirect URI ideally would be radioroom://redirect. In expo project would be exp://localhost
         },
         discovery
     );
 
     useEffect(() => {
+        console.log(response)
+
         if (response?.type === 'success') {
             const { access_token } = response.params;
-            console.log("access token: ", access_token)
+            // console.log("access token: ", access_token)
             changeAccessToken(access_token)
+            changeIsLoggedIn(true)
         }
     }, [response]);
 

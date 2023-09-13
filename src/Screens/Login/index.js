@@ -1,9 +1,9 @@
 import { TextInput } from 'react-native'
 import { Button } from '@rneui/themed'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import { useAuthStore } from '../../Store/useAuthStore'
-import SpotifyApiAuth, {Api} from "../../Utilities/SpotifyApiAuth";
+import {useSpotifyApi} from "../../Utilities/SpotifyApi/useSpotifyApi";
 
 export const Login = () => {
     const [userId, setUserId] = useState('')
@@ -11,12 +11,9 @@ export const Login = () => {
     const changeUserId = useAuthStore((state) => state.changeUserId)
     const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
 
-    const changeCode = useAuthStore((state) => state.changeCode)
-    const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
-    const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
-    const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
+    // const accessToken = useAuthStore((state) => state.accessToken)
 
-    const [apiLogin] = SpotifyApiAuth()
+    const [apiLogin] = useSpotifyApi()
 
     // TODO:
     // - add redirect to Spotify Web
@@ -73,7 +70,6 @@ export const Login = () => {
             title='SpotifyLogin'
             onPress={() => {
                 apiLogin()
-                changeIsLoggedIn(true)
             }}
             loadingProps={{ size: 'small', color: 'white' }}
             buttonStyle={{
