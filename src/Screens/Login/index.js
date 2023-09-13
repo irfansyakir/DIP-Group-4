@@ -40,6 +40,7 @@ export const Login = () => {
         onChangeText={setUserId}
         value={userId}
         placeholder='Enter UserID'
+        keyboardType='default'
       />
       <Button
         title='Login'
