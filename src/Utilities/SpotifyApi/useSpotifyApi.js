@@ -1,7 +1,6 @@
 import * as WebBrowser from 'expo-web-browser';
-import {makeRedirectUri, ResponseType, useAuthRequest} from 'expo-auth-session';
+import {AccessTokenRequest, makeRedirectUri, ResponseType, useAuthRequest} from 'expo-auth-session';
 import {useEffect} from "react";
-import * as Linking from "expo-linking";
 import {useAuthStore} from "../../Store/useAuthStore";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -12,8 +11,16 @@ const discovery = {
 };
 
 const clientId = process.env.EXPO_PUBLIC_SPOTIFY_API_CLIENT_ID
-// const redirectUri = Linking.createURL('/');
+const clientSecret = process.env.EXPO_PUBLIC_SPOTIFY_API_CLIENT_SECRET
 
+// const redirectUri = Linking.createURL('/');
+const redirectUri = makeRedirectUri({
+        scheme: 'radioroom',
+        path: 'redirect'
+})
+// The redirect URI ideally would be radioroom://redirect. In expo project would be exp://localhost
+
+const scope = ['user-read-email', 'playlist-modify-public']
 //Todo
 //Add logout function
 //add refresh token function
@@ -24,37 +31,44 @@ export function useSpotifyApi(){
 
     // const changeCode = useAuthStore((state) => state.changeCode)
     // const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
-    // const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
+    const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
 
     const [request, response, promptAsync] = useAuthRequest(
         {
-            //deactivate this to only get the code so can setup refresh token
-            responseType: ResponseType.Token,
             clientId: clientId,
-            scopes: ['user-read-email', 'playlist-modify-public'],
             // In order to follow the "Authorization Code Flow" to fetch token after authorizationEndpoint
             // this must be set to false
             usePKCE: false,
-            redirectUri: makeRedirectUri({
-                scheme: 'radioroom',
-                path: 'redirect'
-            }),
-            // redirectUri: 'exp://127.0.0.1:8081/--/'
-
-
-            // The redirect URI ideally would be radioroom://redirect. In expo project would be exp://localhost
+            redirectUri: redirectUri,
         },
         discovery
     );
 
     useEffect(() => {
-        console.log(response)
-
         if (response?.type === 'success') {
-            const { access_token } = response.params;
+            // console.log(response)
+            const { code } = response.params;
             // console.log("access token: ", access_token)
-            changeAccessToken(access_token)
-            changeIsLoggedIn(true)
+            // changeAccessToken(access_token)
+            // console.log(code)
+            const tokenRequest = new AccessTokenRequest({
+                code: code,
+                redirectUri: redirectUri,
+                clientId: clientId,
+                clientSecret: clientSecret,
+                scopes: scope,
+                // AuthorizationCode: "authorization_code"
+            },
+                discovery
+            )
+            tokenRequest.performAsync(discovery)
+                .then(r => {
+                    changeAccessToken(r.accessToken)
+                    changeRefreshToken(r.refreshToken)
+                    console.log("Access Token: \n", r.accessToken)
+                    console.log("Refresh Token: \n", r.refreshToken)
+                })
+
         }
     }, [response]);
 

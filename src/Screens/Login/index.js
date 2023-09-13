@@ -69,7 +69,9 @@ export const Login = () => {
         <Button
             title='SpotifyLogin'
             onPress={() => {
-                apiLogin()
+                apiLogin().then(() => {
+                    changeIsLoggedIn(true)
+                })
             }}
             loadingProps={{ size: 'small', color: 'white' }}
             buttonStyle={{
