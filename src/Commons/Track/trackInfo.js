@@ -13,7 +13,7 @@ const Icon = createIconSetFromIcoMoon(
 
 const Item = props => {
 return(
-<TouchableOpacity style={styles.segment} onPress={() => console.log('hehe')} > 
+<TouchableOpacity style={styles.segment} onPress={props.do} > 
   <Icon style={styles.icon} name={props.iconname} size={20} color="white" />
   <Text style={styles.text}>{props.text}</Text>
 </TouchableOpacity>
@@ -30,6 +30,16 @@ export const TrackInfo = () => {
     return null;
   }
 
+  function do1(){
+    console.log('hehe');
+  }
+  function do2(){
+    console.log('haha');
+  }
+  function do3(){
+    console.log('hoho');
+  }
+
   return (
   <View style={styles.container}>
     <LinearGradient
@@ -44,9 +54,9 @@ export const TrackInfo = () => {
       <Text style={styles.desc}>crescent moon • Album name</Text>
 
     {/* album, hide, addsong, addqueue, user, users */}
-      <Item text='Hide song' iconname = 'hide'></Item>
-      <Item text='Add to playlist' iconname = 'addsong'></Item>
-      <Item text='Add to queue' iconname = 'addqueue'></Item>
+      <Item text='Hide song' iconname = 'hide' do = {do1}></Item>
+      <Item text='Add to playlist' iconname = 'addsong' do = {do2}></Item>
+      <Item text='Add to queue' iconname = 'addqueue' do = {do3}></Item>
       <Item text='View album' iconname = 'album'></Item>
       <Item text='View artist' iconname = 'user'></Item>
       <Item text='Song credits' iconname = 'users'></Item>
