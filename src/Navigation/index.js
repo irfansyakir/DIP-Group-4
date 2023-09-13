@@ -19,10 +19,11 @@ function HomeTabs() {
             <Tab.Screen name="Search" component={Search} />
             <Tab.Screen name="RadioRooms" component={RadioRooms} />
             <Tab.Screen name="Profile" component={Profile} />
-                
+            
         </Tab.Navigator>
     );
 }
+
 export const Navigation = () => {
     return(
         <NavigationContainer>
@@ -40,3 +41,5 @@ export const Navigation = () => {
 
     )
 }
+
+
