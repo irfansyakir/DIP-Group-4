@@ -8,6 +8,7 @@ import {Search} from "../Screens/Search";
 import {RadioRooms} from "../Screens/RadioRooms";
 import {Profile} from "../Screens/Profile";
 import {Login} from "../Screens/Login";
+import {Chatroom} from "../Screens/Chatroom";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -18,6 +19,7 @@ function HomeTabs() {
             <Tab.Screen name="Search" component={Search} />
             <Tab.Screen name="RadioRooms" component={RadioRooms} />
             <Tab.Screen name="Profile" component={Profile} />
+                
         </Tab.Navigator>
     );
 }
@@ -30,11 +32,11 @@ export const Navigation = () => {
                     headerBackVisible: false
                 }}
             >
-                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Login" component={Login} /> 
                 <Stack.Screen name="RootHome" component={HomeTabs} />
+                <Stack.Screen name="Chatroom" component={Chatroom} />
             </Stack.Navigator>
         </NavigationContainer>
 
     )
 }
-
