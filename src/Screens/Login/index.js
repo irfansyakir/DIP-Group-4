@@ -3,7 +3,7 @@ import { Button } from '@rneui/themed'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import {useState} from 'react'
 import { useAuthStore } from '../../Store/useAuthStore'
-import {useSpotifyApi} from "../../Utilities/SpotifyApi/useSpotifyApi";
+import {useSpotifyAuthenticate} from "../../Utilities/SpotifyApi/useSpotifyAuthenticate";
 
 export const Login = () => {
     const [userId, setUserId] = useState('')
@@ -13,7 +13,7 @@ export const Login = () => {
 
     // const accessToken = useAuthStore((state) => state.accessToken)
 
-    const [apiLogin] = useSpotifyApi()
+    const [apiLogin] = useSpotifyAuthenticate()
 
     // TODO:
     // - add redirect to Spotify Web

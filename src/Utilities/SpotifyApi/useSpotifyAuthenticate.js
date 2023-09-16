@@ -20,12 +20,12 @@ const redirectUri = makeRedirectUri({
 })
 // The redirect URI ideally would be radioroom://redirect. In expo project would be exp://localhost
 
-const scope = ['user-read-email', 'playlist-modify-public']
+const scope = ['user-read-email', 'playlist-modify-public', 'playlist-modify-private', 'playlist-read-private', 'playlist-read-collaborative']
 //Todo
 //Add logout function
 //add refresh token function
 
-export function useSpotifyApi(){
+export function useSpotifyAuthenticate(){
     const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
     const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
 
@@ -40,6 +40,7 @@ export function useSpotifyApi(){
             // this must be set to false
             usePKCE: false,
             redirectUri: redirectUri,
+            scopes: scope,
         },
         discovery
     );
@@ -65,8 +66,8 @@ export function useSpotifyApi(){
                 .then(r => {
                     changeAccessToken(r.accessToken)
                     changeRefreshToken(r.refreshToken)
-                    console.log("Access Token: \n", r.accessToken)
-                    console.log("Refresh Token: \n", r.refreshToken)
+                    // console.log("Access Token: \n", r.accessToken)
+                    // console.log("Refresh Token: \n", r.refreshToken)
                 })
 
         }
