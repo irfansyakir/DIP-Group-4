@@ -14,7 +14,7 @@ const Icon = createIconSetFromIcoMoon(
 const Item = props => {
 return(
 <TouchableOpacity style={styles.segment} onPress={props.do} > 
-  <Icon style={styles.icon} name={props.iconname} size={20} color="white" />
+  <Icon style={styles.icon} name={props.iconname} size={20}/>
   <Text style={styles.text}>{props.text}</Text>
 </TouchableOpacity>
 )
@@ -56,7 +56,7 @@ export const TrackInfo = () => {
     {/* album, hide, addsong, addqueue, user, users */}
       <Item text='Hide song' iconname = 'hide' do = {do1}></Item>
       <Item text='Add to playlist' iconname = 'addsong' do = {do2}></Item>
-      <Item text='Add to queue' iconname = 'addqueue' do = {do3}></Item>
+      <Item text='Add to queue' iconname = 'addqueue'></Item>
       <Item text='View album' iconname = 'album'></Item>
       <Item text='View artist' iconname = 'user'></Item>
       <Item text='Song credits' iconname = 'users'></Item>
@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
       marginTop:100,
     }, icon:{
       marginRight:15,
+      color: "#FFF",
     }, segment1:{
       display: 'flex',
       flexDirection:  'row',
