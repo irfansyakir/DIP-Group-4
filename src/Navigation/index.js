@@ -11,6 +11,7 @@ import { Profile } from '../Screens/Profile'
 import { Login } from '../Screens/Login'
 import { useAuthStore } from '../Store/useAuthStore'
 import { COLORS, SIZES } from '../Constants'
+import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 
 const Stack = createNativeStackNavigator()
 
@@ -77,19 +78,32 @@ export const Navigation = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerBackTitleVisible: false,
-          headerBackVisible: false,
-          headerShown: false,
-        }}
-      >
-        {isLoggedIn ? (
-          <Stack.Screen name='RootHome' component={HomeTabs} />
-        ) : (
-          <Stack.Screen name='Auth' component={AuthStack} />
+      <React.Fragment>
+        <Stack.Navigator
+          screenOptions={{
+            headerBackTitleVisible: false,
+            headerBackVisible: false,
+            headerShown: false,
+          }}
+        >
+          {isLoggedIn ? (
+            <Stack.Screen name='RootHome' component={HomeTabs} />
+          ) : (
+            <Stack.Screen name='Auth' component={AuthStack} />
+          )}
+        </Stack.Navigator>
+        {isLoggedIn && (
+          <CurrentlyPlaying
+            coverUrl={
+              'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'
+            }
+            title='Never Not'
+            artist={'Lauv'}
+            currentTime={30}
+            duration={100}
+          />
         )}
-      </Stack.Navigator>
+      </React.Fragment>
     </NavigationContainer>
   )
 }
