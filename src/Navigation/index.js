@@ -10,33 +10,21 @@ import {Login} from "../Screens/Login";
 import {EditProfile} from "../Screens/EditProfile";
 import {Fragment} from "react";
 import {useAuthStore} from "../Store/useAuthStore";
+import {TestAPI} from "../Screens/TestAPI";
 
 const Stack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
-//     <NavigationContainer>
-//     <Stack.Navigator
-// screenOptions={{
-//     headerBackTitleVisible: false,
-//         headerBackVisible: false
-// }}
-// >
-// <Stack.Screen name="Login" component={Login} />
-// <Stack.Screen name="RootHome" component={HomeTabs} />
-// <Stack.Screen name="EditProfile" component={EditProfile} />
-// <Stack.Screen name="Profile" component={Profile} />
-// </Stack.Navigator>
-// </NavigationContainer>
-
 // Navigation after user LOG IN
 function HomeTabs() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name='Home' component={Home} />
-      <Tab.Screen name='Search' component={Search} />
-      <Tab.Screen name='RadioRooms' component={RadioRooms} />
-      <Tab.Screen name='Profile' component={Profile} />
+        <Tab.Screen name='Home' component={Home} />
+        <Tab.Screen name='Search' component={Search} />
+        <Tab.Screen name='RadioRooms' component={RadioRooms} />
+        <Tab.Screen name='Profile' component={Profile} />
+        <Tab.Screen name='TestAPI' component={TestAPI} />
     </Tab.Navigator>
   )
 }
