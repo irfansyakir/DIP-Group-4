@@ -1,6 +1,7 @@
 import { AppContainer } from './src/App'
 import { useFonts } from 'expo-font'
 
+
 export default function App() {
   const [loaded] = useFonts({
     InterLight: require('./assets/fonts/Inter-Light.ttf'),
