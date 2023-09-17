@@ -7,15 +7,20 @@ import { Home } from '../Screens/Home'
 import { Search } from '../Screens/Search'
 import { RadioRooms } from '../Screens/RadioRooms'
 import { Profile } from '../Screens/Profile'
+import { EditProfile } from '../Screens/Profile/EditProfile'
 import { Login } from '../Screens/Login'
-import { EditProfile } from '../Screens/EditProfile'
+
 import { Fragment } from 'react'
 import { useAuthStore } from '../Store/useAuthStore'
 import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 
+// Track
+import { Track } from '../Commons/Track/track'
+
 const Stack = createNativeStackNavigator()
+const ProfileStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
@@ -61,7 +66,7 @@ function HomeTabs() {
       <Tab.Screen name='Home' component={Home} />
       <Tab.Screen name='Search' component={Search} />
       <Tab.Screen name='RadioRooms' component={RadioRooms} />
-      <Tab.Screen name='Profile' component={Profile} />
+      <Tab.Screen name='Profile' component={ProfileStackNavigator} />
       <Tab.Screen name='TestAPI' component={TestAPI} />
     </Tab.Navigator>
   )
@@ -70,9 +75,19 @@ function HomeTabs() {
 // Navigation before user LOG IN
 function AuthStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator>
       <Stack.Screen name='Login' component={Login} />
     </Stack.Navigator>
+  )
+}
+
+function ProfileStackNavigator() {
+  return (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      <ProfileStack.Screen name='ProfileTab' component={Profile} />
+      <ProfileStack.Screen name='EditProfile' component={EditProfile} />
+      <ProfileStack.Screen name='Track' component={Track} />
+    </ProfileStack.Navigator>
   )
 }
 
@@ -97,7 +112,7 @@ export const Navigation = () => {
           <Stack.Screen name='Auth' component={AuthStack} />
         )}
       </Stack.Navigator>
-      {isLoggedIn && (
+      {false && (
         <CurrentlyPlaying
           coverUrl={
             'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'

@@ -22,30 +22,64 @@ export async function GetCurrentUserProfile({ accessToken }) {
     console.error('Error fetching user profile:', error)
   }
 }
+
 export async function GetUserPlaylists({
   accessToken,
-  userId,
   limit = 20,
   offset = 0,
 }) {
-  let url = `https://api.spotify.com/v1/users/${userId}/playlists`
-  const extraParams = new URLSearchParams({ limit: limit, offset: offset })
-  url = url + '?' + extraParams
-  console.log(url.toString())
-  return await fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-    .then((response) => {
-      response = response.json()
-      return response
+  try {
+    let url = `https://api.spotify.com/v1/me/playlists`
+    const extraParams = new URLSearchParams({ limit: limit, offset: offset })
+    url = url + '?' + extraParams
+    const playlistResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     })
-    .catch((error) => {
-      console.error(JSON.stringify(error))
-      return null
+    if (playlistResponse.status === 200) {
+      const playlistData = await playlistResponse.json()
+      return playlistData
+    } else {
+      console.error(
+        'Error fetching playlist data:',
+        playlistResponse.statusText
+      )
+    }
+  } catch (error) {
+    console.error('Error fetching playlist data:', error)
+  }
+}
+
+export async function GetPlaylistDetails({
+  accessToken,
+  playlistId,
+  limit = 20,
+  offset = 0,
+}) {
+  try {
+    let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
+    const extraParams = new URLSearchParams({ limit: limit, offset: offset })
+    url = url + '?' + extraParams
+    const playlistResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     })
+    if (playlistResponse.status === 200) {
+      const playlistData = await playlistResponse.json()
+      return playlistData
+    } else {
+      console.error(
+        'Error fetching playlist data:',
+        playlistResponse.statusText
+      )
+    }
+  } catch (error) {
+    console.error('Error fetching playlist data:', error)
+  }
 }
 
 export async function GetTrack({ accessToken, trackId }) {

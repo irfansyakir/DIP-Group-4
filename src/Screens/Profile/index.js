@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Image } from 'expo-image'
 import {
   StyleSheet,
@@ -10,23 +10,60 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native' // Import useNavigation
 import { useProfileStore } from '../../Store/useProfileStore'
+import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
+import { useAuthStore } from '../../Store/useAuthStore'
 
 export const Profile = () => {
   const navigation = useNavigation() // Initialize navigation
   const handleButtonClick = () => {
     navigation.navigate('EditProfile')
   }
-  const handleContainerClick = () => {
+  const handlePlaylistClick = (playlistId) => {
     // Navigate to "YourNewPage" screen when the container is clicked
-    navigation.navigate('Home')
+    const params = { playlistId: playlistId }
+    navigation.navigate('Track', params)
   }
   const handleSeeAllClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
     navigation.navigate('Home')
   }
+
+  // retrieve state data from stores
   const displayName = useProfileStore((state) => state.displayName)
   const followers = useProfileStore((state) => state.followers)
   const profileUrl = useProfileStore((state) => state.profileUrl)
+  const accessToken = useAuthStore((state) => state.accessToken)
+
+  // managing state for playlist
+  const [playlists, setPlaylists] = useState([])
+  const [totalPlaylist, setTotalPlaylist] = useState(0)
+
+  const getPlaylistData = async () => {
+    // fetch data on load
+    try {
+      const playlistData = await GetUserPlaylists({
+        accessToken: accessToken,
+        limit: 4,
+      })
+      setTotalPlaylist(playlistData.total)
+      const playlistArray = []
+      playlistData.items.map((playlist) => {
+        playlistArray.push({
+          id: playlist.id,
+          coverUrl: playlist.images[0].url,
+          name: playlist.name,
+          owner: playlist.owner.display_name,
+        })
+      })
+      setPlaylists(playlistArray)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    getPlaylistData()
+  }, [])
 
   return (
     <View style={styles.container}>
@@ -54,7 +91,7 @@ export const Profile = () => {
           </View>
           <View style={styles.columnContainer}>
             <View style={styles.column}>
-              <Text style={styles.columnBoldText}>23</Text>
+              <Text style={styles.columnBoldText}>{totalPlaylist}</Text>
               <Text style={styles.columnText}>PLAYLISTS</Text>
             </View>
             <View style={styles.column}>
@@ -71,27 +108,20 @@ export const Profile = () => {
           <Text style={styles.playlistText}>Playlists</Text>
         </View>
         <View style={styles.playlistContainer}>
-          <TouchableOpacity onPress={handleContainerClick}>
-            {renderTableRow(
-              require('../../../assets/playlist1.png'),
-              'Vibing',
-              '7 likes'
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleContainerClick}>
-            {renderTableRow(
-              require('../../../assets/playlist2.png'),
-              'Roadtrip',
-              '4 likes'
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleContainerClick}>
-            {renderTableRow(
-              require('../../../assets/playlist3.png'),
-              'Study',
-              '5 likes'
-            )}
-          </TouchableOpacity>
+          {playlists.map((playlist) => {
+            return (
+              <TouchableOpacity
+                key={playlist.id}
+                onPress={() => handlePlaylistClick(playlist.id)}
+              >
+                {renderTableRow(
+                  playlist.coverUrl,
+                  playlist.name,
+                  playlist.owner
+                )}
+              </TouchableOpacity>
+            )
+          })}
         </View>
         <View style={styles.seeAllContainer}>
           <TouchableOpacity onPress={handleSeeAllClick}>
