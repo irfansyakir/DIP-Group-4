@@ -6,10 +6,25 @@ import {
   GetUserPlaylists,
 } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export const TestAPI = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const signOut = useAuthStore((state) => state.signOut)
+
+  async function clearAsyncStorage() {
+    try {
+      await AsyncStorage.clear()
+      console.log('AsyncStorage data cleared.')
+    } catch (error) {
+      console.error('Error clearing AsyncStorage:', error)
+    }
+  }
+
+  const signOutButton = () => {
+    signOut()
+    clearAsyncStorage()
+  }
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -44,7 +59,7 @@ export const TestAPI = () => {
       />
       <Button
         title={'Log Out'}
-        onPress={() => signOut()}
+        onPress={() => signOutButton()}
         // loading={loading}
         loadingProps={{ size: 'small', color: 'white' }}
         buttonStyle={{

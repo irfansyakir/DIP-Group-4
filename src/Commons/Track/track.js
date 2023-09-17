@@ -15,6 +15,7 @@ import { TopBar } from './topbar'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useRoute } from '@react-navigation/native'
 import { GetPlaylistDetails } from '../../Utilities/SpotifyApi/Utils'
+import { Audio } from 'expo-av'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -30,6 +31,8 @@ export const Track = ({ navigation }) => {
   const [image, setImage] = useState('')
   const [title, setTitle] = useState('Loading...')
   const [artist, setArtist] = useState('')
+  const [songUrl, setSongUrl] = useState('')
+  const [soundAudio, setSoundAudio] = useState(null)
 
   const getPlaylistData = async () => {
     // fetch data on load
@@ -42,6 +45,7 @@ export const Track = ({ navigation }) => {
       setImage(playlistData.items[0].track.album.images[0].url)
       setTitle(playlistData.items[0].track.album.name)
       setArtist(playlistData.items[0].track.artists[0].name)
+      setSongUrl(playlistData.items[0].track.preview_url)
     } catch (error) {
       console.error(error)
     }
@@ -50,6 +54,36 @@ export const Track = ({ navigation }) => {
   useEffect(() => {
     getPlaylistData()
   }, [])
+
+  async function playSound() {
+    const { status } = await Audio.requestPermissionsAsync()
+    if (status === 'granted') {
+      if (soundAudio === null) {
+        const { sound } = await Audio.Sound.createAsync({ uri: songUrl })
+        setSoundAudio(sound)
+        await sound.playAsync()
+      } else {
+        await soundAudio.playAsync()
+      }
+    } else {
+      // Handle permission denied
+      console.log('Permission to access audio denied.')
+    }
+  }
+
+  async function pauseSound() {
+    if (soundAudio) {
+      await soundAudio.pauseAsync() // Pause the audio
+    }
+  }
+
+  useEffect(() => {
+    return soundAudio
+      ? () => {
+          soundAudio.unloadAsync()
+        }
+      : undefined
+  }, [soundAudio])
 
   const [fontsLoaded] = useFonts({
     IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
@@ -87,7 +121,7 @@ export const Track = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          <Play></Play>
+          <Play handlePlay={playSound} handlePause={pauseSound}></Play>
 
           <View style={styles.lyrics}>
             <Text style={styles.lyrhead}>Lyrics</Text>
