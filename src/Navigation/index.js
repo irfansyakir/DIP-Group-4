@@ -1,4 +1,5 @@
 import * as React from 'react'
+import {NavigationContainer} from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -14,9 +15,9 @@ import { useAuthStore } from '../Store/useAuthStore'
 import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
+import {Queue} from "../Screens/queue.js";
 
 const Stack = createNativeStackNavigator()
-
 const Tab = createBottomTabNavigator()
 
 // Navigation after user LOG IN
@@ -90,8 +91,9 @@ export const Navigation = () => {
       >
         {isLoggedIn ? (
           <Fragment>
-            <Stack.Screen name='RootHome' component={HomeTabs} />
-            <Stack.Screen name='EditProfile' component={EditProfile} />
+              <Stack.Screen name='RootHome' component={HomeTabs} />
+              <Stack.Screen name='EditProfile' component={EditProfile} />
+              <Stack.Screen name="Queue" component={Queue} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />

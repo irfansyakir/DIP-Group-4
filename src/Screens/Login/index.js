@@ -67,6 +67,10 @@ export const Login = () => {
         }}
       />
 
+        <Button onPress={() => {navigation.navigate('Queue')}}>
+                Go to Queue
+        </Button>
+
         <Button
             title='SpotifyLogin'
             onPress={() => {
