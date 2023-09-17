@@ -3,15 +3,12 @@ import { Button } from '@rneui/themed';
 
 export const Login = ({navigation}) => {
     return (
-        <View
-            style={styles.container}
-        >
-            <Button
-                onPress={() => {
-                    navigation.navigate('RootHome')
-                }}
-            >
+        <View style={styles.container}>
+            <Button onPress={() => {navigation.navigate('RootHome')}}>
                 Go to Home
+            </Button>
+            <Button onPress={() => {navigation.navigate('Queue')}}>
+                Go to Queue
             </Button>
         </View>
 

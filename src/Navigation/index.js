@@ -8,6 +8,7 @@ import {Search} from "../Screens/Search";
 import {RadioRooms} from "../Screens/RadioRooms";
 import {Profile} from "../Screens/Profile";
 import {Login} from "../Screens/Login";
+import {Queue} from "../Screens/queue.js";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -32,6 +33,7 @@ export const Navigation = () => {
             >
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="RootHome" component={HomeTabs} />
+                <Stack.Screen name="Queue" component={Queue} />
             </Stack.Navigator>
         </NavigationContainer>
 
