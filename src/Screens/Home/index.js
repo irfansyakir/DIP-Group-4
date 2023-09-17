@@ -1,18 +1,23 @@
-import {View, Text, Button} from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as React from 'react';
+import { View, Text } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import * as React from 'react'
+import { COLORS } from '../../Constants'
+import { MediumText } from '../../Commons/UI/styledText'
 
-export const Home = ({navigation}) => {
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text>Home Screen</Text>
-            {/*<Button*/}
-            {/*    title="Go to Details"*/}
-            {/*    onPress={() => navigation.navigate('Details')}*/}
-            {/*/>*/}
-        </View>
-    );
+export const Home = () => {
+  const insets = useSafeAreaInsets()
+  return (
+    <View
+      style={{
+        paddingTop: insets.top, // Add top inset as padding
+        paddingBottom: insets.bottom, // Add bottom inset as padding
+        flex: 1, // Make sure the content fills the available space
+        backgroundColor: COLORS.dark, // Adjust background color as needed
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <MediumText style={{ color: COLORS.primary }}>Home Screen</MediumText>
+    </View>
+  )
 }
-
-
