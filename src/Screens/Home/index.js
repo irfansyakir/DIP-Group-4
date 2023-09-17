@@ -1,11 +1,14 @@
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as React from 'react'
 import { COLORS } from '../../Constants'
 import { MediumText } from '../../Commons/UI/styledText'
+import {Button} from "@rneui/themed";
+import {useNavigation} from "@react-navigation/native";
 
 export const Home = () => {
   const insets = useSafeAreaInsets()
+    const navigation = useNavigation(); // Initialize navigation
   return (
     <View
       style={{
@@ -17,6 +20,9 @@ export const Home = () => {
         justifyContent: 'center',
       }}
     >
+        <Button onPress={() => {navigation.navigate('Queue')}}>
+            Go to Queue
+        </Button>
       <MediumText style={{ color: COLORS.primary }}>Home Screen</MediumText>
     </View>
   )
