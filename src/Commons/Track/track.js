@@ -103,7 +103,7 @@ export const Track = ({ navigation }) => {
         style={styles.linearGradient}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
-          <TopBar></TopBar>
+          <TopBar navigation={navigation}></TopBar>
 
           <Image style={styles.img} src={image} />
 
