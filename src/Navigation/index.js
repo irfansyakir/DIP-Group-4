@@ -9,6 +9,7 @@ import { RadioRooms } from '../Screens/RadioRooms'
 import { Profile } from '../Screens/Profile'
 import { Login } from '../Screens/Login'
 import { useAuthStore } from '../Store/useAuthStore'
+import { Playlist } from '../Screens/Playlist'
 
 const Stack = createNativeStackNavigator()
 
