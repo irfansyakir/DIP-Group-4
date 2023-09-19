@@ -3,10 +3,13 @@ import * as React from "react";
 import {Button} from "@rneui/themed";
 import {GetCurrentUserProfile, GetUserPlaylists} from "../../Utilities/SpotifyApi/Utils";
 import {useAuthStore} from "../../Store/useAuthStore";
+import {useNavigation} from "@react-navigation/native";
 
 export const TestAPI = () => {
 
     const accessToken = useAuthStore((state) => state.accessToken)
+    const navigation = useNavigation(); // Initialize navigation
+
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -36,6 +39,13 @@ export const TestAPI = () => {
                     marginVertical: 10,
                 }}
             />
+
+            <Button onPress={() => {navigation.navigate('Queue')}}>
+                Go to Queue
+            </Button>
+            <Button onPress={() => {navigation.navigate('Playlist')}}>
+                Go to Playlist
+            </Button>
         </View>
     );
 }

@@ -30,7 +30,7 @@ export const Queue = ({navigation}) => {
                 </View>
                 <Image
                     style={styles.draggable}
-                    source={require("../../assets/draggable.png")}
+                    source={require("../../../assets/draggable.png")}
                 />
                 </TouchableOpacity>
           );
@@ -89,7 +89,7 @@ export const Queue = ({navigation}) => {
             <View style={styles.playingNow}>
                 <Image
                     style={styles.playlistImage}
-                    source={require("../../assets/playlistPic1.png")}
+                    source={require("../../../assets/playlistPic1.png")}
                 />
                 <View style={styles.songDets}>
                     <Text style={styles.currSong}>Song Name</Text>
@@ -107,23 +107,23 @@ export const Queue = ({navigation}) => {
                 <TouchableOpacity>
                     <Image
                         style={styles.skip}
-                        source={require("../../assets/skipPrev.png")}
+                        source={require("../../../assets/skipPrev.png")}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={toggleImage}>
                     <Image
                         style={styles.playCircle}
-                        source={require("../../assets/playCircle.png")}
+                        source={require("../../../assets/playCircle.png")}
                     />
                     <Image
                         style={play ? styles.play : styles.pause}
-                        source={play ? require("../../assets/play.png") : require("../../assets/pause.png")}
+                        source={play ? require("../../../assets/play.png") : require("../../../assets/pause.png")}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity>
                     <Image
                         style={styles.skip}
-                        source={require("../../assets/skipNext.png")}
+                        source={require("../../../assets/skipNext.png")}
                     />
                 </TouchableOpacity>
 

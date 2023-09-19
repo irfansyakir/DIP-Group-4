@@ -16,7 +16,7 @@ import { Playlist } from '../Screens/Playlist'
 import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
-import {Queue} from "../Screens/queue.js";
+import {Queue} from "../Screens/Queue";
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -95,6 +95,7 @@ export const Navigation = () => {
               <Stack.Screen name='RootHome' component={HomeTabs} />
               <Stack.Screen name='EditProfile' component={EditProfile} />
               <Stack.Screen name="Queue" component={Queue} />
+              <Stack.Screen name="Playlist" component={Playlist} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
