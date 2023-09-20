@@ -46,6 +46,9 @@ export const TestAPI = () => {
             <Button onPress={() => {navigation.navigate('Playlist')}}>
                 Go to Playlist
             </Button>
+            <Button onPress={() => {navigation.navigate('Chatroom')}}>
+                Go to Chatroom
+            </Button>
         </View>
     );
 }
