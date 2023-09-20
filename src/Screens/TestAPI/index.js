@@ -67,6 +67,9 @@ export const TestAPI = () => {
           marginVertical: 10,
         }}
       ></Button>
+            <Button onPress={() => {navigation.navigate('Chatroom')}}>
+                Go to Chatroom
+            </Button>
         </View>
     );
 }

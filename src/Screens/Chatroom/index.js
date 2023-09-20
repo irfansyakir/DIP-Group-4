@@ -14,7 +14,8 @@ import {
   ScrollView,
 } from 'react-native';
 
-import MessageBubble from './MessageBubble'; // Import the MessageBubble component
+import MessageBubble from './MessageBubble';
+import {useNavigation} from "@react-navigation/native"; // Import the MessageBubble component
 
 
 export const Chatroom = () => {
