@@ -14,7 +14,7 @@ const Icon = createIconSetFromIcoMoon(
 
 export const Play = ({ handlePlay, handlePause }) => {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [range, setRange] = useState('0')
+  const [range, setRange] = useState(0)
   const maxTime = 5
 
   const [fontsLoaded] = useFonts({
