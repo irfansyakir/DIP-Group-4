@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useEffect } from 'react'
 import { Text } from 'react-native'
 import { Navigation } from '../Navigation'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -16,7 +17,6 @@ export const AppContainer = () => {
       /* configuration for matching screens with paths */
     },
   }
-
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={'light-content'} />

@@ -1,14 +1,18 @@
-import {Text, View} from "react-native";
-import * as React from "react";
-import {Button} from "@rneui/themed";
-import {GetCurrentUserProfile, GetUserPlaylists} from "../../Utilities/SpotifyApi/Utils";
-import {useAuthStore} from "../../Store/useAuthStore";
+import { Text, View } from 'react-native'
+import * as React from 'react'
+import { Button } from '@rneui/themed'
+import {
+  GetCurrentUserProfile,
+  GetUserPlaylists,
+} from '../../Utilities/SpotifyApi/Utils'
+import { useAuthStore } from '../../Store/useAuthStore'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useNavigation} from "@react-navigation/native";
 
 export const TestAPI = () => {
-
-    const accessToken = useAuthStore((state) => state.accessToken)
-    const navigation = useNavigation(); // Initialize navigation
+  const accessToken = useAuthStore((state) => state.accessToken)
+  const signOut = useAuthStore((state) => state.signOut)
+  const navigation = useNavigation(); // Initialize navigation
 
 
     return (
@@ -46,6 +50,23 @@ export const TestAPI = () => {
             <Button onPress={() => {navigation.navigate('Playlist')}}>
                 Go to Playlist
             </Button>
+            <Button
+        title={'Log Out'}
+        onPress={signOut}
+        // loading={loading}
+        loadingProps={{ size: 'small', color: 'white' }}
+        buttonStyle={{
+          backgroundColor: 'rgba(111, 202, 186, 1)',
+          borderRadius: 5,
+        }}
+        titleStyle={{ fontWeight: 'bold', fontSize: 23 }}
+        containerStyle={{
+          marginHorizontal: 100,
+          height: 50,
+          width: 200,
+          marginVertical: 10,
+        }}
+      ></Button>
             <Button onPress={() => {navigation.navigate('Chatroom')}}>
                 Go to Chatroom
             </Button>

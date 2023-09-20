@@ -1,81 +1,90 @@
-import * as WebBrowser from 'expo-web-browser';
-import {AccessTokenRequest, makeRedirectUri, ResponseType, useAuthRequest} from 'expo-auth-session';
-import {useEffect} from "react";
-import {useAuthStore} from "../../Store/useAuthStore";
+import * as WebBrowser from 'expo-web-browser'
+import {
+  AccessTokenRequest,
+  makeRedirectUri,
+  ResponseType,
+  useAuthRequest,
+} from 'expo-auth-session'
+import { useEffect } from 'react'
+import { useAuthStore } from '../../Store/useAuthStore'
 
-WebBrowser.maybeCompleteAuthSession();
+WebBrowser.maybeCompleteAuthSession()
 
 const discovery = {
-    authorizationEndpoint: 'https://accounts.spotify.com/authorize',
-    tokenEndpoint: 'https://accounts.spotify.com/api/token',
-};
+  authorizationEndpoint: 'https://accounts.spotify.com/authorize',
+  tokenEndpoint: 'https://accounts.spotify.com/api/token',
+}
 
 const clientId = process.env.EXPO_PUBLIC_SPOTIFY_API_CLIENT_ID
 const clientSecret = process.env.EXPO_PUBLIC_SPOTIFY_API_CLIENT_SECRET
 
 // const redirectUri = Linking.createURL('/');
 const redirectUri = makeRedirectUri({
-        scheme: 'radioroom',
-        path: 'redirect'
+  scheme: 'radioroom',
+  path: 'redirect',
 })
 // The redirect URI ideally would be radioroom://redirect. In expo project would be exp://localhost
 
-const scope = ['user-read-email', 'playlist-modify-public', 'playlist-modify-private', 'playlist-read-private', 'playlist-read-collaborative']
+const scope = [
+  'user-read-email',
+  'playlist-modify-public',
+  'playlist-modify-private',
+  'playlist-read-private',
+  'playlist-read-collaborative',
+]
 //Todo
 //Add logout function
 //add refresh token function
 
-export function useSpotifyAuthenticate(){
-    const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
-    const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
+export function useSpotifyAuthenticate() {
+  const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
+  const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
 
-    // const changeCode = useAuthStore((state) => state.changeCode)
-    // const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
-    const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
+  // const changeCode = useAuthStore((state) => state.changeCode)
+  // const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
+  const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
 
-    const [request, response, promptAsync] = useAuthRequest(
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId: clientId,
+      // In order to follow the "Authorization Code Flow" to fetch token after authorizationEndpoint
+      // this must be set to false
+      usePKCE: false,
+      redirectUri: redirectUri,
+      scopes: scope,
+    },
+    discovery
+  )
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      // console.log(response)
+      const { code } = response.params
+      // console.log("access token: ", access_token)
+      // changeAccessToken(access_token)
+      // console.log(code)
+      const tokenRequest = new AccessTokenRequest(
         {
-            clientId: clientId,
-            // In order to follow the "Authorization Code Flow" to fetch token after authorizationEndpoint
-            // this must be set to false
-            usePKCE: false,
-            redirectUri: redirectUri,
-            scopes: scope,
+          code: code,
+          redirectUri: redirectUri,
+          clientId: clientId,
+          clientSecret: clientSecret,
+          scopes: scope,
+          // AuthorizationCode: "authorization_code"
         },
         discovery
-    );
+      )
+      tokenRequest.performAsync(discovery).then((r) => {
+        changeAccessToken(r.accessToken)
+        changeRefreshToken(r.refreshToken)
+        changeIsLoggedIn(true)
+        // console.log("Access Token: \n", r.accessToken)
+        // console.log("Refresh Token: \n", r.refreshToken)
+      })
+    }
+  }, [response])
 
-    useEffect(() => {
-        if (response?.type === 'success') {
-            // console.log(response)
-            const { code } = response.params;
-            // console.log("access token: ", access_token)
-            // changeAccessToken(access_token)
-            // console.log(code)
-            const tokenRequest = new AccessTokenRequest({
-                code: code,
-                redirectUri: redirectUri,
-                clientId: clientId,
-                clientSecret: clientSecret,
-                scopes: scope,
-                // AuthorizationCode: "authorization_code"
-            },
-                discovery
-            )
-            tokenRequest.performAsync(discovery)
-                .then(r => {
-                    changeAccessToken(r.accessToken)
-                    changeRefreshToken(r.refreshToken)
-                    // console.log("Access Token: \n", r.accessToken)
-                    // console.log("Refresh Token: \n", r.refreshToken)
-                })
-
-        }
-    }, [response]);
-
-    return (
-        [promptAsync]
-    );
+  return [promptAsync]
 }
 
 //legacy code -----------------------------------------------------------------------------------------------
