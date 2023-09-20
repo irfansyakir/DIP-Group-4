@@ -56,18 +56,12 @@ export const Track = ({ navigation }) => {
   }, [])
 
   async function playSound() {
-    const { status } = await Audio.requestPermissionsAsync()
-    if (status === 'granted') {
-      if (soundAudio === null) {
-        const { sound } = await Audio.Sound.createAsync({ uri: songUrl })
-        setSoundAudio(sound)
-        await sound.playAsync()
-      } else {
-        await soundAudio.playAsync()
-      }
+    if (soundAudio === null) {
+      const { sound } = await Audio.Sound.createAsync({ uri: songUrl })
+      setSoundAudio(sound)
+      await sound.playAsync()
     } else {
-      // Handle permission denied
-      console.log('Permission to access audio denied.')
+      await soundAudio.playAsync()
     }
   }
 

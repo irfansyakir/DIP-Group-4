@@ -9,9 +9,9 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native' // Import useNavigation
-import { useProfileStore } from '../../Store/useProfileStore'
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 
 export const Profile = () => {
   const navigation = useNavigation() // Initialize navigation
@@ -29,14 +29,14 @@ export const Profile = () => {
   }
 
   // retrieve state data from stores
-  const displayName = useProfileStore((state) => state.displayName)
-  const followers = useProfileStore((state) => state.followers)
-  const profileUrl = useProfileStore((state) => state.profileUrl)
   const accessToken = useAuthStore((state) => state.accessToken)
 
   // managing state for playlist
   const [playlists, setPlaylists] = useState([])
   const [totalPlaylist, setTotalPlaylist] = useState(0)
+  const [displayName, setDisplayName] = useState('')
+  const [followers, setFollowers] = useState(0)
+  const [profileUrl, setProfileUrl] = useState('')
 
   const getPlaylistData = async () => {
     // fetch data on load
@@ -61,8 +61,23 @@ export const Profile = () => {
     }
   }
 
+  const getInitialProfileData = async () => {
+    // fetch data on load
+    try {
+      const profileData = await GetCurrentUserProfile({
+        accessToken: accessToken,
+      })
+      setDisplayName(profileData.display_name)
+      setFollowers(profileData.followers.total)
+      setProfileUrl(profileData.images[1].url)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   useEffect(() => {
     getPlaylistData()
+    getInitialProfileData()
   }, [])
 
   return (

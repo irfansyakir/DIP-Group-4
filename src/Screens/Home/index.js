@@ -1,8 +1,9 @@
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as React from 'react'
 import { COLORS } from '../../Constants'
 import { MediumText } from '../../Commons/UI/styledText'
+import { useAuthStore } from '../../Store/useAuthStore'
 
 export const Home = () => {
   const insets = useSafeAreaInsets()

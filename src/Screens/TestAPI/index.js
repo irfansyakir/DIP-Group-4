@@ -12,24 +12,10 @@ export const TestAPI = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const signOut = useAuthStore((state) => state.signOut)
 
-  async function clearAsyncStorage() {
-    try {
-      await AsyncStorage.clear()
-      console.log('AsyncStorage data cleared.')
-    } catch (error) {
-      console.error('Error clearing AsyncStorage:', error)
-    }
-  }
-
-  const signOutButton = () => {
-    signOut()
-    clearAsyncStorage()
-  }
-
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>TestAPI</Text>
-      <Button
+      {/* <Button
         title='Get Playlists'
         onPress={() => {
           GetCurrentUserProfile({ accessToken: accessToken }).then((res) => {
@@ -56,10 +42,10 @@ export const TestAPI = () => {
           width: 200,
           marginVertical: 10,
         }}
-      />
+      /> */}
       <Button
         title={'Log Out'}
-        onPress={() => signOutButton()}
+        onPress={signOut}
         // loading={loading}
         loadingProps={{ size: 'small', color: 'white' }}
         buttonStyle={{
