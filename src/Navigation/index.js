@@ -30,12 +30,20 @@ export const Navigation = () => {
             <Stack.Navigator
                 screenOptions={{
                     headerBackTitleVisible: false,
-                    headerBackVisible: false
+                    headerBackVisible: false,
+                  
                 }}
             >
                 <Stack.Screen name="Login" component={Login} /> 
                 <Stack.Screen name="RootHome" component={HomeTabs} />
-                <Stack.Screen name="Chatroom" component={Chatroom} />
+                <Stack.Screen name="Chatroom" component={Chatroom} 
+                    options={{
+                        headerTitle:'',
+                        headerShadowVisible:false,
+                        headerBackVisible:true,
+                        
+                    }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
 
