@@ -1,12 +1,6 @@
 import * as WebBrowser from 'expo-web-browser'
-import {
-  AccessTokenRequest,
-  makeRedirectUri,
-  ResponseType,
-  useAuthRequest,
-} from 'expo-auth-session'
-import { useEffect } from 'react'
-import { useAuthStore } from '../../Store/useAuthStore'
+import {AccessTokenRequest, makeRedirectUri, useAuthRequest,} from 'expo-auth-session'
+import {useAuthStore} from '../../Store/useAuthStore'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -44,7 +38,7 @@ export function useSpotifyAuthenticate() {
   // const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
   const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
 
-  const [request, response, promptAsync] = useAuthRequest(
+  const [_, __, promptAsync] = useAuthRequest(
     {
       clientId: clientId,
       // In order to follow the "Authorization Code Flow" to fetch token after authorizationEndpoint
@@ -56,35 +50,43 @@ export function useSpotifyAuthenticate() {
     discovery
   )
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      // console.log(response)
-      const { code } = response.params
-      // console.log("access token: ", access_token)
-      // changeAccessToken(access_token)
-      // console.log(code)
-      const tokenRequest = new AccessTokenRequest(
-        {
-          code: code,
-          redirectUri: redirectUri,
-          clientId: clientId,
-          clientSecret: clientSecret,
-          scopes: scope,
-          // AuthorizationCode: "authorization_code"
-        },
-        discovery
-      )
-      tokenRequest.performAsync(discovery).then((r) => {
-        changeAccessToken(r.accessToken)
-        changeRefreshToken(r.refreshToken)
-        changeIsLoggedIn(true)
-        // console.log("Access Token: \n", r.accessToken)
-        // console.log("Refresh Token: \n", r.refreshToken)
-      })
-    }
-  }, [response])
+  async function getAccessToken(response){
+    // console.log(response)
+      if (response?.type === 'success') {
+        const { code } = response.params
+        return new AccessTokenRequest(
+          {
+            code: code,
+            redirectUri: redirectUri,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            scopes: scope,
+          },
+          discovery
+        );
+      } else if (response?.type === 'error'){
+          new Error('Error in getting the access token. Skill issue.')
+          console.log(response.error)
+        return null
+      }
+  }
 
-  return [promptAsync]
+  async function apiLogin() {
+    promptAsync().then(async response => {
+      const tokenRequest = await getAccessToken(response)
+
+      await tokenRequest?.performAsync(discovery)
+        .then((r) => {
+          changeAccessToken(r.accessToken)
+          changeRefreshToken(r.refreshToken)
+          changeIsLoggedIn(true)
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    })
+  }
+  return [apiLogin]
 }
 
 //legacy code -----------------------------------------------------------------------------------------------
