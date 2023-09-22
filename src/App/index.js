@@ -1,26 +1,28 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import * as React from 'react';
-import {Fragment} from "react";
-import {Navigation} from "../Navigation";
+import * as React from 'react'
+import { useEffect } from 'react'
+import { Text } from 'react-native'
+import { Navigation } from '../Navigation'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { StatusBar } from 'react-native'
+import * as Linking from 'expo-linking'
+import { NavigationContainer } from '@react-navigation/native'
 
+const prefix = [Linking.createURL('/'), 'exp://', 'radioroom://']
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
 export const AppContainer = () => {
-    return (
-        <Fragment>
-            <Navigation/>
-        </Fragment>
-    );
-}
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'pink',
-        alignItems: 'center',
-        justifyContent: 'center',
+  const linking = {
+    prefix: prefix,
+    // prefixes: prefix,
+    config: {
+      /* configuration for matching screens with paths */
     },
-});
+  }
+  return (
+    <SafeAreaProvider>
+      <StatusBar barStyle={'light-content'} />
+      <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+        <Navigation />
+      </NavigationContainer>
+    </SafeAreaProvider>
+  )
+}
