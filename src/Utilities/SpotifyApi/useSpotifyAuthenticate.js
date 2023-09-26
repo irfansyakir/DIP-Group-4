@@ -1,6 +1,10 @@
 import * as WebBrowser from 'expo-web-browser'
-import {AccessTokenRequest, makeRedirectUri, useAuthRequest,} from 'expo-auth-session'
-import {useAuthStore} from '../../Store/useAuthStore'
+import {
+  AccessTokenRequest,
+  makeRedirectUri,
+  useAuthRequest,
+} from 'expo-auth-session'
+import { useAuthStore } from '../../Store/useAuthStore'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -25,6 +29,7 @@ const scope = [
   'playlist-modify-private',
   'playlist-read-private',
   'playlist-read-collaborative',
+  'user-read-recently-played',
 ]
 //Todo
 //Add logout function
@@ -50,38 +55,39 @@ export function useSpotifyAuthenticate() {
     discovery
   )
 
-  async function getAccessToken(response){
+  async function getAccessToken(response) {
     // console.log(response)
-      if (response?.type === 'success') {
-        const { code } = response.params
-        return new AccessTokenRequest(
-          {
-            code: code,
-            redirectUri: redirectUri,
-            clientId: clientId,
-            clientSecret: clientSecret,
-            scopes: scope,
-          },
-          discovery
-        );
-      } else if (response?.type === 'error'){
-          new Error('Error in getting the access token. Skill issue.')
-          console.log(response.error)
-        return null
-      }
+    if (response?.type === 'success') {
+      const { code } = response.params
+      return new AccessTokenRequest(
+        {
+          code: code,
+          redirectUri: redirectUri,
+          clientId: clientId,
+          clientSecret: clientSecret,
+          scopes: scope,
+        },
+        discovery
+      )
+    } else if (response?.type === 'error') {
+      new Error('Error in getting the access token. Skill issue.')
+      console.log(response.error)
+      return null
+    }
   }
 
   async function apiLogin() {
-    promptAsync().then(async response => {
+    promptAsync().then(async (response) => {
       const tokenRequest = await getAccessToken(response)
 
-      await tokenRequest?.performAsync(discovery)
+      await tokenRequest
+        ?.performAsync(discovery)
         .then((r) => {
           changeAccessToken(r.accessToken)
           changeRefreshToken(r.refreshToken)
           changeIsLoggedIn(true)
         })
-        .catch(error => {
+        .catch((error) => {
           console.log(error)
         })
     })

@@ -98,3 +98,23 @@ export async function GetTrack({ accessToken, trackId }) {
       return null
     })
 }
+
+export async function GetRecentlyPlayed({ accessToken }) {
+  try {
+    let url = `https://api.spotify.com/v1/me/player/recently-played?limit=7`
+    const dataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    if (dataResponse.status === 200) {
+      const data = await dataResponse.json()
+      return data
+    } else {
+      console.error('Error fetching recently played:', dataResponse.statusText)
+    }
+  } catch (error) {
+    console.error('Error fetching recently played data:', error)
+  }
+}
