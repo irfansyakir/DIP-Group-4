@@ -1,7 +1,10 @@
 import {child, get, update, push} from "firebase/database";
-import {db, dbRef} from "../../../firebaseConfig"
+import {dbRef} from "../../../firebaseConfig"
 
 export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, djList}){
+  if (!roomID && !roomName && !last_message && !last_message_timestamp && !djList) {
+    throw new Error("One or more required parameters are missing or empty in room_updateRoom.");
+  }
   const updates = {};
 
   if(roomID){
@@ -45,6 +48,9 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
 }
 
 export async function room_getRoom({roomID}){
+  if (!roomID) {
+    throw new Error("roomId is missing in room_getRoom.");
+  }
   try {
     const snapshot = await get(child(dbRef, `/rooms/${roomID}`));
     return await snapshot.val()
@@ -55,6 +61,9 @@ export async function room_getRoom({roomID}){
 }
 
 export async function room_removeRoom({roomID}){
+  if (!roomID) {
+    throw new Error("roomId is missing in room_removeRoom.");
+  }
   const updates = {};
   updates[`/rooms/${roomID}`] = null
   try {

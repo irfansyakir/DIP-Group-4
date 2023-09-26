@@ -2,6 +2,9 @@ import {child, get, update} from "firebase/database";
 import {dbRef} from "../../../firebaseConfig";
 
 export async function queue_updateQueue({roomID, queueList = null}){
+  if (!roomID) {
+    throw new Error("roomID is missing in queue_updateQueue.");
+  }
   const updates = {};
   updates[`/queue/${roomID}`] = queueList
 
@@ -14,6 +17,9 @@ export async function queue_updateQueue({roomID, queueList = null}){
   }
 }
 export async function queue_getQueue({roomID}){
+  if (!roomID) {
+    throw new Error("roomID is missing in queue_getQueue.");
+  }
   try {
     const snapshot = await get(child(dbRef, `/queue/${roomID}`));
     return await snapshot.val()
@@ -23,6 +29,9 @@ export async function queue_getQueue({roomID}){
   }
 }
 export async function queue_removeQueue({roomID}){
+  if (!roomID) {
+    throw new Error("roomID is missing in queue_removeQueue.");
+  }
   const updates = {};
   updates[`/queue/${roomID}`] = null
   try {

@@ -2,6 +2,10 @@ import {child, get, ref, update, push, query, orderByChild} from "firebase/datab
 import {db, dbRef} from "../../../firebaseConfig"
 
 export async function message_setMessage({roomId, username, message, timestamp}) {
+  if (!roomId || !username || !message || !timestamp) {
+    throw new Error("One or more required parameters are missing or empty in message_setMessage.");
+  }
+
   const updates = {};
   const newMessageId = push(child(dbRef, `/messages/${roomId}`)).key;
 
@@ -24,6 +28,9 @@ export async function message_setMessage({roomId, username, message, timestamp})
 }
 
 export async function message_getMessage({roomId}) {
+  if (!roomId) {
+    throw new Error("roomId is missing in message_getMessage.");
+  }
   try {
     let sortedMessages = []
     const messagesQueryRef = await query(ref(db, `messages/${roomId}`), orderByChild(`timestamp`));

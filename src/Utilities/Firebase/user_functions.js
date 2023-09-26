@@ -7,6 +7,9 @@ async function userExist({userId}){
 }
 
 export async function user_updateUser({userID, username, roomsObjects}){
+  if (!userID && !username && !roomsObjects) {
+    throw new Error("One or more required parameters are missing or empty in user_updateUser.");
+  }
   const updates = {};
 
   if(userID){
@@ -29,6 +32,9 @@ export async function user_updateUser({userID, username, roomsObjects}){
 }
 
 export async function user_getRooms({userId}) {
+  if (!userId) {
+    throw new Error("userID is missing or empty in user_getRooms.");
+  }
   try {
     const snapshot = await get(child(dbRef, `/users/${userId}/rooms/`));
     return await snapshot.val()
@@ -38,6 +44,9 @@ export async function user_getRooms({userId}) {
   }
 }
 export async function user_getUsername({userId}) {
+  if (!userId) {
+    throw new Error("userID is missing or empty in user_getUsername.");
+  }
   try {
     const snapshot = await get(child(dbRef, `/users/${userId}/username/`));
     return await snapshot.val()
@@ -47,6 +56,9 @@ export async function user_getUsername({userId}) {
   }
 }
 export async function user_addToRoom({userId, arrayOfRoomIDs}){
+  if (!userId || !arrayOfRoomIDs) {
+    throw new Error("One or more required parameters are missing or empty in user_addToRoom.");
+  }
   const updates = {};
 
   await arrayOfRoomIDs.forEach(roomId => {
@@ -67,6 +79,9 @@ export async function user_addToRoom({userId, arrayOfRoomIDs}){
   }
 }
 export async function user_removeFromRooms({userId, arrayOfRoomIDs}){
+  if (!userId || !arrayOfRoomIDs) {
+    throw new Error("One or more required parameters are missing or empty in user_removeFromRooms.");
+  }
   const updates = {};
 
   arrayOfRoomIDs.forEach(roomId => {
@@ -87,6 +102,9 @@ export async function user_removeFromRooms({userId, arrayOfRoomIDs}){
   }
 }
 export async function user_removeUser({userId}){
+  if (!userId) {
+    throw new Error("userID is missing or empty in user_removeUser.");
+  }
   try {
     if (!(await userExist(userId))) {
       console.log("user does not exists");
