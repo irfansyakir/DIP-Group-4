@@ -11,7 +11,6 @@ import {
   user_addToRoom,
   user_getRooms,
   user_removeFromRooms,
-  user_setNewUser,
   user_removeUser
 } from "../../Utilities/Firebase/user_functions";
 import {room_getRoom, room_removeRoom, room_updateRoom} from "../../Utilities/Firebase/room_functions";
@@ -23,12 +22,16 @@ import {
 import {useEffect, useState} from "react";
 import {useFirebaseListener} from "../../Utilities/Firebase/useFirebaseListener";
 import {queue_getQueue, queue_updateQueue} from "../../Utilities/Firebase/queue_functions";
+import {useSpotifyRefresh} from "../../Utilities/SpotifyApi/useSpotifyAuthenticate";
+
 
 export const TestAPI = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const signOut = useAuthStore((state) => state.signOut)
+
   const navigation = useNavigation(); // Initialize navigation
 
+  const [refresh] = useSpotifyRefresh() //refresh spotify auth token
 
   // --------------------------------------------------------------------------------------------------> Firebase Listener
 
@@ -85,6 +88,12 @@ export const TestAPI = () => {
             />
             <Button onPress={() => {navigation.navigate('Chatroom')}}>
                 Go to Chatroom
+            </Button>
+
+            <Button onPress={() => {
+              refresh().then()
+            }}>
+              Refresh Token
             </Button>
 
 

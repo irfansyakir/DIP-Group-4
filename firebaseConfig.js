@@ -1,5 +1,11 @@
 import { initializeApp } from 'firebase/app';
 import {getDatabase, ref} from "firebase/database";
+// import { getAuth, signInAnonymously } from "firebase/auth";
+
+import { initializeAuth, getReactNativePersistence, signInAnonymously} from 'firebase/auth';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 
 // Optionally import the services that you want to use
@@ -24,6 +30,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
 export const dbRef = ref(db)
+// export const auth = getAuth(app
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+});
+export function useFirebaseSignInAnon(){
+  async function doSignIn(){
+    await signInAnonymously(auth)
+  }
+  return [doSignIn]
+}
 
 // console.log(database)
 // For more information on how to access Firebase in your project,
