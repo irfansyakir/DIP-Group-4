@@ -98,3 +98,21 @@ export async function GetTrack({ accessToken, trackId }) {
       return null
     })
 }
+
+// test lol
+export async function SearchTrack({ accessToken, text }) {
+  return await fetch(`https://api.spotify.com/v1/search?q=${text}&type=track&limit=10`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+    .then((response) => {
+      response = response.json()
+      return response
+    })
+    .catch((error) => {
+      console.error(JSON.stringify(error))
+      return null
+    })
+}

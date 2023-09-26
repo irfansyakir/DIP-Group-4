@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { Home } from '../Screens/Home'
-import { Search } from '../Screens/Search'
+import { Search, SearchClick } from '../Screens/Search'
 import { RadioRooms } from '../Screens/RadioRooms'
 import { Profile } from '../Screens/Profile'
 import { EditProfile } from '../Screens/Profile/EditProfile'
@@ -114,6 +114,7 @@ export const Navigation = () => {
               <Stack.Screen name="Queue" component={Queue} />
               <Stack.Screen name="Playlist" component={Playlist} />
               <Stack.Screen name="Chatroom" component={Chatroom} />
+              <Stack.Screen name="SearchClick" component={SearchClick} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
