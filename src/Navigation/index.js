@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 import {NavigationContainer} from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -22,7 +22,7 @@ import {Chatroom} from "../Screens/Chatroom";
 
 // Track
 import { Track } from '../Commons/Track/track'
-import { CreateRoom } from '../Screens/RadioRooms/createroom';
+import { CreateRoom } from '../Screens/RadioRooms/createroom'
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()

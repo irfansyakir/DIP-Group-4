@@ -7,8 +7,8 @@ import { useNavigation } from '@react-navigation/native'; // Import useNavigatio
 
 
 export const CreateRoom = ()=> {
+    
     const [selectedIndex, setIndex] = React.useState(0);
-
 
     const [text, onChangeText] = React.useState('');
     const navigation = useNavigation(); // Initialize navigation
@@ -60,7 +60,7 @@ export const CreateRoom = ()=> {
                 />
                 <Text style={styles.subtitle}>Settings</Text>
                 <Text style={styles.setting}>Allow listeners to queue songs</Text>
-                <Stack row align="right" spacing={4}>
+                <Stack row align="right" spacing={2}>
                     <CheckBox
                     checked={selectedIndex === 0}
                     onPress={() => setIndex(0)}
@@ -70,7 +70,7 @@ export const CreateRoom = ()=> {
                     />
                 </Stack>
                 <Text style={styles.setting}>Invites only</Text>
-                <Stack row align="right" spacing={4}>
+                <Stack row align="right" spacing={2}>
                     <CheckBox
                     checked={selectedIndex === 1}
                     onPress={() => setIndex(1)}
