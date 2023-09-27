@@ -22,6 +22,7 @@ import { Chatroom } from '../Screens/Chatroom'
 
 // Track
 import { Track } from '../Commons/Track/track'
+import { CreateRoom } from '../Screens/RadioRooms/createroom'
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
@@ -92,6 +93,7 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen name='ProfileTab' component={Profile} />
       <ProfileStack.Screen name='EditProfile' component={EditProfile} />
       <ProfileStack.Screen name='Track' component={Track} />
+      <ProfileStack.Screen name='CreateRoom' component={CreateRoom} />
     </ProfileStack.Navigator>
   )
 }
@@ -127,6 +129,7 @@ export const Navigation = () => {
             <Stack.Screen name='Queue' component={Queue} />
             <Stack.Screen name='Playlist' component={Playlist} />
             <Stack.Screen name='Chatroom' component={Chatroom} />
+            <Stack.Screen name='CreateRoom' component={CreateRoom} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
