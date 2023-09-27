@@ -27,12 +27,15 @@ import {
   current_track_updateCurrentTrack,
 } from '../../Utilities/Firebase/current_track_functions'
 import { useEffect, useState } from 'react'
-import { useFirebaseListener } from '../../Utilities/Firebase/useFirebaseListener'
 import {
   queue_getQueue,
   queue_updateQueue,
 } from '../../Utilities/Firebase/queue_functions'
 import { useSpotifyRefresh } from '../../Utilities/SpotifyApi/useSpotifyAuthenticate'
+import {
+  useIsCurrentTrackPlayingListener,
+  useTimeOfLastPlayedListener
+} from "../../Utilities/Firebase/useFirebaseListener";
 
 export const TestAPI = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
@@ -45,7 +48,8 @@ export const TestAPI = () => {
   // --------------------------------------------------------------------------------------------------> Firebase Listener
 
   const roomId = '123qweasd'
-  const [timeOfLastPlayed, isCurrentTrackPlaying] = useFirebaseListener(roomId)
+  const [timeOfLastPlayed] = useTimeOfLastPlayedListener(roomId)
+  const [isCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomId)
 
   useEffect(() => {
     console.log('timeOFlAstPlatyed: ', timeOfLastPlayed)
