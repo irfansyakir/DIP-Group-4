@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect , useRef} from 'react'
 import {
   StyleSheet,
   Text,
@@ -14,7 +14,7 @@ import { Play } from './play'
 import { TopBar } from './topbar'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useRoute } from '@react-navigation/native'
-import { GetPlaylistDetails } from '../../Utilities/SpotifyApi/Utils'
+import { GetPlaylistDetails, GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
 
 const Icon = createIconSetFromIcoMoon(
@@ -27,7 +27,8 @@ export const Track = ({ navigation }) => {
   // temporary: get first track of playlist ID
   const accessToken = useAuthStore((state) => state.accessToken)
   const route = useRoute()
-  const { playlistId } = route.params
+  // const { playlistId } = route.params
+  const { trackId } = route.params
   const [image, setImage] = useState('')
   const [title, setTitle] = useState('Loading...')
   const [artist, setArtist] = useState('')
@@ -37,15 +38,29 @@ export const Track = ({ navigation }) => {
   const getPlaylistData = async () => {
     // fetch data on load
     try {
-      const playlistData = await GetPlaylistDetails({
-        accessToken: accessToken,
-        playlistId: playlistId,
-        limit: 4,
-      })
-      setImage(playlistData.items[0].track.album.images[0].url)
-      setTitle(playlistData.items[0].track.album.name)
-      setArtist(playlistData.items[0].track.artists[0].name)
-      setSongUrl(playlistData.items[0].track.preview_url)
+      if (playlistId === undefined){
+        console.log(trackId)
+        const trackData = await GetTrack({
+          accessToken: accessToken,
+          trackId: trackId,
+        })
+        setImage(trackData.album.images[0].url)
+        setTitle(trackData.album.name)
+        setArtist(trackData.artists[0].name)
+        setSongUrl(trackData.preview_url)
+  
+      } else{
+        const playlistData = await GetPlaylistDetails({
+          accessToken: accessToken,
+          playlistId: playlistId,
+          limit: 4,
+        })
+        setImage(playlistData.items[0].track.album.images[0].url)
+        setTitle(playlistData.items[0].track.album.name)
+        setArtist(playlistData.items[0].track.artists[0].name)
+        setSongUrl(playlistData.items[0].track.preview_url)
+      }
+
     } catch (error) {
       console.error(error)
     }

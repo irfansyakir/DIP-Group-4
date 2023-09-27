@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { Home } from '../Screens/Home'
-import { Search } from '../Screens/Search'
+import { Search, SearchClick } from '../Screens/Search'
 import { RadioRooms } from '../Screens/RadioRooms'
 import { Profile } from '../Screens/Profile'
 import { EditProfile } from '../Screens/Profile/EditProfile'
@@ -25,6 +25,7 @@ import { Track } from '../Commons/Track/track'
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
+const SearchStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
@@ -68,7 +69,7 @@ function HomeTabs() {
       })}
     >
       <Tab.Screen name='Home' component={Home} />
-      <Tab.Screen name='Search' component={Search} />
+      <Tab.Screen name='Search' component={SearchStackNavigator} />
       <Tab.Screen name='RadioRooms' component={RadioRooms} />
       <Tab.Screen name='Profile' component={ProfileStackNavigator} />
       <Tab.Screen name='TestAPI' component={TestAPI} />
@@ -92,6 +93,16 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen name='EditProfile' component={EditProfile} />
       <ProfileStack.Screen name='Track' component={Track} />
     </ProfileStack.Navigator>
+  )
+}
+
+function SearchStackNavigator(){
+  return(
+    <SearchStack.Navigator screenOptions={{ headerShown: false }}>
+      
+      <Stack.Screen name="SearchClick" component={SearchClick} />
+      <ProfileStack.Screen name='Track' component={Track} />
+    </SearchStack.Navigator>
   )
 }
 
