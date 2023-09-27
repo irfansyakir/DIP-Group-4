@@ -4,6 +4,8 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList } from 'r
 import Svg, { Text as SvgText } from 'react-native-svg';
 import {useNavigation} from "@react-navigation/native";
 import {Button} from "@rneui/themed";
+import { useNavigation } from '@react-navigation/native';
+
 
 export const RadioRooms = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,6 +13,7 @@ export const RadioRooms = () => {
 
   const navigation = useNavigation(); // Initialize navigation
 
+  const navigation = useNavigation(); // Initialize navigation
 
   // Sample data for recommended radio rooms
   const recommendedRooms = [
@@ -22,6 +25,11 @@ export const RadioRooms = () => {
   const handleRoomSelect = (roomId) => {
     setSelectedRoom(roomId === selectedRoom ? null : roomId);
   };
+
+  const goToChatroom = () => { 
+    navigation.navigate('Chatroom')
+
+  }
 
   return (
     <View style={styles.container}>
@@ -77,7 +85,7 @@ export const RadioRooms = () => {
               ]}
             >
               <Text style={styles.roomRecommendation}>{item.name}</Text>
-              <TouchableOpacity style={styles.joinButton}>
+              <TouchableOpacity style={styles.joinButton} onPress={goToChatroom}>
                 <Svg width="100%" height="100%">
                   <SvgText
                     x="50%"

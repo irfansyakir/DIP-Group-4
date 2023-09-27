@@ -7,7 +7,7 @@ const MessageBubble = ({ text }) => {
   return (
     <View style={styles.messageContainer}>
       <View style={styles.messageBubble}>
-        <Text> You</Text>
+        <Text style={styles.youText}> You</Text>
         <Text style={styles.messageText}>{text}</Text>
       </View>
     </View>
@@ -29,9 +29,16 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 12,
     maxWidth: '80%', // Limit the message width to 80% of the container
   },
+
+  youText: {
+    color: 'white',
+    fontSize: 10,
+    marginLeft: 5
+  },
   messageText: {
-    color: 'black',
-    fontSize: 16,
+    color: 'white',
+    fontSize: 10,
+    marginLeft: 5
   },
 });
 

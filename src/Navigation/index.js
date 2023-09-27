@@ -111,11 +111,11 @@ export const Navigation = () => {
       >
         {isLoggedIn ? (
           <Fragment>
-            <Stack.Screen name='RootHome' component={HomeTabs} />
-            <Stack.Screen name='EditProfile' component={EditProfile} />
-            <Stack.Screen name='Queue' component={Queue} />
-            <Stack.Screen name='Playlist' component={Playlist} />
-            <Stack.Screen name='Chatroom' component={Chatroom} />
+              <Stack.Screen name='RootHome' component={HomeTabs} />
+              <Stack.Screen name='EditProfile' component={EditProfile} />
+              <Stack.Screen name="Queue" component={Queue} />
+              <Stack.Screen name="Playlist" component={Playlist} />
+              <Stack.Screen name="Chatroom" component={Chatroom} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
@@ -132,6 +132,10 @@ export const Navigation = () => {
           duration={100}
         />
       )}
+      
+      
+       
+
     </React.Fragment>
   )
 }

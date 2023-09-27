@@ -13,6 +13,9 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
+import * as FileSystem from 'expo-file-system'; // Import the FileSystem module
+const chatMessagesFilePath = `${FileSystem.documentDirectory}chat_messages.txt`;
+
 
 import MessageBubble from './MessageBubble';
 import {useNavigation} from "@react-navigation/native"; // Import the MessageBubble component
@@ -28,22 +31,51 @@ export const Chatroom = () => {
     // Handle button press action here
   };
 
-  const sendMessage = () => {
+  // Function to load messages from the text file
+  const loadMessagesFromFile = async () => {
+    try {
+      const fileContent = await FileSystem.readAsStringAsync(
+        chatMessagesFilePath,
+        { encoding: FileSystem.EncodingType.UTF8 }
+      );
+
+      if (fileContent) {
+        const messages = fileContent.split('\n').filter((message) => message.trim() !== '');
+
+        // Populate the chatMessages state with the messages from the file
+        setChatMessages(messages.map((text, id) => ({ text, id: id.toString() })));
+      }
+    } catch (error) {
+      console.error('Error reading messages from file:', error);
+    }
+  };
+
+  const sendMessage = async () => {
     if (message.trim() !== '') {
-      // Create a new message object and add it to the chatMessages state
       const newMessage = {
         text: message,
-        id: chatMessages.length.toString(), // Assign a unique ID
+        id: chatMessages.length.toString(),
       };
-
+  
       // Update the chatMessages state with the new message
       setChatMessages([...chatMessages, newMessage]);
-
+  
+      // Save the message to the text file
+      try {
+        await FileSystem.writeAsStringAsync(
+          chatMessagesFilePath,
+          `${message}\n`,
+          { encoding: FileSystem.EncodingType.UTF8, append: true }
+        );
+      } catch (error) {
+        console.error('Error saving message to file:', error);
+      }
+  
       // Clear the input field
       setMessage('');
     }
   };
-
+  
 
   // Use useEffect to scroll to the bottom when chatMessages change
   useEffect(() => {
@@ -51,6 +83,12 @@ export const Chatroom = () => {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [chatMessages]);
+
+  // Load messages from the file when the component mounts
+  useEffect(() => {
+    loadMessagesFromFile();
+  }, []); // Empty dependency array to load messages only once when the component mounts
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -70,9 +108,15 @@ export const Chatroom = () => {
             <View style={styles.musicPlayer}>
               <Text>Music Player</Text>
             </View>
-            <View style={styles.roomCode}>
-              <Text>Room Code</Text>
+            
+            <View style={styles.roomCodeView}>
+              <Text style={styles.roomCodeTitle}>Room Code</Text>
+                <View style={styles.roomCodeContainer}> 
+                 <Text style={styles.roomCode}>rkaiRnl</Text>
+                 <Text style={styles.numberListening}>237 LISTENING</Text>
+                </View>
             </View>
+            
 
             <ScrollView
               style={styles.chatbox} // Apply styles to the ScrollView
@@ -123,6 +167,8 @@ const styles = StyleSheet.create({
     marginRight: 88,
     fontWeight: '700',
   },
+
+
   viewQueueBtn: {
     width: 150,
     height: 34,
@@ -145,7 +191,7 @@ const styles = StyleSheet.create({
     marginRight: 22,
     marginBottom: 20,
   },
-  roomCode: {
+  roomCodeView: {
     width: 380,
     height: 64,
     backgroundColor: '#13151E', // Change the color as needed
@@ -154,6 +200,36 @@ const styles = StyleSheet.create({
     marginRight: 22,
     marginBottom: 20,
   },
+
+  roomCodeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  
+  roomCodeTitle: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 400,
+    marginTop: 7,
+    marginLeft: 16
+  },
+
+  roomCode: {
+    fontSize: 17,
+    color: 'white',
+    fontWeight: 700,
+    marginTop: 8,
+    marginLeft: 16
+  },
+
+  numberListening : {
+    fontSize: 10,
+    color: '#FFE457',
+    marginLeft: 200,
+    marginRight: 10
+  },
+
   chatbox: {
     width: 380,
     height: 250,
