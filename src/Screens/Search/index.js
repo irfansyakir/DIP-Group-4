@@ -31,9 +31,9 @@ export const Search = () => {
 export const SearchClick = () => {
     // Initialize navigation
     const navigation = useNavigation(); 
-    
+
     const backButton = () => {
-        navigation.navigate('Search')
+        navigation.navigate('SearchTab')
     }
 
     const handleTrackClick = (trackId) => {
