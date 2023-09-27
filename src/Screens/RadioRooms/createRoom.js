@@ -44,6 +44,12 @@ export const CreateRoom = ()=> {
             <View style={styles.subtitle}>
             <ScrollView>
                 <Text>Select a theme</Text>
+                <Image
+                    source={{ uri: assets / clouds.png }} />
+                <Image
+                    source={{ uri: assets / palmtrees.png }} />
+                <Image
+                    source={{ uri: assets / raindrops.png }} />
                 <Text style={styles.subtitle}>Room Name</Text>
                 <TextInput
                     style={styles.input}
