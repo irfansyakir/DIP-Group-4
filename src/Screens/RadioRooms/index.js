@@ -1,17 +1,48 @@
+// import {StyleSheet, Text, View} from 'react-native';
+// import { Button } from '@rneui/themed';
+// export const RadioRooms = ({navigation}) => {
+//     return (
+//         <View style={styles.container}>
+            
+//             <Button
+//                 onPress={() => {
+//                     navigation.navigate('Chatroom')
+//                 }}
+//             >
+//                 Go to Chatroom
+//             </Button>
+//         </View>
 
+//     );
+// }   
+
+
+// const styles = StyleSheet.create({
+//     container: {
+//         display: "flex",
+//         width: '100%',
+//         height: '100%',
+
+//         // backgroundColor: 'pink',
+//         // alignItems: 'center',
+//         justifyContent: 'center',
+//     },
+// });
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import Svg, { Text as SvgText } from 'react-native-svg';
-import {useNavigation} from "@react-navigation/native";
-import {Button} from "@rneui/themed";
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 export const RadioRooms = () => {
+  const [text, onChangeText] = React.useState('');
+  const navigation = useNavigation(); // Initialize navigation
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
 
-  const navigation = useNavigation(); // Initialize navigation
-
-
+  const handleButtonClick = () => {
+    // Navigate to "YourNewPage" screen when the container is clicked
+    navigation.navigate('CreateRoom');
+  };
   // Sample data for recommended radio rooms
   const recommendedRooms = [
     { id: '1', name: 'Radio Room 1' },
@@ -32,7 +63,7 @@ export const RadioRooms = () => {
           </SvgText>
         </Svg>
       </View>
-      <TouchableOpacity style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.buttonContainer} onPress={handleButtonClick}>
         <Svg width="100%" height="100%">
           <SvgText
             x="50%"
@@ -46,7 +77,6 @@ export const RadioRooms = () => {
           </SvgText>
         </Svg>
       </TouchableOpacity>
-
       <TouchableOpacity
         style={styles.searchBar}
         onPress={() => {} /* Handle search bar click */}
