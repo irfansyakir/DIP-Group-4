@@ -131,46 +131,6 @@ export async function GetRecentlyPlayed({ accessToken }) {
   }
 }
 
-export async function GetRecentlyPlayed({ accessToken }) {
-  try {
-    let url = `https://api.spotify.com/v1/me/player/recently-played?limit=7`
-    const dataResponse = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-    if (dataResponse.status === 200) {
-      const data = await dataResponse.json()
-      return data
-    } else {
-      console.error('Error fetching recently played:', dataResponse.statusText)
-    }
-  } catch (error) {
-    console.error('Error fetching recently played data:', error)
-  }
-}
-
-export async function SearchTrack({ accessToken, text }) {
-  return await fetch(
-    `https://api.spotify.com/v1/search?q=${text}&type=track&limit=10`,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  )
-    .then((response) => {
-      response = response.json()
-      return response
-    })
-    .catch((error) => {
-      console.error(JSON.stringify(error))
-      return null
-    })
-}
-
 export async function SearchTrack({ accessToken, text }) {
   return await fetch(
     `https://api.spotify.com/v1/search?q=${text}&type=track&limit=10`,
