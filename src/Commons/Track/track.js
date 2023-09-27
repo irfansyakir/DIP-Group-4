@@ -27,7 +27,7 @@ export const Track = ({ navigation }) => {
   // temporary: get first track of playlist ID
   const accessToken = useAuthStore((state) => state.accessToken)
   const route = useRoute()
-  // const { playlistId } = route.params
+  const { playlistId } = route.params
   const { trackId } = route.params
   const [image, setImage] = useState('')
   const [title, setTitle] = useState('Loading...')
@@ -38,8 +38,9 @@ export const Track = ({ navigation }) => {
   const getPlaylistData = async () => {
     // fetch data on load
     try {
+      console.log(playlistId)
       if (playlistId === undefined){
-        console.log(trackId)
+        
         const trackData = await GetTrack({
           accessToken: accessToken,
           trackId: trackId,

@@ -99,9 +99,9 @@ function ProfileStackNavigator() {
 function SearchStackNavigator(){
   return(
     <SearchStack.Navigator screenOptions={{ headerShown: false }}>
-      
-      <Stack.Screen name="SearchClick" component={SearchClick} />
-      <ProfileStack.Screen name='Track' component={Track} />
+      <SearchStack.Screen name='SearchTab' component={Search} />
+      <SearchStack.Screen name="SearchClick" component={SearchClick} />
+      <SearchStack.Screen name='Track' component={Track} />
     </SearchStack.Navigator>
   )
 }
