@@ -31,8 +31,15 @@ export const Search = () => {
 export const SearchClick = () => {
     // Initialize navigation
     const navigation = useNavigation(); 
+    
     const backButton = () => {
         navigation.navigate('Search')
+    }
+
+    const handleTrackClick = (trackId) => {
+        // Navigate to "YourNewPage" screen when the container is clicked
+        const params = { trackId: trackId }
+        navigation.navigate('Track', params)
     }
 
     const test = [
@@ -75,7 +82,7 @@ export const SearchClick = () => {
     }
 
     const renderItem = ({ item }) => (
-        <Pressable onPress={()=>console.log("hehe")}>
+        <Pressable onPress={() => handleTrackClick(item.id)}>
         <View style={{flexDirection:'row', paddingVertical:7, alignItems: 'center'}}>
             {/* SONG IMAGE */}
             <Image style={styles.img} src={item.coverUrl} />

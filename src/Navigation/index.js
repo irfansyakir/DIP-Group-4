@@ -25,6 +25,7 @@ import { Track } from '../Commons/Track/track'
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
+const SearchStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
@@ -68,7 +69,7 @@ function HomeTabs() {
       })}
     >
       <Tab.Screen name='Home' component={Home} />
-      <Tab.Screen name='Search' component={Search} />
+      <Tab.Screen name='Search' component={SearchStackNavigator} />
       <Tab.Screen name='RadioRooms' component={RadioRooms} />
       <Tab.Screen name='Profile' component={ProfileStackNavigator} />
       <Tab.Screen name='TestAPI' component={TestAPI} />
@@ -95,6 +96,16 @@ function ProfileStackNavigator() {
   )
 }
 
+function SearchStackNavigator(){
+  return(
+    <SearchStack.Navigator screenOptions={{ headerShown: false }}>
+      
+      <Stack.Screen name="SearchClick" component={SearchClick} />
+      <ProfileStack.Screen name='Track' component={Track} />
+    </SearchStack.Navigator>
+  )
+}
+
 export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
 
@@ -114,7 +125,6 @@ export const Navigation = () => {
               <Stack.Screen name="Queue" component={Queue} />
               <Stack.Screen name="Playlist" component={Playlist} />
               <Stack.Screen name="Chatroom" component={Chatroom} />
-              <Stack.Screen name="SearchClick" component={SearchClick} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
