@@ -33,7 +33,7 @@ export const CreateRoom = ()=> {
 
     const handleContainerClick = () => {
         // Navigate to "YourNewPage" screen when the container is clicked
-        navigation.navigate('Room');
+        navigation.navigate('"Room"Room');
     };
 */
     return (
