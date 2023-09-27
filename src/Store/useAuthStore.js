@@ -5,7 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 export const useAuthStore = create(
   persist(
     (set) => ({
-      userId: '',
       isLoggedIn: false,
       code: '',
       codeVerifier: '',
@@ -19,7 +18,6 @@ export const useAuthStore = create(
       changeRefreshToken: (value) => set(() => ({ refreshToken: value })),
       signOut: () =>
         set(() => ({
-          userId: '',
           isLoggedIn: false,
           code: '',
           codeVerifier: '',

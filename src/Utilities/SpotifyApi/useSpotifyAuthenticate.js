@@ -1,6 +1,12 @@
 import * as WebBrowser from 'expo-web-browser'
-import {AccessTokenRequest, makeRedirectUri, useAuthRequest,} from 'expo-auth-session'
-import {useAuthStore} from '../../Store/useAuthStore'
+import {
+  AccessTokenRequest,
+  makeRedirectUri,
+  RefreshTokenRequest,
+  useAuthRequest,
+} from 'expo-auth-session'
+import { useAuthStore } from '../../Store/useAuthStore'
+import { useFirebaseSignInAnon } from '../../../firebaseConfig'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -25,6 +31,7 @@ const scope = [
   'playlist-modify-private',
   'playlist-read-private',
   'playlist-read-collaborative',
+  'user-read-recently-played',
 ]
 //Todo
 //Add logout function
@@ -33,10 +40,11 @@ const scope = [
 export function useSpotifyAuthenticate() {
   const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
   const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
-
+  const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
   // const changeCode = useAuthStore((state) => state.changeCode)
   // const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
-  const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
+
+  const [firebaseSignIn] = useFirebaseSignInAnon()
 
   const [_, __, promptAsync] = useAuthRequest(
     {
@@ -50,45 +58,67 @@ export function useSpotifyAuthenticate() {
     discovery
   )
 
-  async function getAccessToken(response){
+  async function getAccessToken(response) {
     // console.log(response)
-      if (response?.type === 'success') {
-        const { code } = response.params
-        return new AccessTokenRequest(
-          {
-            code: code,
-            redirectUri: redirectUri,
-            clientId: clientId,
-            clientSecret: clientSecret,
-            scopes: scope,
-          },
-          discovery
-        );
-      } else if (response?.type === 'error'){
-          new Error('Error in getting the access token. Skill issue.')
-          console.log(response.error)
-        return null
-      }
+    if (response?.type === 'success') {
+      const { code } = response.params
+      return new AccessTokenRequest(
+        {
+          code: code,
+          redirectUri: redirectUri,
+          clientId: clientId,
+          clientSecret: clientSecret,
+          scopes: scope,
+        },
+        discovery
+      )
+    } else if (response?.type === 'error') {
+      new Error('Error in getting the access token. Skill issue.')
+      console.log(response.error)
+      return null
+    }
   }
 
   async function apiLogin() {
-    promptAsync().then(async response => {
+    promptAsync().then(async (response) => {
       const tokenRequest = await getAccessToken(response)
 
-      await tokenRequest?.performAsync(discovery)
+      await tokenRequest
+        ?.performAsync(discovery)
         .then((r) => {
           changeAccessToken(r.accessToken)
           changeRefreshToken(r.refreshToken)
           changeIsLoggedIn(true)
         })
-        .catch(error => {
+        .catch((error) => {
           console.log(error)
         })
+      await firebaseSignIn()
     })
   }
   return [apiLogin]
 }
 
+export function useSpotifyRefresh() {
+  const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
+  const refreshToken = useAuthStore((state) => state.refreshToken)
+  async function doRefresh() {
+    const refreshTokenRequest = await new RefreshTokenRequest(
+      {
+        refreshToken: refreshToken,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        scopes: scope,
+      },
+      discovery
+    )
+    await refreshTokenRequest.performAsync(discovery).then((r) => {
+      changeAccessToken(r)
+      // console.log(r.accessToken)
+    })
+  }
+  return [doRefresh]
+}
 //legacy code -----------------------------------------------------------------------------------------------
 
 //     import * as Linking from 'expo-linking';

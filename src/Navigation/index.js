@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {NavigationContainer} from "@react-navigation/native";
+import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -17,8 +17,8 @@ import { Playlist } from '../Screens/Playlist'
 import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
-import {Queue} from "../Screens/Queue";
-import {Chatroom} from "../Screens/Chatroom";
+import { Queue } from '../Screens/Queue'
+import { Chatroom } from '../Screens/Chatroom'
 
 // Track
 import { Track } from '../Commons/Track/track'
@@ -108,6 +108,8 @@ function SearchStackNavigator(){
 
 export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
+  const wholeState = useAuthStore((state) => state)
+  console.log(wholeState)
 
   return (
     <React.Fragment>
@@ -120,11 +122,11 @@ export const Navigation = () => {
       >
         {isLoggedIn ? (
           <Fragment>
-              <Stack.Screen name='RootHome' component={HomeTabs} />
-              <Stack.Screen name='EditProfile' component={EditProfile} />
-              <Stack.Screen name="Queue" component={Queue} />
-              <Stack.Screen name="Playlist" component={Playlist} />
-              <Stack.Screen name="Chatroom" component={Chatroom} />
+            <Stack.Screen name='RootHome' component={HomeTabs} />
+            <Stack.Screen name='EditProfile' component={EditProfile} />
+            <Stack.Screen name='Queue' component={Queue} />
+            <Stack.Screen name='Playlist' component={Playlist} />
+            <Stack.Screen name='Chatroom' component={Chatroom} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
