@@ -99,7 +99,6 @@ export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
   const wholeState = useAuthStore((state) => state)
   console.log(wholeState)
-  console.log('navigate page')
 
   return (
     <React.Fragment>
