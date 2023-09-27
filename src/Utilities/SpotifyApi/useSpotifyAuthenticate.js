@@ -2,9 +2,11 @@ import * as WebBrowser from 'expo-web-browser'
 import {
   AccessTokenRequest,
   makeRedirectUri,
+  RefreshTokenRequest,
   useAuthRequest,
 } from 'expo-auth-session'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useFirebaseSignInAnon } from '../../../firebaseConfig'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -38,10 +40,11 @@ const scope = [
 export function useSpotifyAuthenticate() {
   const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
   const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
-
+  const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
   // const changeCode = useAuthStore((state) => state.changeCode)
   // const changeCodeVerifier = useAuthStore((state) => state.changeCodeVerifier)
-  const changeRefreshToken = useAuthStore((state) => state.changeRefreshToken)
+
+  const [firebaseSignIn] = useFirebaseSignInAnon()
 
   const [_, __, promptAsync] = useAuthRequest(
     {
@@ -90,11 +93,32 @@ export function useSpotifyAuthenticate() {
         .catch((error) => {
           console.log(error)
         })
+      await firebaseSignIn()
     })
   }
   return [apiLogin]
 }
 
+export function useSpotifyRefresh() {
+  const changeAccessToken = useAuthStore((state) => state.changeAccessToken)
+  const refreshToken = useAuthStore((state) => state.refreshToken)
+  async function doRefresh() {
+    const refreshTokenRequest = await new RefreshTokenRequest(
+      {
+        refreshToken: refreshToken,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        scopes: scope,
+      },
+      discovery
+    )
+    await refreshTokenRequest.performAsync(discovery).then((r) => {
+      changeAccessToken(r)
+      // console.log(r.accessToken)
+    })
+  }
+  return [doRefresh]
+}
 //legacy code -----------------------------------------------------------------------------------------------
 
 //     import * as Linking from 'expo-linking';
