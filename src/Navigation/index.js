@@ -19,10 +19,11 @@ import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 import { Queue } from '../Screens/Queue'
 import { Chatroom } from '../Screens/Chatroom'
+import { CreateRoom } from "../Screens/RadioRooms/Components/CreateRoom";
 
 // Track
 import { Track } from '../Commons/Track/track'
-import { CreateRoom } from '../Screens/RadioRooms/createroom'
+
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
@@ -93,7 +94,7 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen name='ProfileTab' component={Profile} />
       <ProfileStack.Screen name='EditProfile' component={EditProfile} />
       <ProfileStack.Screen name='Track' component={Track} />
-      <ProfileStack.Screen name='CreateRoom' component={CreateRoom} />
+      {/*<ProfileStack.Screen name='CreateRoom' component={CreateRoom} />*/}
     </ProfileStack.Navigator>
   )
 }

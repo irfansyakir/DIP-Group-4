@@ -35,7 +35,10 @@ export const RadioRooms = () => {
           </SvgText>
         </Svg>
       </View>
-      <TouchableOpacity style={styles.buttonContainer}> onPress={handleButtonClick}
+      <TouchableOpacity
+        style={styles.buttonContainer}
+        onPress={handleButtonClick}
+      >
         <Svg width="100%" height="100%">
           <SvgText
             x="50%"

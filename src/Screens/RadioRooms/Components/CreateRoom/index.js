@@ -5,6 +5,12 @@ import { Image, Text, View, TextInput, Button,
 import { CheckBox } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
+import clouds from  '../../../../../assets/clouds.png'
+import raindrops from '../../../../../assets/raindrops.png'
+import palmTrees from '../../../../../assets/palmtrees.png'
+
+import {Stack} from "@rneui/layout";
+
 
 export const CreateRoom = ()=> {
     
@@ -45,11 +51,11 @@ export const CreateRoom = ()=> {
             <ScrollView>
                 <Text>Select a theme</Text>
                 <Image
-                    source={{ uri: assets / clouds.png }} />
+                    source={clouds} />
                 <Image
-                    source={{ uri: assets / palmtrees.png }} />
+                  source={palmTrees} />
                 <Image
-                    source={{ uri: assets / raindrops.png }} />
+                  source={raindrops} />
                 <Text style={styles.subtitle}>Room Name</Text>
                 <TextInput
                     style={styles.input}
@@ -86,7 +92,7 @@ export const CreateRoom = ()=> {
                     />
                 </Stack>
                 <View>
-                    <TouchableOpacity style={styles.buttonListen} onPress={handleContainerClick}>
+                    <TouchableOpacity style={styles.buttonListen}>
                         <Text style={styles.buttonText}>Start Listening</Text>
                     </TouchableOpacity>
                 </View>
