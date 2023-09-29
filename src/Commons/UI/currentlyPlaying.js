@@ -1,10 +1,11 @@
-import { View, Image, TouchableOpacity } from 'react-native'
+import { View, Image, TouchableOpacity, Pressable } from 'react-native'
 import { Dimensions } from 'react-native'
-import { BoldText, MediumText } from './styledText'
+import { LightText, MediumText } from './styledText'
 import { COLORS } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { useEffect } from 'react'
+import { useNavigation } from '@react-navigation/native'
 
 const SongProgessBar = ({ currentTime, duration }) => {
   return (
@@ -33,6 +34,7 @@ export function CurrentlyPlaying({ duration, currentTime }) {
   const isPlaying = useMusicStore((state) => state.isPlaying)
   const soundObject = useMusicStore((state) => state.soundObject)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+  const navigation = useNavigation()
 
   const play = async () => {
     try {
@@ -57,7 +59,7 @@ export function CurrentlyPlaying({ duration, currentTime }) {
   }, [isPlaying])
 
   return !soundObject ? null : (
-    <View
+    <Pressable
       style={{
         position: 'absolute',
         width: screenWidth - 20,
@@ -72,6 +74,9 @@ export function CurrentlyPlaying({ duration, currentTime }) {
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
+      }}
+      onPress={() => {
+        navigation.navigate('Track')
       }}
     >
       <Image style={{ width: 50, height: 50 }} src={songInfo.coverUrl} />
@@ -97,10 +102,12 @@ export function CurrentlyPlaying({ duration, currentTime }) {
               display: 'flex',
             }}
           >
-            <BoldText style={{ color: 'white' }}>{songInfo.songTitle}</BoldText>
-            <MediumText style={{ color: COLORS.light, fontSize: 12 }}>
-              {songInfo.songArtist}
+            <MediumText style={{ color: 'white', fontSize: 14 }}>
+              {songInfo.songTitle}
             </MediumText>
+            <LightText style={{ color: COLORS.light, fontSize: 12 }}>
+              {songInfo.songArtist}
+            </LightText>
           </View>
           <TouchableOpacity
             onPress={() => {
@@ -117,6 +124,6 @@ export function CurrentlyPlaying({ duration, currentTime }) {
         </View>
         <SongProgessBar currentTime={currentTime} duration={duration} />
       </View>
-    </View>
+    </Pressable>
   )
 }
