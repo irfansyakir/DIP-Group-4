@@ -3,6 +3,8 @@ import { Dimensions } from 'react-native'
 import { BoldText, MediumText } from './styledText'
 import { COLORS } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useMusicStore } from '../../Store/useMusicStore'
+import { useEffect } from 'react'
 
 const SongProgessBar = ({ currentTime, duration }) => {
   return (
@@ -25,15 +27,27 @@ const SongProgessBar = ({ currentTime, duration }) => {
   )
 }
 
-export function CurrentlyPlaying({
-  coverUrl,
-  title,
-  artist,
-  duration,
-  currentTime,
-}) {
+export function CurrentlyPlaying({ duration, currentTime }) {
   const screenWidth = Dimensions.get('window').width
-  return (
+  const songInfo = useMusicStore((state) => state.songInfo)
+  const isPlaying = useMusicStore((state) => state.isPlaying)
+  const soundObject = useMusicStore((state) => state.soundObject)
+  const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+
+  const play = async () => {
+    await soundObject.playAsync()
+  }
+  const pause = async () => {
+    await soundObject.pauseAsync()
+  }
+
+  useEffect(() => {
+    if (soundObject) {
+      isPlaying ? play() : pause()
+    }
+  }, [isPlaying])
+
+  return !soundObject ? null : (
     <View
       style={{
         position: 'absolute',
@@ -51,7 +65,7 @@ export function CurrentlyPlaying({
         paddingVertical: 10,
       }}
     >
-      <Image style={{ width: 50, height: 50 }} src={coverUrl} />
+      <Image style={{ width: 50, height: 50 }} src={songInfo.coverUrl} />
       <View
         aria-label='text and bar'
         style={{
@@ -74,14 +88,18 @@ export function CurrentlyPlaying({
               display: 'flex',
             }}
           >
-            <BoldText style={{ color: 'white' }}>{title}</BoldText>
+            <BoldText style={{ color: 'white' }}>{songInfo.songTitle}</BoldText>
             <MediumText style={{ color: COLORS.light, fontSize: 12 }}>
-              {artist}
+              {songInfo.songArtist}
             </MediumText>
           </View>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity
+            onPress={() => {
+              changeIsPlaying(!isPlaying)
+            }}
+          >
             {/* update state for pause and play */}
-            {true ? (
+            {!isPlaying ? (
               <Ionicons name='play' size={24} color={COLORS.white} />
             ) : (
               <Ionicons name='pause' size={24} color={COLORS.white} />

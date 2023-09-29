@@ -46,8 +46,8 @@ export const Home = () => {
         })
       })
       setRecentlyPlayed(currRecentlyPlayed)
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -128,7 +128,7 @@ export const Home = () => {
           style={{ marginHorizontal: 10 }}
           horizontal={true}
           data={recentlyPlayed}
-          keyExtractor={(item) => item.id}
+          keyExtractor={() => Math.random() * 10}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity>

@@ -19,11 +19,10 @@ import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 import { Queue } from '../Screens/Queue'
 import { Chatroom } from '../Screens/Chatroom'
-import { CreateRoom } from "../Screens/RadioRooms/Components/CreateRoom";
+import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
 
 // Track
 import { Track } from '../Commons/Track/track'
-
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
@@ -99,11 +98,11 @@ function ProfileStackNavigator() {
   )
 }
 
-function SearchStackNavigator(){
-  return(
+function SearchStackNavigator() {
+  return (
     <SearchStack.Navigator screenOptions={{ headerShown: false }}>
       <SearchStack.Screen name='SearchTab' component={Search} />
-      <SearchStack.Screen name="SearchClick" component={SearchClick} />
+      <SearchStack.Screen name='SearchClick' component={SearchClick} />
       <SearchStack.Screen name='Track' component={Track} />
     </SearchStack.Navigator>
   )
@@ -136,7 +135,7 @@ export const Navigation = () => {
           <Stack.Screen name='Auth' component={AuthStack} />
         )}
       </Stack.Navigator>
-      {false && (
+      {true && (
         <CurrentlyPlaying
           coverUrl={
             'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'

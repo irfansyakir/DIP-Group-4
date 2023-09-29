@@ -5,6 +5,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import Slider from '@react-native-community/slider'
+import { useMusicStore } from '../../Store/useMusicStore'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -12,8 +13,10 @@ const Icon = createIconSetFromIcoMoon(
   'icomoon.ttf'
 )
 
-export const Play = ({ handlePlay, handlePause }) => {
-  const [isPlaying, setIsPlaying] = useState(false)
+export const Play = () => {
+  const isPlaying = useMusicStore((state) => state.isPlaying)
+  const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+  const soundObject = useMusicStore((state) => state.soundObject)
   const [range, setRange] = useState(0)
   const maxTime = 5
 
@@ -34,9 +37,8 @@ export const Play = ({ handlePlay, handlePause }) => {
   }
 
   const togglePlay = () => {
-    if (isPlaying) handlePause()
-    else handlePlay()
-    setIsPlaying(!isPlaying)
+    console.log(isPlaying, soundObject)
+    changeIsPlaying(!isPlaying)
   }
 
   return (
