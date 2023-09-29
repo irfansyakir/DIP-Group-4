@@ -32,7 +32,6 @@ export const Home = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const [recentlyPlayed, setRecentlyPlayed] = useState([])
   const [playlists, setPlaylists] = useState([])
-  
 
   const getRecentlyPlayed = async () => {
     try {
@@ -87,32 +86,28 @@ export const Home = () => {
     getPlaylistData()
   }, [])
 
-  
   return (
     <View
       style={{
         paddingTop: insets.top, // Add top inset as padding
-        paddingBottom: insets.bottom, // Add bottom inset as padding
         flex: 1, // Make sure the content fills the available space
         backgroundColor: COLORS.dark, // Adjust background color as needed
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <ScrollView style={{ flex: 1, marginTop: 20 }}>
-        <View>
-          <Text
-            style={{
-              color: 'white',
-              marginHorizontal: 10,
-              fontSize: 17,
-              fontWeight: 'bold',
-              marginVertical: 10,
-            }}
-          >
-            Recently Played
-          </Text>
-        </View>
+      <ScrollView style={{ width: '100%' }}>
+        <Text
+          style={{
+            color: 'white',
+            marginHorizontal: 10,
+            fontSize: 17,
+            fontWeight: 'bold',
+            marginVertical: 10,
+          }}
+        >
+          Recently Played
+        </Text>
 
         <FlatList
           style={{ marginHorizontal: 10 }}
@@ -127,7 +122,6 @@ export const Home = () => {
                   width: 100,
                   height: 100,
                   marginRight: 10,
-                  
                 }}
                 src={item.photoUrl}
               />
@@ -136,7 +130,13 @@ export const Home = () => {
                 <Text
                   numberOfLines={1}
                   ellipsizeMode='tail'
-                  style={{ fontWeight: '400', fontSize: 10, color: 'white', width:100, flex:1 }}
+                  style={{
+                    fontWeight: '400',
+                    fontSize: 10,
+                    color: 'white',
+                    width: 100,
+                    flex: 1,
+                  }}
                 >
                   {item.title}
                 </Text>
@@ -144,8 +144,6 @@ export const Home = () => {
             </TouchableOpacity>
           )}
         />
-
-        
 
         <View
           style={{
@@ -173,7 +171,7 @@ export const Home = () => {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity
             style={{
-              width: 55,
+              width: 50,
               height: 50,
               // width:50,
               justifyContent: 'center',
@@ -184,7 +182,14 @@ export const Home = () => {
           >
             <AntDesign name='plus' size={24} color='white' />
           </TouchableOpacity>
-          <Text style={{ color: 'white', fontSize: 15, fontWeight: 'bold' }}>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 15,
+              fontWeight: 'bold',
+              marginLeft: 5,
+            }}
+          >
             Create Playlist
           </Text>
         </View>
@@ -205,43 +210,48 @@ export const Home = () => {
             )
           })}
         </View>
-
-       
       </ScrollView>
     </View>
   )
 }
 
-
-
 const styles = StyleSheet.create({
-  playlistContainer:{
-    marginTop: 15,
+  playlistContainer: {
+    marginTop: 10,
     flex: 1,
     alignItems: 'stretch',
-    marginLeft: 18,
-  }
+    marginLeft: 10,
+  },
 })
 
 const renderTableRow = (imageSource, title, description) => (
-  <View style={{flexDirection: 'row', alignItems:'center', marginBottom:10}}>
+  <View
+    style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
+  >
     <Image
       style={{
         width: 50,
         height: 50,
         marginRight: 10,
-        justifyContent:'center',
+        justifyContent: 'center',
       }}
-      source={imageSource}
+      src={imageSource}
       contentFit={'fill'}
     />
-    <View style={{flex:1, marginLeft:5 }}>
-      <Text 
-      numberOfLines={1}
-      ellipsizeMode='tail'
-      style={{color: '#FFFFFF',fontSize: 16,fontWeight: '400',width:250}}>{title}</Text>
-      <Text style={{fontSize:13, color:'#B3B3B3',}}>{description}</Text>
+    <View style={{ flex: 1, marginLeft: 5 }}>
+      <Text
+        numberOfLines={1}
+        ellipsizeMode='tail'
+        style={{
+          color: '#FFFFFF',
+          fontSize: 16,
+          fontWeight: '400',
+          width: 250,
+        }}
+      >
+        {title}
+      </Text>
+      <Text style={{ fontSize: 13, color: '#B3B3B3' }}>{description}</Text>
     </View>
   </View>
 )
-
