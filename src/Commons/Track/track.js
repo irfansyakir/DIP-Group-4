@@ -35,6 +35,7 @@ export const Track = ({ navigation }) => {
   const soundObject = useMusicStore((state) => state.soundObject)
   const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
   const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
+  const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
 
   const getPlaylistData = async () => {
     // fetch data on load
@@ -76,7 +77,10 @@ export const Track = ({ navigation }) => {
 
   const createSoundObject = async (uri) => {
     // clear previous song
-    if (soundObject) soundObject.unloadAsync()
+    if (soundObject) {
+      changeIsPlaying(false)
+      soundObject.unloadAsync()
+    }
 
     const { sound } = await Audio.Sound.createAsync({ uri: uri })
     changeSoundObject(sound)

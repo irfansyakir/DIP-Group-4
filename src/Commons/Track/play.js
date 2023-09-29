@@ -16,7 +16,6 @@ const Icon = createIconSetFromIcoMoon(
 export const Play = () => {
   const isPlaying = useMusicStore((state) => state.isPlaying)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
-  const soundObject = useMusicStore((state) => state.soundObject)
   const [range, setRange] = useState(0)
   const maxTime = 5
 
@@ -37,7 +36,6 @@ export const Play = () => {
   }
 
   const togglePlay = () => {
-    console.log(isPlaying, soundObject)
     changeIsPlaying(!isPlaying)
   }
 

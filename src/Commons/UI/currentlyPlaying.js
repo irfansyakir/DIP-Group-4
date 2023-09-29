@@ -35,10 +35,19 @@ export function CurrentlyPlaying({ duration, currentTime }) {
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
 
   const play = async () => {
-    await soundObject.playAsync()
+    try {
+      await soundObject.playAsync()
+    } catch (err) {
+      console.log(err)
+    }
   }
+
   const pause = async () => {
-    await soundObject.pauseAsync()
+    try {
+      await soundObject.pauseAsync()
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   useEffect(() => {
