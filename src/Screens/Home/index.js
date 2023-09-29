@@ -9,11 +9,13 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native'
 import { AntDesign } from '@expo/vector-icons'
 import { GetRecentlyPlayed } from '../../Utilities/SpotifyApi/Utils'
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useNavigation } from '@react-navigation/native' // Import useNavigation
 //Danish's Home Page
 //Needs testing first
 
@@ -30,6 +32,7 @@ export const Home = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const [recentlyPlayed, setRecentlyPlayed] = useState([])
   const [playlists, setPlaylists] = useState([])
+  
 
   const getRecentlyPlayed = async () => {
     try {
@@ -49,6 +52,12 @@ export const Home = () => {
     } catch (error) {
       console.error(error)
     }
+  }
+
+  const handlePlaylistClick = (playlistId) => {
+    // Navigate to "YourNewPage" screen when the container is clicked
+    //const params = { playlistId: playlistId }
+    //navigation.navigate('Track', params)
   }
 
   const getPlaylistData = async () => {
@@ -78,26 +87,7 @@ export const Home = () => {
     getPlaylistData()
   }, [])
 
-  // Sample data for songs and playlists
-  const recommendedSongs = [
-    { id: '1', name: 'Song 1', artist: 'Artist One' },
-    { id: '2', name: 'Song 2', artist: 'Artist Two' },
-    { id: '3', name: 'Song 3', artist: 'Artist Three' },
-    { id: '4', name: 'Song 4', artist: 'Artist Four' },
-    { id: '5', name: 'Song 5', artist: 'Artist Five' },
-    { id: '6', name: 'Song 6', artist: 'Artist Six' },
-    { id: '7', name: 'Song 7', artist: 'Artist Seven' },
-  ]
-
-  const recommendedPlaylists = [
-    { id: '1', name: 'Playlist 1', songs: 10 },
-    { id: '2', name: 'Playlist 2', songs: 3 },
-    { id: '3', name: 'Playlist 3', songs: 21 },
-    { id: '4', name: 'Playlist 4', songs: 19 },
-    { id: '5', name: 'Playlist 5', songs: 17 },
-    { id: '6', name: 'Playlist 6', songs: 9 },
-    { id: '7', name: 'Playlist 7', songs: 8 },
-  ]
+  
   return (
     <View
       style={{
@@ -137,6 +127,7 @@ export const Home = () => {
                   width: 100,
                   height: 100,
                   marginRight: 10,
+                  
                 }}
                 src={item.photoUrl}
               />
@@ -144,7 +135,8 @@ export const Home = () => {
               <View>
                 <Text
                   numberOfLines={1}
-                  style={{ fontWeight: '400', fontSize: 10, color: 'white' }}
+                  ellipsizeMode='tail'
+                  style={{ fontWeight: '400', fontSize: 10, color: 'white', width:100, flex:1 }}
                 >
                   {item.title}
                 </Text>
@@ -152,6 +144,8 @@ export const Home = () => {
             </TouchableOpacity>
           )}
         />
+
+        
 
         <View
           style={{
@@ -195,41 +189,59 @@ export const Home = () => {
           </Text>
         </View>
 
-        <FlatList
-          data={playlists}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 10,
-              }}
-            >
-              <Image
-                style={{
-                  width: 50,
-                  height: 50,
-                  marginRight: 10,
-                }}
-                src={item.photoUrl}
-              />
+        <View style={styles.playlistContainer}>
+          {playlists.map((playlist) => {
+            return (
+              <TouchableOpacity
+                key={playlist.id}
+                onPress={() => handlePlaylistClick(playlist.id)}
+              >
+                {renderTableRow(
+                  playlist.photoUrl,
+                  playlist.name,
+                  playlist.owner
+                )}
+              </TouchableOpacity>
+            )
+          })}
+        </View>
 
-              <View>
-                <Text
-                  numberOfLines={1}
-                  style={{ fontWeight: '400', fontSize: 16, color: 'white' }}
-                >
-                  {item.name}
-                </Text>
-                <Text style={{ marginTop: 4, color: '#9A9A9A' }}>
-                  {item.total} songs
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
+       
       </ScrollView>
     </View>
   )
 }
+
+
+
+const styles = StyleSheet.create({
+  playlistContainer:{
+    marginTop: 15,
+    flex: 1,
+    alignItems: 'stretch',
+    marginLeft: 18,
+  }
+})
+
+const renderTableRow = (imageSource, title, description) => (
+  <View style={{flexDirection: 'row', alignItems:'center', marginBottom:10}}>
+    <Image
+      style={{
+        width: 50,
+        height: 50,
+        marginRight: 10,
+        justifyContent:'center',
+      }}
+      source={imageSource}
+      contentFit={'fill'}
+    />
+    <View style={{flex:1, marginLeft:5 }}>
+      <Text 
+      numberOfLines={1}
+      ellipsizeMode='tail'
+      style={{color: '#FFFFFF',fontSize: 16,fontWeight: '400',width:250}}>{title}</Text>
+      <Text style={{fontSize:13, color:'#B3B3B3',}}>{description}</Text>
+    </View>
+  </View>
+)
+
