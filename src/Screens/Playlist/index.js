@@ -40,14 +40,18 @@ export const Playlist = () => {
     { id: '5', name: 'Song 5', artist: 'Artist Five' },
     { id: '6', name: 'Song 6', artist: 'Artist Six' },
     { id: '7', name: 'Song 7', artist: 'Artist Seven' },
+    { id: '8', name: 'Song 8', artist: 'Artist Eight' }
   ]
+
+  
 
   return (
     <LinearGradient
       colors={['#836E55', '#4C4134', '#15120F']}
       style={{ flex: 1 }}
     >
-      <ScrollView
+      <View
+      
         style={{
           flex: 1,
           marginTop: 20,
@@ -55,20 +59,20 @@ export const Playlist = () => {
           paddingBottom: insets.bottom,
         }}
       >
-        <TouchableOpacity style={{ marginHorizontal: 10 }}>
-          <Ionicons name='arrow-back' size={24} color='white' />
+        <TouchableOpacity style={{ marginHorizontal: 10, marginBottom:10 }}>
+          <Ionicons name='arrow-back' size={30} color='white' />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
+            flexDirection:'row',
             backgroundColor: '#7E6E5B',
-            padding: 9,
-            flex: 1,
-            borderRadius: 3,
-            height: 38,
+            height:38,
+            alignItems:'center',
+            gap:10,
+            borderRadius:3,
+            padding:9,
+            
           }}
         >
           <AntDesign name='search1' size={20} color='white' />
@@ -78,7 +82,7 @@ export const Playlist = () => {
             autoFocus={false}
             placeholder='Find in Playlist'
             placeholderTextColor={'white'}
-            style={{ fontWeight: '400', color: 'black' }}
+            style={{ fontWeight: '400', color: 'white' }}
           />
         </TouchableOpacity>
 
@@ -120,6 +124,7 @@ export const Playlist = () => {
 
         <FlatList
           data={recommendedSongs}
+          horizontal={false}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity
@@ -168,7 +173,7 @@ export const Playlist = () => {
             </TouchableOpacity>
           )}
         />
-      </ScrollView>
+      </View>
     </LinearGradient>
   )
 }
