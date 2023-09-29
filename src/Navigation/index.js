@@ -13,7 +13,7 @@ import { Login } from '../Screens/Login'
 
 import { Fragment } from 'react'
 import { useAuthStore } from '../Store/useAuthStore'
-import { Playlist } from '../Screens/Playlist'
+import { Playlist } from '../Commons/Playlist'
 import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
@@ -71,9 +71,9 @@ function HomeTabs() {
     >
       <Tab.Screen name='Home' component={Home} />
       <Tab.Screen name='Search' component={SearchStackNavigator} />
-      <Tab.Screen name='RadioRooms' component={RadioRooms} />
+      {/* <Tab.Screen name='RadioRooms' component={RadioRooms} /> */}
       <Tab.Screen name='Profile' component={ProfileStackNavigator} />
-      <Tab.Screen name='TestAPI' component={TestAPI} />
+      {/* <Tab.Screen name='TestAPI' component={TestAPI} /> */}
     </Tab.Navigator>
   )
 }

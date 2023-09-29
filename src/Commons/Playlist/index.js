@@ -1,35 +1,25 @@
 import {
-  ActivityIndicator,
   FlatList,
   Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
   TouchableOpacity,
 } from 'react-native'
-import React, { useState, useEffect, useContext, useRef } from 'react'
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { AntDesign } from '@expo/vector-icons'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { Feather, FontAwesome } from '@expo/vector-icons'
 import { Entypo } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-//import AsyncStorage from "@react-native-async-storage/async-storage";
-//import SongItem from "../components/SongItem";
-//import { Player } from "../PlayerContext";
-//import { BottomModal } from "react-native-modals";
-//import { ModalContent } from "react-native-modals";
-//import { Audio } from "expo-av";
-//import { debounce } from "lodash";
+import { BoldText, MediumText } from '../UI/styledText'
 
-export const Playlist = () => {
+export const Playlist = ({ route }) => {
   const [input, setInput] = useState('')
   const insets = useSafeAreaInsets()
+  const navigation = useNavigation()
+  const playlistID = route.params
 
   // Sample data for song display
   const recommendedSongs = [
@@ -40,10 +30,8 @@ export const Playlist = () => {
     { id: '5', name: 'Song 5', artist: 'Artist Five' },
     { id: '6', name: 'Song 6', artist: 'Artist Six' },
     { id: '7', name: 'Song 7', artist: 'Artist Seven' },
-    { id: '8', name: 'Song 8', artist: 'Artist Eight' }
+    { id: '8', name: 'Song 8', artist: 'Artist Eight' },
   ]
-
-  
 
   return (
     <LinearGradient
@@ -51,28 +39,30 @@ export const Playlist = () => {
       style={{ flex: 1 }}
     >
       <View
-      
         style={{
           flex: 1,
           marginTop: 20,
           paddingTop: insets.top,
           paddingBottom: insets.bottom,
+          marginHorizontal: 20,
         }}
       >
-        <TouchableOpacity style={{ marginHorizontal: 10, marginBottom:10 }}>
-          <Ionicons name='arrow-back' size={30} color='white' />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ marginBottom: 15 }}
+        >
+          <Ionicons name='chevron-back' size={25} color='white' />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={{
-            flexDirection:'row',
+            flexDirection: 'row',
             backgroundColor: '#7E6E5B',
-            height:38,
-            alignItems:'center',
-            gap:10,
-            borderRadius:3,
-            padding:9,
-            
+            height: 38,
+            alignItems: 'center',
+            gap: 10,
+            borderRadius: 3,
+            padding: 9,
           }}
         >
           <AntDesign name='search1' size={20} color='white' />
@@ -82,16 +72,25 @@ export const Playlist = () => {
             autoFocus={false}
             placeholder='Find in Playlist'
             placeholderTextColor={'white'}
-            style={{ fontWeight: '400', color: 'white' }}
+            style={{
+              fontFamily: 'InterLight',
+              fontSize: 12,
+              color: 'white',
+            }}
           />
         </TouchableOpacity>
 
         <View style={{ height: 50 }} />
-        <View style={{ marginHorizontal: 10, alignItems: 'center' }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}>
-            {' '}
+        <View
+          style={{
+            marginHorizontal: 10,
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <BoldText style={{ color: 'white', fontSize: 18 }}>
             PLAYLIST NAME
-          </Text>
+          </BoldText>
         </View>
 
         <View
@@ -102,10 +101,9 @@ export const Playlist = () => {
             gap: 10,
           }}
         >
-          <Text style={{ fontSize: 14, color: 'white' }}>
-            {' '}
-            Insert Description{' '}
-          </Text>
+          <MediumText style={{ fontSize: 12, color: 'white' }}>
+            Insert Description
+          </MediumText>
 
           <TouchableOpacity
             style={{
@@ -118,7 +116,7 @@ export const Playlist = () => {
               backgroundColor: '#41BBC4',
             }}
           >
-            <Entypo name='controller-play' size={24} color='black' />
+            <Entypo name='controller-play' size={30} color='black' />
           </TouchableOpacity>
         </View>
 
