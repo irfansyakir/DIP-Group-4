@@ -105,6 +105,12 @@ export const Track = ({ navigation }) => {
     return null
   }
 
+  const handleMoreClick = (trackId) => {
+    // Navigate to "YourNewPage" screen when the container is clicked
+    const params = { image: image, artist:artist, title: title  }
+    navigation.navigate('TrackInfo', params)
+  }
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -123,9 +129,9 @@ export const Track = ({ navigation }) => {
 
             <Text style={styles.headtxt}>{aorP}</Text>
 
-          <TouchableOpacity onPress={() => console.log('more')}>
-            <Icon style={styles.icon} name='more' size={25} />
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleMoreClick()}>
+              <Icon style={styles.icon} name='more' size={25} />
+            </TouchableOpacity>
           </View>
 
           <Image style={styles.img} src={image} />
