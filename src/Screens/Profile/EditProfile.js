@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Image } from 'expo-image'
 import {
   StyleSheet,
@@ -12,36 +12,52 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useProfileStore } from '../../Store/useProfileStore'
+import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 
 export const EditProfile = () => {
   const [text, onChangeText] = React.useState('')
   const navigation = useNavigation() // Initialize navigation
   const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
-  const showMessage = () => {
-    const customMessage = 'You are about to leave the page.'
-    Alert.alert(
-      'Save Changes?',
-      customMessage, // Set your custom message here
-      [
-        {
-          text: 'Yes',
-          onPress: () => navigation.navigate('ProfileTab'),
-        },
-        {
-          text: 'Cancel',
-          onPress: () => console.log('No Pressed'),
-        },
-      ],
-      { cancelable: true }
-    )
-  }
+  const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
+
   const handleButtonClick = () => {
-    navigation.navigate('Profile')
+    navigation.navigate('ProfileTab')
   }
   const handleContainerClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
     // navigation.navigate('Home');
     changeIsLoggedIn(false)
+  }
+  const handleNameClick = () => {
+    changeDisplayName(displayName)
+    navigation.navigate('ProfileTab')
+  }
+    // retrieve state data from stores
+  const accessToken = useAuthStore((state) => state.accessToken)
+
+    // managing state for playlist
+  const [displayName, setDisplayName] = useState('')
+  const [profileUrl, setProfileUrl] = useState('')
+
+  const getInitialProfileData = async () => {
+    // fetch data on load
+    try {
+      const profileData = await GetCurrentUserProfile({
+        accessToken: accessToken,
+      })
+      setDisplayName(profileData.display_name)
+      setProfileUrl(profileData.images[1].url)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  useEffect(() => {
+    getInitialProfileData()
+  }, [])
+
+  let callFunction = (e) => {
+    setDisplayName(e)
   }
 
   return (
@@ -54,7 +70,7 @@ export const EditProfile = () => {
         style={styles.background}
       />
       <View style={styles.header}>
-        <TouchableOpacity style={styles.buttonBack} onPress={showMessage}>
+        <TouchableOpacity style={styles.buttonBack} onPress={handleButtonClick}>
           <Image
             style={styles.backImage}
             source={require('../../../assets/Backbutton.png')}
@@ -65,10 +81,10 @@ export const EditProfile = () => {
       </View>
       <View style={styles.body}>
         <ScrollView>
-          <Text style={styles.nameText}>maya</Text>
+          <Text style={styles.nameText}>{displayName}</Text>
           <Image
             style={styles.profileImage}
-            source={require('../../../assets/image-3.png')}
+            source={profileUrl}
             contentFit={'fill'}
           />
           <View>
@@ -79,11 +95,17 @@ export const EditProfile = () => {
           <Text style={styles.boldText}>Edit username</Text>
           <TextInput
             style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
-            placeholder='Type a username...'
+            onChangeText={callFunction}
+            value={displayName}
+            placeholder='Type a new username...'
           />
           <View>
+          <TouchableOpacity
+              style={styles.buttonLogout}
+              onPress={handleNameClick}
+            >
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.buttonLogout}
               onPress={handleContainerClick}
@@ -158,7 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     paddingTop: 10,
     paddingBottom: 10,
-    marginLeft: 100,
+    marginLeft: 110,
   },
 
   input: {

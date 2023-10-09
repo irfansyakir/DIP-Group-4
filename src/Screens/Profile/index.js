@@ -11,10 +11,15 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native' // Import useNavigation
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useProfileStore } from '../../Store/useProfileStore'
 import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 
 export const Profile = () => {
   const navigation = useNavigation() // Initialize navigation
+  const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
+  const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
+  const changeFollowers = useProfileStore((state) => state.changeFollowers)
+  const storeDisplayName = useProfileStore((state) => state.displayName)
   const handleButtonClick = () => {
     navigation.navigate('EditProfile')
   }
@@ -70,6 +75,24 @@ export const Profile = () => {
       setDisplayName(profileData.display_name)
       setFollowers(profileData.followers.total)
       setProfileUrl(profileData.images[1].url)
+      changeDisplayName(profileData.display_name)
+      changeFollowers(profileData.followers.total)
+      changeProfileUrl(profileData.images[1].url)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const getChangedProfileData = async () => {
+    // fetch data on load
+    try {
+      const profileData = await GetCurrentUserProfile({
+        accessToken: accessToken,
+      })
+      setDisplayName(storeDisplayName)
+      setFollowers(profileData.followers.total)
+      setProfileUrl(profileData.images[1].url)
+
     } catch (error) {
       console.error(error)
     }
@@ -77,8 +100,16 @@ export const Profile = () => {
 
   useEffect(() => {
     getPlaylistData()
-    getInitialProfileData()
+    if (storeDisplayName == '') {
+      getInitialProfileData()
+    } else {
+      getChangedProfileData()
+    }
   }, [])
+
+  let callFunction = (e) => {
+    setDisplayName(e)
+  }
 
   return (
     <View style={styles.container}>
