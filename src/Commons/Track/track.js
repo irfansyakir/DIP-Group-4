@@ -21,6 +21,7 @@ const Icon = createIconSetFromIcoMoon(
 
 export const Track = ({ navigation }) => {
   const songInfo = useMusicStore((state) => state.songInfo)
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
 
   const [fontsLoaded] = useFonts({
     IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
