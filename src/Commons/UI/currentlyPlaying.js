@@ -4,7 +4,7 @@ import { LightText, MediumText } from './styledText'
 import { COLORS } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 
 const SongProgessBar = ({ currentTime, duration }) => {
@@ -28,12 +28,16 @@ const SongProgessBar = ({ currentTime, duration }) => {
   )
 }
 
-export function CurrentlyPlaying({ duration, currentTime }) {
+export function CurrentlyPlaying({ currentPage }) {
   const screenWidth = Dimensions.get('window').width
   const songInfo = useMusicStore((state) => state.songInfo)
   const isPlaying = useMusicStore((state) => state.isPlaying)
   const soundObject = useMusicStore((state) => state.soundObject)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+  const [posInterval, setPosInterval] = useState()
+  const [position, setPosition] = useState()
+  const [duration, setDuration] = useState()
   const navigation = useNavigation()
 
   const play = async () => {
@@ -51,6 +55,25 @@ export function CurrentlyPlaying({ duration, currentTime }) {
       console.log(err)
     }
   }
+
+  const updatePosition = async () => {
+    if (soundObject) {
+      const status = await soundObject.getStatusAsync()
+      setPosition(status.positionMillis)
+      setDuration(status.durationMillis)
+      if (!status.isPlaying) clearInterval(posInterval)
+    }
+  }
+
+  useEffect(() => {
+    // Periodically update the playback position
+    setPosition(0)
+    clearInterval(posInterval)
+    setPosInterval(setInterval(updatePosition, 1000))
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(posInterval)
+  }, [soundObject])
 
   useEffect(() => {
     if (soundObject) {
@@ -74,9 +97,11 @@ export function CurrentlyPlaying({ duration, currentTime }) {
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
+        display: currentPage === 'Track' ? 'none' : 'relative',
       }}
       onPress={() => {
         navigation.navigate('Track')
+        changeCurrentPage('Track')
       }}
     >
       <Image style={{ width: 50, height: 50 }} src={songInfo.coverUrl} />
@@ -122,7 +147,7 @@ export function CurrentlyPlaying({ duration, currentTime }) {
             )}
           </TouchableOpacity>
         </View>
-        <SongProgessBar currentTime={currentTime} duration={duration} />
+        <SongProgessBar currentTime={position} duration={duration - 39} />
       </View>
     </Pressable>
   )

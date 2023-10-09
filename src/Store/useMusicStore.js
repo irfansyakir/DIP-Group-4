@@ -10,6 +10,8 @@ export const useMusicStore = create((set) => ({
     songArtist: '',
     songAlbum: '',
   },
+  currentPage: '',
+  changeCurrentPage: (page) => set(() => ({ currentPage: page })),
   changeSoundObject: (sound) => set(() => ({ soundObject: sound })),
   addToPlaylist: (track) => set(() => ({ playlist: [...playlist, track] })),
   clearPlaylist: () => set(() => ({ playlist: [] })),

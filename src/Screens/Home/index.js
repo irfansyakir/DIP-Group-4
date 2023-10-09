@@ -40,6 +40,7 @@ export const Home = () => {
   const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
   const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
   const navigation = useNavigation()
 
   const handleTrackClick = (trackId) => {
@@ -210,7 +211,7 @@ export const Home = () => {
           </Text>
         </View>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity
             style={{
               width: 50,
@@ -234,7 +235,7 @@ export const Home = () => {
           >
             Create Playlist
           </Text>
-        </View>
+        </View> */}
 
         <View style={styles.playlistContainer}>
           {playlists.map((playlist) => {
@@ -242,6 +243,7 @@ export const Home = () => {
               <TouchableOpacity
                 key={playlist.id}
                 onPress={() => {
+                  changeCurrentPage('Playlist')
                   navigation.navigate('Playlist', playlist.id)
                 }}
               >

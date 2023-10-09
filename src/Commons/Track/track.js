@@ -42,7 +42,11 @@ export const Track = ({ navigation }) => {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* TOP BAR */}
           <View style={styles.topbar}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              onPress={() => {
+                changeCurrentPage(navigation.pop())
+              }}
+            >
               <Icon style={styles.icon} name='down' size={20} />
             </TouchableOpacity>
 

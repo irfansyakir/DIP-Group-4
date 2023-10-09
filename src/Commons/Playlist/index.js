@@ -21,7 +21,7 @@ import { COLORS } from '../../Constants'
 import SingleSong from '../Songs/SingleSong'
 
 export const Playlist = ({ route }) => {
-  const [input, setInput] = useState('')
+  // const [input, setInput] = useState('')
   const insets = useSafeAreaInsets()
   const navigation = useNavigation()
   const playlistID = route.params
@@ -178,9 +178,9 @@ export const Playlist = ({ route }) => {
             <Entypo name='controller-play' size={30} color='black' />
           </TouchableOpacity>
         </View>
-        <View style={{ marginBottom: 100 }}>
+        <View style={{ marginBottom: 150 }}>
           {songs.map((item) => {
-            return <SingleSong key={Math.random()} item={item} />
+            return <SingleSong key={item.id} item={item} />
             // return (
             //   <TouchableOpacity
             //     key={Math.random()}

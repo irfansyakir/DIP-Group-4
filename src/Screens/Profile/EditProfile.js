@@ -12,11 +12,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useMusicStore } from '../../Store/useMusicStore'
 
 export const EditProfile = () => {
   const [text, onChangeText] = React.useState('')
   const navigation = useNavigation() // Initialize navigation
   const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
+  const soundObject = useMusicStore((state) => state.soundObject)
   const showMessage = () => {
     const customMessage = 'You are about to leave the page.'
     Alert.alert(
@@ -41,6 +43,7 @@ export const EditProfile = () => {
   const handleContainerClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
     // navigation.navigate('Home');
+    soundObject.unloadAsync()
     changeIsLoggedIn(false)
   }
 

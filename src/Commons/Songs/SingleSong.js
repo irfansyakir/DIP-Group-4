@@ -1,4 +1,4 @@
-import { Text, StyleSheet, TouchableOpacity, View, Image } from 'react-native'
+import { Text, TouchableOpacity, View, Image } from 'react-native'
 import { COLORS, SIZES } from '../../Constants'
 import { Audio } from 'expo-av'
 import { useAuthStore } from '../../Store/useAuthStore'
@@ -50,7 +50,10 @@ export default function SingleSong({ item }) {
   const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
   return (
-    <TouchableOpacity onPress={() => debouncedTrackClick(item.id)}>
+    <TouchableOpacity
+      key={item.id}
+      onPress={() => debouncedTrackClick(item.id)}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -59,7 +62,10 @@ export default function SingleSong({ item }) {
         }}
       >
         {/* SONG IMAGE */}
-        <Image style={styles.img} src={item.coverUrl} />
+        <Image
+          style={{ width: 50, height: 50, borderRadius: 10, marginRight: 15 }}
+          src={item.coverUrl}
+        />
         <View>
           {/* TITLE AND ARTIST */}
           <Text style={{ color: '#FFF', fontSize: SIZES.medium }}>
@@ -71,44 +77,3 @@ export default function SingleSong({ item }) {
     </TouchableOpacity>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    paddingTop: 70,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    // alignItems:'center'
-  },
-  button: {
-    backgroundColor: COLORS.light,
-    padding: 10,
-    paddingLeft: 20,
-    marginTop: 15,
-    borderRadius: 7,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sbar: {
-    flexDirection: 'row',
-    backgroundColor: '#333',
-    borderRadius: 10,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  input: {
-    color: COLORS.light,
-    width: 250,
-    fontSize: SIZES.medium,
-
-    padding: 10,
-    // borderColor: '#bbb',
-    // borderWidth: 1,
-  },
-  img: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    marginRight: 15,
-  },
-})

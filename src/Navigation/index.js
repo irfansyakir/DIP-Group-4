@@ -23,10 +23,12 @@ import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
 
 // Track
 import { Track } from '../Commons/Track/track'
+import { useMusicStore } from '../Store/useMusicStore'
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
 const SearchStack = createNativeStackNavigator()
+const HomeStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
@@ -69,7 +71,7 @@ function HomeTabs() {
         },
       })}
     >
-      <Tab.Screen name='Home' component={Home} />
+      <Tab.Screen name='Home' component={HomeStackNavigator} />
       <Tab.Screen name='Search' component={SearchStackNavigator} />
       {/* <Tab.Screen name='RadioRooms' component={RadioRooms} /> */}
       <Tab.Screen name='Profile' component={ProfileStackNavigator} />
@@ -84,6 +86,17 @@ function AuthStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name='Login' component={Login} />
     </Stack.Navigator>
+  )
+}
+
+function HomeStackNavigator() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name='HomeTab' component={Home} />
+      <HomeStack.Screen name='Track' component={Track} />
+      <HomeStack.Screen name='Playlist' component={Playlist} />
+      {/*<ProfileStack.Screen name='CreateRoom' component={CreateRoom} />*/}
+    </HomeStack.Navigator>
   )
 }
 
@@ -112,8 +125,7 @@ function SearchStackNavigator() {
 
 export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
-  const wholeState = useAuthStore((state) => state)
-  console.log(wholeState)
+  const currentPage = useMusicStore((state) => state.currentPage)
 
   return (
     <React.Fragment>
@@ -140,13 +152,9 @@ export const Navigation = () => {
       </Stack.Navigator>
       {isLoggedIn && (
         <CurrentlyPlaying
-          coverUrl={
-            'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'
-          }
-          title='Never Not'
-          artist={'Lauv'}
           currentTime={30}
           duration={100}
+          currentPage={currentPage}
         />
       )}
     </React.Fragment>
