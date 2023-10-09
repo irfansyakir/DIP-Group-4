@@ -66,7 +66,7 @@ export function CurrentlyPlaying({ duration, currentTime }) {
         left: 10,
         right: 10,
         height: 70,
-        bottom: 100,
+        bottom: 90,
         backgroundColor: '#303847',
         borderRadius: 10,
         display: 'flex',

@@ -18,6 +18,7 @@ import { BoldText, LightText, MediumText } from '../UI/styledText'
 import { GetPlaylistDetails } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { COLORS } from '../../Constants'
+import SingleSong from '../Songs/SingleSong'
 
 export const Playlist = ({ route }) => {
   const [input, setInput] = useState('')
@@ -48,7 +49,8 @@ export const Playlist = ({ route }) => {
       const playlistSongs = []
       playlistData.tracks.items.map((item) => {
         playlistSongs.push({
-          imageUrl: item.track.album.images[0].url,
+          id: item.track.id,
+          coverUrl: item.track.album.images[0].url,
           title: item.track.name,
           artist: item.track.artists[0].name,
         })
@@ -178,51 +180,52 @@ export const Playlist = ({ route }) => {
         </View>
         <View style={{ marginBottom: 100 }}>
           {songs.map((item) => {
-            return (
-              <TouchableOpacity
-                key={Math.random()}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: 10,
-                }}
-              >
-                <Image
-                  style={{
-                    width: 50,
-                    height: 50,
-                    marginRight: 10,
-                  }}
-                  src={item.imageUrl}
-                />
+            return <SingleSong key={Math.random()} item={item} />
+            // return (
+            //   <TouchableOpacity
+            //     key={Math.random()}
+            //     style={{
+            //       flexDirection: 'row',
+            //       alignItems: 'center',
+            //       padding: 10,
+            //     }}
+            //   >
+            //     <Image
+            //       style={{
+            //         width: 50,
+            //         height: 50,
+            //         marginRight: 10,
+            //       }}
+            //       src={item.imageUrl}
+            //     />
 
-                <View style={{ flex: 1 }}>
-                  <Text
-                    numberOfLines={1}
-                    style={{ fontWeight: '400', fontSize: 16, color: 'white' }}
-                  >
-                    {item.title}
-                  </Text>
-                  <Text style={{ marginTop: 4, color: '#9A9A9A' }}>
-                    {item.artist}
-                  </Text>
-                </View>
+            //     <View style={{ flex: 1 }}>
+            //       <Text
+            //         numberOfLines={1}
+            //         style={{ fontWeight: '400', fontSize: 16, color: 'white' }}
+            //       >
+            //         {item.title}
+            //       </Text>
+            //       <Text style={{ marginTop: 4, color: '#9A9A9A' }}>
+            //         {item.artist}
+            //       </Text>
+            //     </View>
 
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginHorizontal: 10,
-                  }}
-                >
-                  <Entypo
-                    name='dots-three-horizontal'
-                    size={24}
-                    color='#ABA4A3'
-                  />
-                </View>
-              </TouchableOpacity>
-            )
+            //     <View
+            //       style={{
+            //         flexDirection: 'row',
+            //         alignItems: 'center',
+            //         marginHorizontal: 10,
+            //       }}
+            //     >
+            //       <Entypo
+            //         name='dots-three-horizontal'
+            //         size={24}
+            //         color='#ABA4A3'
+            //       />
+            //     </View>
+            //   </TouchableOpacity>
+            // )
           })}
         </View>
       </ScrollView>

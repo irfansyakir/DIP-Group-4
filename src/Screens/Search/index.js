@@ -183,7 +183,6 @@ const styles = StyleSheet.create({
     paddingTop: 70,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // alignItems:'center'
   },
   button: {
     backgroundColor: COLORS.light,
@@ -205,10 +204,7 @@ const styles = StyleSheet.create({
     color: COLORS.light,
     width: 250,
     fontSize: SIZES.medium,
-
     padding: 10,
-    // borderColor: '#bbb',
-    // borderWidth: 1,
   },
   img: {
     width: 50,
