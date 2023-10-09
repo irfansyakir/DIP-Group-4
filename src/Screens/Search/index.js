@@ -18,6 +18,7 @@ import { useAuthStore } from '../../Store/useAuthStore'
 import { SearchTrack } from '../../Utilities/SpotifyApi/Utils'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
+import { debounce } from '../../Utilities/Functions/debounce'
 
 export const Search = () => {
   const navigation = useNavigation() // Initialize navigation
@@ -53,8 +54,10 @@ export const SearchClick = () => {
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
 
   const backButton = () => {
-    navigation.navigate('SearchTab')
+    navigation.goBack()
   }
+
+  const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
   const handleTrackClick = (trackId) => {
     const createSoundObject = async (uri) => {
@@ -123,7 +126,7 @@ export const SearchClick = () => {
   }
 
   const renderItem = ({ item }) => (
-    <Pressable onPress={() => handleTrackClick(item.id)}>
+    <TouchableOpacity onPress={() => debouncedTrackClick(item.id)}>
       <View
         style={{
           flexDirection: 'row',
@@ -141,7 +144,7 @@ export const SearchClick = () => {
           <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
         </View>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   )
 
   return (

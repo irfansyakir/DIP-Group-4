@@ -18,6 +18,8 @@ import { useAuthStore } from '../../Store/useAuthStore'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
+import { useNavigation } from '@react-navigation/native'
+import { debounce } from '../../Utilities/Functions/debounce'
 //Danish's Home Page
 //Needs testing first
 
@@ -38,6 +40,7 @@ export const Home = () => {
   const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
   const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+  const navigation = useNavigation()
 
   const handleTrackClick = (trackId) => {
     const createSoundObject = async (uri) => {
@@ -46,7 +49,6 @@ export const Home = () => {
         changeIsPlaying(false)
         soundObject.unloadAsync()
       }
-
       const { sound } = await Audio.Sound.createAsync({ uri: uri })
       changeSoundObject(sound)
       changeIsPlaying(true)
@@ -72,6 +74,8 @@ export const Home = () => {
 
     getTrackData()
   }
+
+  const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
   const getRecentlyPlayed = async () => {
     try {
@@ -152,7 +156,7 @@ export const Home = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                handleTrackClick(item.id)
+                debouncedTrackClick(item.id)
               }}
             >
               <Image
@@ -237,7 +241,9 @@ export const Home = () => {
             return (
               <TouchableOpacity
                 key={playlist.id}
-                onPress={() => handlePlaylistClick(playlist.id)}
+                onPress={() => {
+                  navigation.navigate('Playlist', playlist.id)
+                }}
               >
                 {renderTableRow(
                   playlist.photoUrl,

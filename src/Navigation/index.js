@@ -93,6 +93,7 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen name='ProfileTab' component={Profile} />
       <ProfileStack.Screen name='EditProfile' component={EditProfile} />
       <ProfileStack.Screen name='Track' component={Track} />
+      <ProfileStack.Screen name='Playlist' component={Playlist} />
       {/*<ProfileStack.Screen name='CreateRoom' component={CreateRoom} />*/}
     </ProfileStack.Navigator>
   )
@@ -104,6 +105,7 @@ function SearchStackNavigator() {
       <SearchStack.Screen name='SearchTab' component={Search} />
       <SearchStack.Screen name='SearchClick' component={SearchClick} />
       <SearchStack.Screen name='Track' component={Track} />
+      <SearchStack.Screen name='Playlist' component={Playlist} />
     </SearchStack.Navigator>
   )
 }
@@ -130,12 +132,13 @@ export const Navigation = () => {
             <Stack.Screen name='Playlist' component={Playlist} />
             <Stack.Screen name='Chatroom' component={Chatroom} />
             <Stack.Screen name='CreateRoom' component={CreateRoom} />
+            <Stack.Screen name='Track' component={Track} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
         )}
       </Stack.Navigator>
-      {true && (
+      {isLoggedIn && (
         <CurrentlyPlaying
           coverUrl={
             'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'

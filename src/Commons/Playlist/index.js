@@ -5,45 +5,75 @@ import {
   TextInput,
   View,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { AntDesign } from '@expo/vector-icons'
 import { Entypo } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { BoldText, MediumText } from '../UI/styledText'
+import { BoldText, LightText, MediumText } from '../UI/styledText'
+import { GetPlaylistDetails } from '../../Utilities/SpotifyApi/Utils'
+import { useAuthStore } from '../../Store/useAuthStore'
+import { COLORS } from '../../Constants'
 
 export const Playlist = ({ route }) => {
   const [input, setInput] = useState('')
   const insets = useSafeAreaInsets()
   const navigation = useNavigation()
   const playlistID = route.params
+  const accessToken = useAuthStore((state) => state.accessToken)
 
-  // Sample data for song display
-  const recommendedSongs = [
-    { id: '1', name: 'Song 1', artist: 'Artist One' },
-    { id: '2', name: 'Song 2', artist: 'Artist Two' },
-    { id: '3', name: 'Song 3', artist: 'Artist Three' },
-    { id: '4', name: 'Song 4', artist: 'Artist Four' },
-    { id: '5', name: 'Song 5', artist: 'Artist Five' },
-    { id: '6', name: 'Song 6', artist: 'Artist Six' },
-    { id: '7', name: 'Song 7', artist: 'Artist Seven' },
-    { id: '8', name: 'Song 8', artist: 'Artist Eight' },
-  ]
+  // states
+  const [playlistName, setPlaylistName] = useState('Loading...')
+  const [description, setDescription] = useState('Loading...')
+  const [coverUrl, setCoverUrl] = useState('')
+  const [followers, setFollowers] = useState(0)
+  const [totalSongs, setTotalSongs] = useState(0)
+  const [songs, setSongs] = useState([])
+
+  const getPlaylistData = async () => {
+    try {
+      const playlistData = await GetPlaylistDetails({
+        accessToken: accessToken,
+        playlistId: playlistID,
+      })
+      setPlaylistName(playlistData.name)
+      setDescription(playlistData.description || '')
+      setCoverUrl(playlistData.images[0].url)
+      setFollowers(playlistData.followers.total)
+      setTotalSongs(playlistData.tracks.total)
+      const playlistSongs = []
+      playlistData.tracks.items.map((item) => {
+        playlistSongs.push({
+          imageUrl: item.track.album.images[0].url,
+          title: item.track.name,
+          artist: item.track.artists[0].name,
+        })
+      })
+      setSongs(playlistSongs)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    getPlaylistData()
+  }, [])
 
   return (
     <LinearGradient
       colors={['#836E55', '#4C4134', '#15120F']}
       style={{ flex: 1 }}
     >
-      <View
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         style={{
           flex: 1,
           marginTop: 20,
           paddingTop: insets.top,
-          paddingBottom: insets.bottom,
           marginHorizontal: 20,
         }}
       >
@@ -54,7 +84,7 @@ export const Playlist = ({ route }) => {
           <Ionicons name='chevron-back' size={25} color='white' />
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={{
             flexDirection: 'row',
             backgroundColor: '#7E6E5B',
@@ -78,32 +108,59 @@ export const Playlist = ({ route }) => {
               color: 'white',
             }}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <View style={{ height: 50 }} />
-        <View
-          style={{
-            marginHorizontal: 10,
-            alignItems: 'center',
-            marginBottom: 10,
-          }}
-        >
-          <BoldText style={{ color: 'white', fontSize: 18 }}>
-            PLAYLIST NAME
-          </BoldText>
+        <View style={{ position: 'relative' }}>
+          <Image
+            style={{
+              width: 350,
+              height: 350,
+              borderRadius: 2,
+              marginTop: 20,
+            }}
+            src={coverUrl}
+          />
+          <View
+            style={{
+              right: 10,
+              bottom: 10,
+              position: 'absolute',
+            }}
+          >
+            <BoldText
+              style={{
+                color: 'white',
+                fontSize: 26,
+                textShadowColor: 'rgba(0, 0, 0, 0.75)',
+                textShadowOffset: { width: -1, height: 1 },
+                textShadowRadius: 10,
+              }}
+            >
+              {playlistName}
+            </BoldText>
+          </View>
         </View>
 
+        {description === '' ? null : (
+          <LightText style={{ fontSize: 12, color: 'white', marginTop: 10 }}>
+            {description}
+          </LightText>
+        )}
+
         <View
           style={{
+            marginTop: 20,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 10,
           }}
         >
-          <MediumText style={{ fontSize: 12, color: 'white' }}>
-            Insert Description
-          </MediumText>
+          <View style={{ display: 'flex', width: '60%', gap: 2 }}>
+            <MediumText style={{ fontSize: 10, color: COLORS.light }}>
+              {totalSongs} songs | {followers} saves
+            </MediumText>
+          </View>
 
           <TouchableOpacity
             style={{
@@ -119,59 +176,56 @@ export const Playlist = ({ route }) => {
             <Entypo name='controller-play' size={30} color='black' />
           </TouchableOpacity>
         </View>
-
-        <FlatList
-          data={recommendedSongs}
-          horizontal={false}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 10,
-              }}
-            >
-              <Image
-                style={{
-                  width: 50,
-                  height: 50,
-                  marginRight: 10,
-                }}
-                source={{
-                  uri: 'https://file-examples.com/storage/fe7bce3209650074f95baa0/2017/10/file_example_PNG_500kB.png',
-                }}
-              />
-
-              <View style={{ flex: 1 }}>
-                <Text
-                  numberOfLines={1}
-                  style={{ fontWeight: '400', fontSize: 16, color: 'white' }}
-                >
-                  {item.name}{' '}
-                </Text>
-                <Text style={{ marginTop: 4, color: '#9A9A9A' }}>
-                  {item.artist}
-                </Text>
-              </View>
-
-              <View
+        <View style={{ marginBottom: 100 }}>
+          {songs.map((item) => {
+            return (
+              <TouchableOpacity
+                key={Math.random()}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  marginHorizontal: 10,
+                  padding: 10,
                 }}
               >
-                <Entypo
-                  name='dots-three-horizontal'
-                  size={24}
-                  color='#ABA4A3'
+                <Image
+                  style={{
+                    width: 50,
+                    height: 50,
+                    marginRight: 10,
+                  }}
+                  src={item.imageUrl}
                 />
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{ fontWeight: '400', fontSize: 16, color: 'white' }}
+                  >
+                    {item.title}
+                  </Text>
+                  <Text style={{ marginTop: 4, color: '#9A9A9A' }}>
+                    {item.artist}
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginHorizontal: 10,
+                  }}
+                >
+                  <Entypo
+                    name='dots-three-horizontal'
+                    size={24}
+                    color='#ABA4A3'
+                  />
+                </View>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+      </ScrollView>
     </LinearGradient>
   )
 }
