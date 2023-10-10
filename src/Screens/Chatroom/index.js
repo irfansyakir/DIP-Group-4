@@ -50,7 +50,7 @@ export const Chatroom = () => {
     // Handle button press action here
   };
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (message.trim() !== '') {
       const newMessage = {
         text: message,
@@ -69,14 +69,7 @@ export const Chatroom = () => {
       // Update the chatMessages state with the new message
       setChatMessages([...chatMessages, newMessage]);
 
-      // message_setMessage(roomID, username, message,'121234557');
-      message_setMessage({
-        roomId: roomID,
-        username: username,
-        message: message,
-        timestamp: Date.now()
-      });
-      
+      // Clear the input field
       setMessage('');
     }
   };

@@ -5,11 +5,12 @@ import Svg, { Text as SvgText } from 'react-native-svg';
 import {useNavigation} from "@react-navigation/native";
 import {Button} from "@rneui/themed";
 
+import { useNavigation } from '@react-navigation/native';
+
 
 export const RadioRooms = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
-
   const navigation = useNavigation(); // Initialize navigation
 
   // Sample data for recommended radio rooms
