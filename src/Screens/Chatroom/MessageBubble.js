@@ -3,12 +3,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const MessageBubble = ({ text }) => {
+const MessageBubble = ({ text, timestamp }) => {
   return (
     <View style={styles.messageContainer}>
       <View style={styles.messageBubble}>
-        <Text style={styles.youText}> You</Text>
+        <Text style={styles.youText}>You</Text>
         <Text style={styles.messageText}>{text}</Text>
+        <Text style={styles.timestampText}>{timestamp}</Text>
       </View>
     </View>
   );
@@ -31,13 +32,18 @@ const styles = StyleSheet.create({
   },
 
   youText: {
-    color: 'white',
+    color: '#13151E',
     fontSize: 10,
     marginLeft: 5
   },
   messageText: {
-    color: 'white',
+    color: '#13151E',
     fontSize: 10,
+    marginLeft: 5
+  },
+  timestampText: {
+    color: '#F8F8FA',
+    fontSize: 7,
     marginLeft: 5
   },
 });

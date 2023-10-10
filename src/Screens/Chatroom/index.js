@@ -10,44 +10,44 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  FlatList,
   ScrollView,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system'; // Import the FileSystem module
-const chatMessagesFilePath = `${FileSystem.documentDirectory}chat_messages.txt`;
-
-
+import { useAuthStore } from '../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
-import {useNavigation} from "@react-navigation/native"; // Import the MessageBubble component
+import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
+import {message_setMessage} from '../../Utilities/Firebase/messages_functions'
+
+//const chatMessagesFilePath = `${FileSystem.documentDirectory}chat_messages.txt`;
 
 
 export const Chatroom = () => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
+  const [username, setUsername] = useState('')
+  const [timestampHHMM, setTimestampHHMM] = useState('')
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
+  const accessToken = useAuthStore((state) => state.accessToken)
+  const roomID = '123birds';
 
+  const getInitialProfileData = async () => {
+    // fetch data on load
+    try {
+      const profileData = await GetCurrentUserProfile({
+        accessToken: accessToken,
+      })
+      setUsername(profileData.display_name)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    getInitialProfileData()
+  }, [])
 
   const handleButtonPress = () => {
     // Handle button press action here
-  };
-
-  // Function to load messages from the text file
-  const loadMessagesFromFile = async () => {
-    try {
-      const fileContent = await FileSystem.readAsStringAsync(
-        chatMessagesFilePath,
-        { encoding: FileSystem.EncodingType.UTF8 }
-      );
-
-      if (fileContent) {
-        const messages = fileContent.split('\n').filter((message) => message.trim() !== '');
-
-        // Populate the chatMessages state with the messages from the file
-        setChatMessages(messages.map((text, id) => ({ text, id: id.toString() })));
-      }
-    } catch (error) {
-      console.error('Error reading messages from file:', error);
-    }
   };
 
   const sendMessage = async () => {
@@ -56,22 +56,27 @@ export const Chatroom = () => {
         text: message,
         id: chatMessages.length.toString(),
       };
-  
+
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const currentTime = `${hours}:${minutes}`;
+      
+      setTimestampHHMM(currentTime);
+
+
+
       // Update the chatMessages state with the new message
       setChatMessages([...chatMessages, newMessage]);
-  
-      // Save the message to the text file
-      try {
-        await FileSystem.writeAsStringAsync(
-          chatMessagesFilePath,
-          `${message}\n`,
-          { encoding: FileSystem.EncodingType.UTF8, append: true }
-        );
-      } catch (error) {
-        console.error('Error saving message to file:', error);
-      }
-  
-      // Clear the input field
+
+      // message_setMessage(roomID, username, message,'121234557');
+      message_setMessage({
+        roomId: roomID,
+        username: username,
+        message: message,
+        timestamp: Date.now()
+      });
+      
       setMessage('');
     }
   };
@@ -86,7 +91,7 @@ export const Chatroom = () => {
 
   // Load messages from the file when the component mounts
   useEffect(() => {
-    loadMessagesFromFile();
+    //loadMessagesFromFile();
   }, []); // Empty dependency array to load messages only once when the component mounts
 
 
@@ -125,7 +130,7 @@ export const Chatroom = () => {
               keyboardShouldPersistTaps="handled"
             >
               {chatMessages.map((messageItem) => (
-                <MessageBubble key={messageItem.id} text={messageItem.text} />
+                <MessageBubble key={messageItem.id} text={messageItem.text} timestamp={timestampHHMM}/>
               ))}
             </ScrollView>
 
