@@ -29,6 +29,7 @@ export const Chatroom = () => {
   const roomID = '123birds';
 
   const getInitialProfileData = async () => {
+    console.log('getting profile data');
     // fetch data on load
     try {
       const profileData = await GetCurrentUserProfile({
@@ -42,8 +43,9 @@ export const Chatroom = () => {
 
   const getMessages = async () => { 
     try {
+
       const messages = await message_getMessage({ roomId:roomID});
-      
+
       const newMessagesArray = [];
       let id = 0;
       messages.map(obj => obj.toJSON()).forEach(obj => {
@@ -52,11 +54,19 @@ export const Chatroom = () => {
         const hours = date.getHours();
         const minutes = date.getMinutes();
         const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        let right = true;
+
+        console.log('username is: ' + username);
+
+        if (obj.username != username) {
+            right = false;
+        }
       
         const newMessage = {
           text: obj.message,
           id: id++,        
           timestamp: formattedTime, 
+          right: right,
         }
         
         console.log(newMessage)
@@ -74,9 +84,20 @@ export const Chatroom = () => {
   }
 
   useEffect(() => {
-    getInitialProfileData()
-    getMessages()
+    getInitialProfileData();
   }, [])
+
+  useEffect(() => {
+    getMessages()
+  }, [username])
+
+  // Use useEffect to scroll to the bottom when chatMessages change
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [chatMessages]);
+
 
   const handleButtonPress = () => {
     // Handle button press action here for the view queue button
@@ -89,15 +110,16 @@ export const Chatroom = () => {
       const hours = now.getHours().toString().padStart(2, '0');
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const currentTime = `${hours}:${minutes}`;
+      const right = true;
       
-      //setTimestampHHMM(currentTime);
-
       const newMessage = {
         text: message,
         id: chatMessages.length.toString(),
         timestamp: currentTime,
+        right: right,
       };
-
+    
+      console.log('sending message: ' + message + ' to DB');
       message_setMessage( {
           roomId: roomID,
           username: username,
@@ -110,21 +132,15 @@ export const Chatroom = () => {
 
       // Clear the input field
       setMessage('');
+
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
     }
   };
   
 
-  // Use useEffect to scroll to the bottom when chatMessages change
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [chatMessages]);
-
-  // Load messages from the file when the component mounts
-  useEffect(() => {
-    //loadMessagesFromFile();
-  }, []); // Empty dependency array to load messages only once when the component mounts
+  
 
 
   return (
@@ -162,7 +178,14 @@ export const Chatroom = () => {
               keyboardShouldPersistTaps="handled"
             >
               {chatMessages.map((messageItem) => (
-                <MessageBubble key={messageItem.id} text={messageItem.text} timestamp={messageItem.timestamp}/>
+                
+                <MessageBubble 
+                  key={messageItem.id} 
+                  text={messageItem.text} 
+                  timestamp={messageItem.timestamp}
+                  right={messageItem.right} 
+                />
+                
               ))}
             </ScrollView>
 
@@ -204,7 +227,6 @@ const styles = StyleSheet.create({
     marginRight: 88,
     fontWeight: '700',
   },
-
 
   viewQueueBtn: {
     width: 150,

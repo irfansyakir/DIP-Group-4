@@ -3,9 +3,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const MessageBubble = ({ text, timestamp }) => {
+const MessageBubble = ({ text, timestamp, right}) => {
+
   return (
-    <View style={styles.messageContainer}>
+    
+    <View style={right ? styles.messageContainerRight : styles.messageContainerLeft}>
       <View style={styles.messageBubble}>
         <Text style={styles.youText}>You</Text>
         <Text style={styles.messageText}>{text}</Text>
@@ -16,11 +18,18 @@ const MessageBubble = ({ text, timestamp }) => {
 };
 
 const styles = StyleSheet.create({
-  messageContainer: {
+  messageContainerRight: {
     alignItems: 'flex-end', // Align messages to the right
     marginBottom: 10,
     marginRight: 10
   },
+
+  messageContainerLeft: {
+    alignItems: 'flex-start', // Align messages to the right
+    marginBottom: 10,
+    marginRight: 10
+  },
+
   messageBubble: {
     backgroundColor: '#41BBC4', // Background color of the message bubble
     padding: 10,
