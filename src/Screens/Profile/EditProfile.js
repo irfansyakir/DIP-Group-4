@@ -32,6 +32,7 @@ export const EditProfile = () => {
   }
   const handleNameClick = () => {
     changeDisplayName(displayName)
+    console.log('saved ' + displayName)
     navigation.navigate('ProfileTab')
   }
     // retrieve state data from stores

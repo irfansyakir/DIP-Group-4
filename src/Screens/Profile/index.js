@@ -78,7 +78,7 @@ export const Profile = () => {
       changeDisplayName(profileData.display_name)
       changeFollowers(profileData.followers.total)
       changeProfileUrl(profileData.images[1].url)
-
+      console.log(storeDisplayName)
       console.log('2')
 
     } catch (error) {
@@ -92,10 +92,10 @@ export const Profile = () => {
       const profileData = await GetCurrentUserProfile({
         accessToken: accessToken,
       })
+      console.log(storeDisplayName)
       setDisplayName(storeDisplayName)
       setFollowers(profileData.followers.total)
       setProfileUrl(profileData.images[1].url)
-
       console.log('3')
 
     } catch (error) {
@@ -104,13 +104,14 @@ export const Profile = () => {
   }
 
   useEffect(() => {
-    getPlaylistData()
     if (storeDisplayName == '') {
+      console.log('get initial')
       getInitialProfileData()
     } else {
+      console.log('get changed')
       getChangedProfileData()
     }
-  }, [])
+  }, [storeDisplayName])
 
   let callFunction = (e) => {
     setDisplayName(e)
