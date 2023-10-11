@@ -3,9 +3,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import Svg, { Text as SvgText } from 'react-native-svg';
 import {useNavigation} from "@react-navigation/native";
-import {Button} from "@rneui/themed";
-
-import { useNavigation } from '@react-navigation/native';
 
 
 export const RadioRooms = () => {

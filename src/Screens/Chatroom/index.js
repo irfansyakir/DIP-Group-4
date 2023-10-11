@@ -12,20 +12,18 @@ import {
   Keyboard,
   ScrollView,
 } from 'react-native';
-import * as FileSystem from 'expo-file-system'; // Import the FileSystem module
+
 import { useAuthStore } from '../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
 import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 import {message_setMessage} from '../../Utilities/Firebase/messages_functions'
-
-//const chatMessagesFilePath = `${FileSystem.documentDirectory}chat_messages.txt`;
+import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
 
 
 export const Chatroom = () => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
   const [username, setUsername] = useState('')
-  const [timestampHHMM, setTimestampHHMM] = useState('')
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
   const roomID = '123birds';
@@ -42,29 +40,70 @@ export const Chatroom = () => {
     }
   }
 
+  const getMessages = async () => { 
+    try {
+      const messages = await message_getMessage({ roomId:roomID});
+      
+      const newMessagesArray = [];
+      let id = 0;
+      messages.map(obj => obj.toJSON()).forEach(obj => {
+
+        const date = new Date(obj.timestamp);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      
+        const newMessage = {
+          text: obj.message,
+          id: id++,        
+          timestamp: formattedTime, 
+        }
+        
+        console.log(newMessage)
+        newMessagesArray.push(newMessage);
+        
+      })
+
+      setChatMessages(newMessagesArray);
+      
+      // Now you can work with the sorted messages
+    } catch (error) {
+      console.error("Error while getting messages:", error);
+    }
+
+  }
+
   useEffect(() => {
     getInitialProfileData()
+    getMessages()
   }, [])
 
   const handleButtonPress = () => {
-    // Handle button press action here
+    // Handle button press action here for the view queue button
   };
 
   const sendMessage = () => {
     if (message.trim() !== '') {
-      const newMessage = {
-        text: message,
-        id: chatMessages.length.toString(),
-      };
-
+      
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, '0');
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const currentTime = `${hours}:${minutes}`;
       
-      setTimestampHHMM(currentTime);
+      //setTimestampHHMM(currentTime);
 
+      const newMessage = {
+        text: message,
+        id: chatMessages.length.toString(),
+        timestamp: currentTime,
+      };
 
+      message_setMessage( {
+          roomId: roomID,
+          username: username,
+          message: message,
+          timestamp: now.getTime(),
+      });
 
       // Update the chatMessages state with the new message
       setChatMessages([...chatMessages, newMessage]);
@@ -123,7 +162,7 @@ export const Chatroom = () => {
               keyboardShouldPersistTaps="handled"
             >
               {chatMessages.map((messageItem) => (
-                <MessageBubble key={messageItem.id} text={messageItem.text} timestamp={timestampHHMM}/>
+                <MessageBubble key={messageItem.id} text={messageItem.text} timestamp={messageItem.timestamp}/>
               ))}
             </ScrollView>
 
