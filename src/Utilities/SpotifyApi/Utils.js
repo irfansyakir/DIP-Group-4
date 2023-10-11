@@ -150,3 +150,26 @@ export async function SearchTrack({ accessToken, text }) {
       return null
     })
 }
+
+export async function GetQueue({ accessToken }) {
+  try {
+    let url = `https://api.spotify.com/v1/me/player/queue`
+    const dataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    
+
+    if (dataResponse.status === 200) {
+      const data = await dataResponse.json()
+      return data
+    } else {
+      console.error('Error fetching queue:', dataResponse.statusText)
+    }
+  } catch (error) {
+    console.error('Error fetching queue data:', error)
+  }
+}
