@@ -78,6 +78,9 @@ export const Profile = () => {
       changeDisplayName(profileData.display_name)
       changeFollowers(profileData.followers.total)
       changeProfileUrl(profileData.images[1].url)
+
+      console.log('2')
+
     } catch (error) {
       console.error(error)
     }
@@ -92,6 +95,8 @@ export const Profile = () => {
       setDisplayName(storeDisplayName)
       setFollowers(profileData.followers.total)
       setProfileUrl(profileData.images[1].url)
+
+      console.log('3')
 
     } catch (error) {
       console.error(error)

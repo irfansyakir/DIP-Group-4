@@ -20,6 +20,7 @@ export const EditProfile = () => {
   const navigation = useNavigation() // Initialize navigation
   const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
   const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
+  const storeDisplayName = useProfileStore((state) => state.displayName)
 
   const handleButtonClick = () => {
     navigation.navigate('ProfileTab')
@@ -46,12 +47,20 @@ export const EditProfile = () => {
       const profileData = await GetCurrentUserProfile({
         accessToken: accessToken,
       })
-      setDisplayName(profileData.display_name)
-      setProfileUrl(profileData.images[1].url)
+      if (storeDisplayName == profileData.display_name) {
+        setDisplayName(profileData.display_name)
+        setProfileUrl(profileData.images[1].url)
+        console.log('1')
+      } else {
+        setDisplayName(storeDisplayName)
+        setProfileUrl(profileData.images[1].url)
+        console.log('0')
+      }
     } catch (error) {
       console.error(error)
     }
   }
+
   useEffect(() => {
     getInitialProfileData()
   }, [])
