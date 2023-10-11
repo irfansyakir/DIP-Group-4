@@ -43,7 +43,9 @@ export const EditProfile = () => {
   const handleContainerClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
     // navigation.navigate('Home');
-    soundObject.unloadAsync()
+    if (soundObject) {
+      soundObject.unloadAsync()
+    }
     changeIsLoggedIn(false)
   }
 
