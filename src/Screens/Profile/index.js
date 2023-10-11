@@ -104,6 +104,7 @@ export const Profile = () => {
   }
 
   useEffect(() => {
+    getPlaylistData()
     if (storeDisplayName == '') {
       console.log('get initial')
       getInitialProfileData()
