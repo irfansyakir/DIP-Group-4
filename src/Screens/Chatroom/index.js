@@ -23,13 +23,15 @@ import { message_getMessage } from '../../Utilities/Firebase/messages_functions'
 export const Chatroom = () => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
-  const [username, setUsername] = useState('')
+  //const [username, setUsername] = useState('') ----> IRFAN PC
+  const username = 'darkstealthexe';
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
   const roomID = '123birds';
 
   const getInitialProfileData = async () => {
-    console.log('getting profile data');
+    //console.log('getting profile data');
+
     // fetch data on load
     try {
       const profileData = await GetCurrentUserProfile({
@@ -37,7 +39,7 @@ export const Chatroom = () => {
       })
       setUsername(profileData.display_name)
     } catch (error) {
-      console.error(error)
+      //console.error(error)
     }
   }
 
@@ -45,10 +47,13 @@ export const Chatroom = () => {
     try {
 
       const messages = await message_getMessage({ roomId:roomID});
+      
 
       const newMessagesArray = [];
       let id = 0;
       messages.map(obj => obj.toJSON()).forEach(obj => {
+
+        
 
         const date = new Date(obj.timestamp);
         const hours = date.getHours();
@@ -56,7 +61,7 @@ export const Chatroom = () => {
         const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         let right = true;
 
-        console.log('username is: ' + username);
+        
 
         if (obj.username != username) {
             right = false;
@@ -67,9 +72,11 @@ export const Chatroom = () => {
           id: id++,        
           timestamp: formattedTime, 
           right: right,
+          username: obj.username,
         }
-        
-        console.log(newMessage)
+
+        console.log(newMessage);
+        //console.log(newMessage)
         newMessagesArray.push(newMessage);
         
       })
@@ -117,9 +124,10 @@ export const Chatroom = () => {
         id: chatMessages.length.toString(),
         timestamp: currentTime,
         right: right,
+        username: username,
       };
-    
-      console.log('sending message: ' + message + ' to DB');
+
+      console.log('sending message: ' + message);
       message_setMessage( {
           roomId: roomID,
           username: username,
@@ -184,6 +192,7 @@ export const Chatroom = () => {
                   text={messageItem.text} 
                   timestamp={messageItem.timestamp}
                   right={messageItem.right} 
+                  username={messageItem.username}
                 />
                 
               ))}
@@ -285,7 +294,7 @@ const styles = StyleSheet.create({
   numberListening : {
     fontSize: 10,
     color: '#FFE457',
-    marginLeft: 200,
+    marginLeft: 240,
     marginRight: 10
   },
 
