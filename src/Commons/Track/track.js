@@ -15,6 +15,7 @@ import { useAuthStore } from '../../Store/useAuthStore'
 import { useRoute } from '@react-navigation/native'
 import { GetPlaylistDetails, GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
+import { BackgroundImage } from '@rneui/base'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -113,11 +114,13 @@ export const Track = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <BackgroundImage style={styles.container} src={image} blurRadius={90}>
+        
       <LinearGradient
-        colors={['#121212', '#5C4C3F', '#9A7E66']}
+        colors={['#121212', 'transparent']}
         start={{ x: 0, y: 1 }}
         end={{ x: 0, y: 0 }}
-        locations={[0.6, 0.8, 1]}
+        locations={[0.2, 1]}
         style={styles.linearGradient}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -166,6 +169,7 @@ export const Track = ({ navigation }) => {
           </View>
         </ScrollView>
       </LinearGradient>
+      </BackgroundImage>
     </View>
   )
 }
@@ -218,7 +222,7 @@ const styles = StyleSheet.create({
   lyrics: {
     height: 'auto',
     width: 350,
-    backgroundColor: '#665959',
+    backgroundColor: '#333',
     borderRadius: 10,
     padding: 30,
     paddingBottom: 40,

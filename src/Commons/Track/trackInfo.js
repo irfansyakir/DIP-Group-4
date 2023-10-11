@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from 'expo-font';
 import { createIconSetFromIcoMoon } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { BackgroundImage } from '@rneui/base'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -37,11 +38,12 @@ export const TrackInfo = () => {
   
   return (
   <View style={styles.container}>
+    <BackgroundImage style={styles.container} src={img} blurRadius={90}>
     <LinearGradient
-      colors={['#121212', '#5C4C3F', '#9A7E66']}
+      colors={['#121212', 'transparent']}
       start={{ x: 0, y: 1 }}
       end={{ x: 0, y: 0 }}
-      locations={[0.6, 0.8, 1]}
+      locations={[0.5, 1]}
       style={styles.linearGradient}
     >
       <Image style={styles.img} src = {img}/>
@@ -58,6 +60,7 @@ export const TrackInfo = () => {
         <Text style={styles.text}>Close</Text>
       </TouchableOpacity>
     </LinearGradient>
+    </BackgroundImage>
   </View>
   );
 }
@@ -65,7 +68,7 @@ export const TrackInfo = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
+    margin: 0,
   },linearGradient: {
     flex: 1,
     alignItems: 'center',
