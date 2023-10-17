@@ -22,8 +22,8 @@ import {useMessageListener} from '../../Utilities/Firebase/useFirebaseListener';
 export const Chatroom = () => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
-  //const [username, setUsername] = useState('') ----> IRFAN PC remove
-  const username = 'darkstealthexe';
+  const [username, setUsername] = useState('');
+  //const username = 'darkstealthexe';
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
   const roomID = '123birds';
@@ -102,7 +102,7 @@ export const Chatroom = () => {
 
   useEffect(() => {
     getMessages();
-  }, [chatRefresh])
+  }, [username, chatRefresh])
 
 
   const handleButtonPress = () => {
