@@ -15,6 +15,7 @@ import {
 
 import { useAuthStore } from '../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
+import background from './background.png';
 import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 import {message_setMessage} from '../../Utilities/Firebase/messages_functions'
 import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
@@ -23,7 +24,7 @@ import { message_getMessage } from '../../Utilities/Firebase/messages_functions'
 export const Chatroom = () => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
-  //const [username, setUsername] = useState('') ----> IRFAN PC
+  //const [username, setUsername] = useState('') ----> IRFAN PC remove
   const username = 'darkstealthexe';
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
@@ -152,13 +153,13 @@ export const Chatroom = () => {
 
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'position' : 'position'} // Use 'position' behavior for both platforms
-          keyboardVerticalOffset={0} // Set the offset to 0
-        >
+
+    <KeyboardAvoidingView
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    style={styles.container}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
+  >
+    
           <View style={styles.container}>
             <View style={styles.topContainer}>
               <Text style={styles.roomName}>Room Name</Text>
@@ -182,7 +183,7 @@ export const Chatroom = () => {
             <ScrollView
               style={styles.chatbox} // Apply styles to the ScrollView
               ref={scrollViewRef} // Use the ref here
-              contentContainerStyle={{ flexGrow: 1 }} // Allow the content to grow within the ScrollView
+    
               keyboardShouldPersistTaps="handled"
             >
               {chatMessages.map((messageItem) => (
@@ -210,10 +211,9 @@ export const Chatroom = () => {
               onSubmitEditing={sendMessage}
             />
           </View>
+    </KeyboardAvoidingView>
 
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
+  
   );
 
   
@@ -223,6 +223,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     alignItems: 'center',
+    backgroundColor: 'red',
   },
   topContainer: {
     marginTop: 15,
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
 
   chatbox: {
     width: 380,
-    height: 250,
+    height: '250',
     backgroundColor: '#343434', // Change the color as needed
     borderRadius: 10,
     marginLeft: 22,
