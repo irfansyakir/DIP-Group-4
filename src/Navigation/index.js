@@ -71,10 +71,10 @@ function HomeTabs() {
         },
       })}
     >
-      <Tab.Screen name='Home' component={HomeStackNavigator} />
-      <Tab.Screen name='Search' component={SearchStackNavigator} />
+      <Tab.Screen name='Home' component={HomeStackNavigator} options={{unmountOnBlur: true}}/>
+      <Tab.Screen name='Search' component={SearchStackNavigator} options={{unmountOnBlur: true}}/>
       {/* <Tab.Screen name='RadioRooms' component={RadioRooms} /> */}
-      <Tab.Screen name='Profile' component={ProfileStackNavigator} />
+      <Tab.Screen name='Profile' component={ProfileStackNavigator} options={{unmountOnBlur: true}}/>
       {/* <Tab.Screen name='TestAPI' component={TestAPI} /> */}
     </Tab.Navigator>
   )

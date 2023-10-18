@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {
   StyleSheet,
   Text,
@@ -22,6 +22,9 @@ const Icon = createIconSetFromIcoMoon(
 export const Track = ({ navigation }) => {
   const songInfo = useMusicStore((state) => state.songInfo)
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+  useEffect(() => {
+    return () => changeCurrentPage("Not Track")
+  }, [])
 
   const [fontsLoaded] = useFonts({
     IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
@@ -30,6 +33,8 @@ export const Track = ({ navigation }) => {
   if (!fontsLoaded) {
     return null
   }
+
+
 
   return (
     <View style={styles.container}>

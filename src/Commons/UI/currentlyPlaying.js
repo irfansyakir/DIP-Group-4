@@ -6,6 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 const SongProgessBar = ({ currentTime, duration }) => {
   return (
@@ -39,6 +40,7 @@ export function CurrentlyPlaying({ currentPage }) {
   const [position, setPosition] = useState()
   const [duration, setDuration] = useState()
   const navigation = useNavigation()
+  const insets = useSafeAreaInsets()
 
   const play = async () => {
     try {
@@ -89,15 +91,14 @@ export function CurrentlyPlaying({ currentPage }) {
         left: 10,
         right: 10,
         height: 70,
-        bottom: 90,
+        bottom: insets.bottom + 60,
         backgroundColor: '#303847',
         borderRadius: 10,
-        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
-        display: currentPage === 'Track' ? 'none' : 'relative',
+        display: currentPage === 'Track' ? 'none' : 'flex',
       }}
       onPress={() => {
         navigation.navigate('Track')
