@@ -4,16 +4,14 @@
 
 // Due to premium limitations, the songs will only be available as 30-second previews obtained through the 'preview_url'
 
-import {useAuthStore} from "../../Store/useAuthStore";
-import {useState} from "react";
+import { useAuthStore } from '../../Store/useAuthStore'
+import { useState } from 'react'
 
-async function handleApiResponse(callback){
+async function handleApiResponse(callback) {
   const zustandRefreshToken = useAuthStore((state) => state.refreshToken)
   const zustandAccessToken = useAuthStore((state) => state.accessToken)
   // const [refreshToken, setRefreshToken] = useState()
   // const [accessToken, setAccessToken] = useState()
-  
-
 }
 
 export async function GetCurrentUserProfile({ accessToken }) {
@@ -130,5 +128,48 @@ export async function GetRecentlyPlayed({ accessToken }) {
     }
   } catch (error) {
     console.error('Error fetching recently played data:', error)
+  }
+}
+
+export async function SearchTrack({ accessToken, text }) {
+  return await fetch(
+    `https://api.spotify.com/v1/search?q=${text}&type=track&limit=10`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  )
+    .then((response) => {
+      response = response.json()
+      return response
+    })
+    .catch((error) => {
+      console.error(JSON.stringify(error))
+      return null
+    })
+}
+
+export async function GetQueue({ accessToken }) {
+  try {
+    let url = `https://api.spotify.com/v1/me/player/queue`
+    const dataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    
+
+    if (dataResponse.status === 200) {
+      const data = await dataResponse.json()
+      return data
+    } else {
+      console.error('Error fetching queue:', dataResponse.statusText)
+    }
+  } catch (error) {
+    console.error('Error fetching queue data:', error)
   }
 }

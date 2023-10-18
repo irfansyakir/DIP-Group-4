@@ -10,6 +10,11 @@ export const RadioRooms = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const navigation = useNavigation(); // Initialize navigation
 
+  const handleButtonClick = () => {
+    // Navigate to "YourNewPage" screen when the container is clicked
+    navigation.navigate('CreateRoom');
+  };
+
   // Sample data for recommended radio rooms
   const recommendedRooms = [
     { id: '1', name: 'Radio Room 1' },
@@ -35,7 +40,10 @@ export const RadioRooms = () => {
           </SvgText>
         </Svg>
       </View>
-      <TouchableOpacity style={styles.buttonContainer}>
+      <TouchableOpacity
+        style={styles.buttonContainer}
+        onPress={handleButtonClick}
+      >
         <Svg width="100%" height="100%">
           <SvgText
             x="50%"
