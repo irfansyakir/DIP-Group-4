@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
 import {
   StyleSheet,
   Text,
@@ -20,27 +21,51 @@ export const EditProfile = () => {
   const navigation = useNavigation() // Initialize navigation
   const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
   const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
+  const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
   const storeDisplayName = useProfileStore((state) => state.displayName)
+  const storeProfileUrl = useProfileStore((state) => state.profileUrl)
+  // managing state for playlist
+  const [displayName, setDisplayName] = useState('')
+  const [profileUrl, setProfileUrl] = useState('')
 
   const handleButtonClick = () => {
     navigation.navigate('ProfileTab')
   }
+
+  //const handleProfileImageClick = () => {
+  //  changeProfileUrl(profileUrl)
+  //  console.log('saved ' + profileUrl)
+  //  navigation.navigate('ProfileTab')
+  //}
+
+  const handleProfileImageClick = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    })
+
+    if (!result.cancelled) {
+      setProfileUrl(result.uri)
+      console.log(result.uri)
+    }
+  }
+
   const handleContainerClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
     // navigation.navigate('Home');
     changeIsLoggedIn(false)
   }
-  const handleNameClick = () => {
+
+  const handleSaveChangesClick = () => {
     changeDisplayName(displayName)
-    console.log('saved ' + displayName)
+    changeProfileUrl(result.uri)
+    console.log('saved ' + displayName + ', ' + result.uri)
     navigation.navigate('ProfileTab')
   }
     // retrieve state data from stores
   const accessToken = useAuthStore((state) => state.accessToken)
-
-    // managing state for playlist
-  const [displayName, setDisplayName] = useState('')
-  const [profileUrl, setProfileUrl] = useState('')
 
   const getInitialProfileData = async () => {
     // fetch data on load
@@ -50,12 +75,17 @@ export const EditProfile = () => {
       })
       if (storeDisplayName == profileData.display_name) {
         setDisplayName(profileData.display_name)
-        setProfileUrl(profileData.images[1].url)
-        console.log('1')
+        console.log('name 1')
       } else {
         setDisplayName(storeDisplayName)
+        console.log('name 0')
+      }
+      if (storeProfileUrl == profileData.profileUrl) {
         setProfileUrl(profileData.images[1].url)
-        console.log('0')
+        console.log('img 1')
+      } else {
+        setProfileUrl(storeProfileUrl)
+        console.log('img 0')
       }
     } catch (error) {
       console.error(error)
@@ -98,7 +128,7 @@ export const EditProfile = () => {
             contentFit={'fill'}
           />
           <View>
-            <TouchableOpacity style={styles.button} onPress={handleButtonClick}>
+            <TouchableOpacity style={styles.button} onPress={handleProfileImageClick}>
               <Text style={styles.buttonText}>Change photo</Text>
             </TouchableOpacity>
           </View>
@@ -112,7 +142,7 @@ export const EditProfile = () => {
           <View>
           <TouchableOpacity
               style={styles.buttonLogout}
-              onPress={handleNameClick}
+              onPress={handleSaveChangesClick}
             >
               <Text style={styles.buttonText}>Save Changes</Text>
             </TouchableOpacity>

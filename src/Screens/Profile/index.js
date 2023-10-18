@@ -20,6 +20,7 @@ export const Profile = () => {
   const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
   const changeFollowers = useProfileStore((state) => state.changeFollowers)
   const storeDisplayName = useProfileStore((state) => state.displayName)
+  const storeProfileUrl = useProfileStore((state) => state.profileUrl)
   const handleButtonClick = () => {
     navigation.navigate('EditProfile')
   }
@@ -93,9 +94,21 @@ export const Profile = () => {
         accessToken: accessToken,
       })
       console.log(storeDisplayName)
-      setDisplayName(storeDisplayName)
+      if (storeDisplayName == profileData.displayName) {
+        setDisplayName(profileData.displayName)
+        console.log('name 1')
+      } else {
+        setDisplayName(storeDisplayName)
+        console.log('name 0')
+      }
       setFollowers(profileData.followers.total)
-      setProfileUrl(profileData.images[1].url)
+      if (storeProfileUrl == profileData.profileUrl) {
+        setProfileUrl(profileData.images[1].url)
+        console.log('img 1')
+      } else {
+        setProfileUrl(storeProfileUrl)
+        console.log('img 0')
+      }
       console.log('3')
 
     } catch (error) {
@@ -112,7 +125,7 @@ export const Profile = () => {
       console.log('get changed')
       getChangedProfileData()
     }
-  }, [storeDisplayName])
+  }, [storeDisplayName, storeProfileUrl])
 
   let callFunction = (e) => {
     setDisplayName(e)
