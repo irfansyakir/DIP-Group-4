@@ -70,8 +70,8 @@ function HomeTabs() {
         },
       })}
     >
-      <Tab.Screen name='Home' component={Home} />
-      <Tab.Screen name='Search' component={SearchStackNavigator} />
+      {/* <Tab.Screen name='Home' component={Home} /> */}
+      <Tab.Screen name='Search' component={Search} />
       <Tab.Screen name='RadioRooms' component={RadioRooms} />
       <Tab.Screen name='Profile' component={ProfileStackNavigator} />
       <Tab.Screen name='TestAPI' component={TestAPI} />
@@ -125,12 +125,11 @@ export const Navigation = () => {
       >
         {isLoggedIn ? (
           <Fragment>
-            <Stack.Screen name='RootHome' component={HomeTabs} />
-            <Stack.Screen name='EditProfile' component={EditProfile} />
-            <Stack.Screen name='Queue' component={Queue} />
-            <Stack.Screen name='Playlist' component={Playlist} />
-            <Stack.Screen name='Chatroom' component={Chatroom} />
-            <Stack.Screen name='CreateRoom' component={CreateRoom} />
+              <Stack.Screen name='RootHome' component={HomeTabs} />
+              <Stack.Screen name='EditProfile' component={EditProfile} />
+              <Stack.Screen name="Queue" component={Queue} />
+              <Stack.Screen name="Playlist" component={Playlist} />
+              <Stack.Screen name="Chatroom" component={Chatroom} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
@@ -147,6 +146,10 @@ export const Navigation = () => {
           duration={100}
         />
       )}
+      
+      
+       
+
     </React.Fragment>
   )
 }
