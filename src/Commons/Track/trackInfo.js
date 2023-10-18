@@ -42,7 +42,7 @@ export const TrackInfo = () => {
     if(trackId){
       // const roomID='123qweasd'
       queue_updateQueue({queueList: ["05XoZNL3OMdegGO0SnrHWD", "05XoZNL3OMdegGO0SnrHWDsdf", "05XoZNL3OMdegGO0SnrHWDsdjhfb"]})
-      navigation.navigate('Track', {setpop: true})
+      navigation.navigate('Track', {setpop: true, trackId: trackId})
     }
   }
   
