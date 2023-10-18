@@ -3,46 +3,94 @@ import {
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
   TouchableOpacity,
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  FlatList,
   ScrollView,
 } from 'react-native';
 
+import { useAuthStore } from '../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
-import {useNavigation} from "@react-navigation/native"; // Import the MessageBubble component
+import background from './background.png';
+import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
+import { message_setMessage } from '../../Utilities/Firebase/messages_functions'
+import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
+import {useMessageListener} from '../../Utilities/Firebase/useFirebaseListener';
 
 
 export const Chatroom = () => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
+  const [username, setUsername] = useState('');
+  //const username = 'darkstealthexe';
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
+  const accessToken = useAuthStore((state) => state.accessToken)
+  const roomID = '123birds';
+  const [chatRefresh] = useMessageListener(roomID);
+  const [messageOnLoad, setMessagesLoad] = useState(false);
 
-
-  const handleButtonPress = () => {
-    // Handle button press action here
-  };
-
-  const sendMessage = () => {
-    if (message.trim() !== '') {
-      // Create a new message object and add it to the chatMessages state
-      const newMessage = {
-        text: message,
-        id: chatMessages.length.toString(), // Assign a unique ID
-      };
-
-      // Update the chatMessages state with the new message
-      setChatMessages([...chatMessages, newMessage]);
-
-      // Clear the input field
-      setMessage('');
+  const getInitialProfileData = async () => {
+    // fetch data on load
+    try {
+      const profileData = await GetCurrentUserProfile({
+        accessToken: accessToken,
+      })
+      setUsername(profileData.display_name)
+    } catch (error) {
+      //console.error(error)
     }
-  };
+  }
+
+  const getMessages = async () => { 
+    try {
+
+      const messages = await message_getMessage({ roomId:roomID});
+      const newMessagesArray = [];
+      let id = 0;
+      messages.map(obj => obj.toJSON()).forEach(obj => {
+
+        const date = new Date(obj.timestamp);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        let right = true;
+
+        if (obj.username != username) {
+            right = false;
+        }
+      
+        const newMessage = {
+          text: obj.message,
+          id: id++,        
+          timestamp: formattedTime,
+          right: right,
+          username: obj.username,
+        }
+
+        //console.log(newMessage);
+        newMessagesArray.push(newMessage);   
+      })
+
+      setChatMessages(newMessagesArray);
+      
+    
+      
+      // Now you can work with the sorted messages
+    } catch (error) {
+      console.error("Error while getting messages:", error);
+    }
+  }
+
+  const updateMessages = async () => { 
+    console.log(chatRefresh);
+
+  }
+
+  useEffect(() => {
+    getInitialProfileData();
+  }, [])
+
 
 
   // Use useEffect to scroll to the bottom when chatMessages change
@@ -52,64 +100,120 @@ export const Chatroom = () => {
     }
   }, [chatMessages]);
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'position' : 'position'} // Use 'position' behavior for both platforms
-          keyboardVerticalOffset={0} // Set the offset to 0
-        >
-          <View style={styles.container}>
-            <View style={styles.topContainer}>
-              <Text style={styles.roomName}>Room Name</Text>
-              <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
-                <Text style={styles.buttonText}>View Queue</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.musicPlayer}>
-              <Text>Music Player</Text>
-            </View>
-            <View style={styles.roomCode}>
-              <Text>Room Code</Text>
-            </View>
-
-            <ScrollView
-              style={styles.chatbox} // Apply styles to the ScrollView
-              ref={scrollViewRef} // Use the ref here
-              contentContainerStyle={{ flexGrow: 1 }} // Allow the content to grow within the ScrollView
-              keyboardShouldPersistTaps="handled"
-            >
-              {chatMessages.map((messageItem) => (
-                <MessageBubble key={messageItem.id} text={messageItem.text} />
-              ))}
-            </ScrollView>
+  useEffect(() => {
+    getMessages();
+  }, [username, chatRefresh])
 
 
-            <TextInput
-              style={styles.message}
-              placeholder="Message..."
-              multiline={false} // Set to false for a single-line input
-              placeholderTextColor="#888"
-              returnKeyType="done"
-              onChangeText={(text) => setMessage(text)}
-              value={message}
-              onSubmitEditing={sendMessage}
-            />
-          </View>
+  const handleButtonPress = () => {
+    // Handle button press action here for the view queue button
+  };
 
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
-  );
+  const sendMessage = () => {
+    if (message.trim() !== '') {
+      
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const currentTime = `${hours}:${minutes}`;
+      const right = true;
+      
+      const newMessage = {
+        text: message,
+        id: chatMessages.length.toString(),
+        timestamp: currentTime,
+        right: right,
+        username: username,
+      };
 
+      console.log('sending message: ' + message);
+      message_setMessage( {
+          roomId: roomID,
+          username: username,
+          message: message,
+          timestamp: now.getTime(),
+      });
+
+      // Update the chatMessages state with the new message
+      setChatMessages([...chatMessages, newMessage]);
+
+      // Clear the input field
+      setMessage('');
+
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }
+  };
+
+  // heyu
   
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
+    >
+      <View style={styles.container}>
+        <View style={styles.topContainer}>
+          <Text style={styles.roomName}>Room Name</Text>
+          <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
+            <Text style={styles.buttonText}>View Queue</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.musicPlayer}>
+          <Text>Music Player</Text>
+        </View>
+        
+        <View style={styles.roomCodeView}>
+          <Text style={styles.roomCodeTitle}>Room Code</Text>
+            <View style={styles.roomCodeContainer}> 
+              <Text style={styles.roomCode}>rkaiRnl</Text>
+              <Text style={styles.numberListening}>237 LISTENING</Text>
+            </View>
+        </View>
+        
+
+        <ScrollView
+          style={styles.chatbox} // Apply styles to the ScrollView
+          ref={scrollViewRef} // Use the ref here
+
+          keyboardShouldPersistTaps="handled"
+        >
+          {chatMessages.map((messageItem) => (
+            
+            <MessageBubble 
+              key={messageItem.id} 
+              text={messageItem.text} 
+              timestamp={messageItem.timestamp}
+              right={messageItem.right} 
+              username={messageItem.username}
+            />
+            
+          ))}
+        </ScrollView>
+
+
+        <TextInput
+          style={styles.message}
+          placeholder="Message..."
+          multiline={false} // Set to false for a single-line input
+          placeholderTextColor="#888"
+          returnKeyType="done"
+          onChangeText={(text) => setMessage(text)}
+          value={message}
+          onSubmitEditing={sendMessage}
+        />
+      </View>
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     alignItems: 'center',
+    backgroundColor: 'blue',
   },
   topContainer: {
     marginTop: 15,
@@ -121,8 +225,9 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginLeft: 22,
     marginRight: 88,
-    fontWeight: '700',
+    // fontWeight: 700,
   },
+
   viewQueueBtn: {
     width: 150,
     height: 34,
@@ -134,7 +239,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'black',
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
   },
   musicPlayer: {
     width: 380,
@@ -145,7 +250,7 @@ const styles = StyleSheet.create({
     marginRight: 22,
     marginBottom: 20,
   },
-  roomCode: {
+  roomCodeView: {
     width: 380,
     height: 64,
     backgroundColor: '#13151E', // Change the color as needed
@@ -154,6 +259,36 @@ const styles = StyleSheet.create({
     marginRight: 22,
     marginBottom: 20,
   },
+
+  roomCodeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  roomCodeTitle: {
+    color: 'white',
+    fontSize: 12,
+    // fontWeight: 400,
+    marginTop: 7,
+    marginLeft: 16
+  },
+
+  roomCode: {
+    fontSize: 17,
+    color: 'white',
+    // fontWeight: 700,
+    marginTop: 8,
+    marginLeft: 16
+  },
+
+  numberListening : {
+    fontSize: 10,
+    color: '#FFE457',
+    marginLeft: 240,
+    marginRight: 10
+  },
+
   chatbox: {
     width: 380,
     height: 250,

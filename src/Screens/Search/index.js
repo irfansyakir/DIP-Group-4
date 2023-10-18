@@ -42,12 +42,6 @@ export const SearchClick = () => {
         navigation.navigate('Track', params)
     }
 
-    const test = [
-        {id:1, title:"Song Name", artist:"crescent moon", img:"songimgtest.jpg"}, 
-        {id:2, title:"test ", artist:"heeheee"},
-        {id:3, title:"waawawadfjsnfjsomw ", artist:"jsdngjsdn"},
-    ]; 
-
     const [input, setInput] = useState();
     const [data, setData] = useState([]);
 
@@ -56,7 +50,6 @@ export const SearchClick = () => {
         setInput(text);
 
         if (text.length==0) setData([]);
-        // else setData(test);
         else{
         try{
             const trackdata = await SearchTrack({
@@ -88,7 +81,7 @@ export const SearchClick = () => {
             <Image style={styles.img} src={item.coverUrl} />
             <View>
                 {/* TITLE AND ARTIST */}
-                <Text style={{color:'#FFF', fontSize: SIZES.medium,}}>{item.title}</Text>
+                <Text numberOfLines={1} ellipsizeMode='tail' style={{color:'#FFF', width: 280, fontSize: SIZES.medium,}}>{item.title}</Text>
                 <Text style={{color:COLORS.grey}}>{item.artist}</Text>
             </View>
         </View>

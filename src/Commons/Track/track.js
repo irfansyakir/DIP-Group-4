@@ -15,6 +15,8 @@ import { useAuthStore } from '../../Store/useAuthStore'
 import { useRoute } from '@react-navigation/native'
 import { GetPlaylistDetails, GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
+import { BackgroundImage } from '@rneui/base'
+import { ConfirmationPopup } from './confirm'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -34,6 +36,9 @@ export const Track = ({ navigation }) => {
   const [songUrl, setSongUrl] = useState('')
   const [aorP, setAorP]= useState('')
   const [soundAudio, setSoundAudio] = useState(null)
+
+  const { setpop } = route.params
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const getPlaylistData = async () => {
     // fetch data on load
@@ -68,10 +73,27 @@ export const Track = ({ navigation }) => {
       console.error(error)
     }
   }
-
   useEffect(() => {
     getPlaylistData()
   }, [])
+
+  useEffect(()=>{
+  const listener = navigation.addListener('focus', () => {
+    if (setpop === true){
+      setModalVisible(true);
+      console.log("modal appears")
+
+      setTimeout( () => {
+        setModalVisible(false);
+        console.log("modal gone")
+      }, 2000)
+
+      navigation.setParams({ setpop: false })
+    }
+  })
+
+  return listener;
+  },[navigation, setpop])
 
   async function playSound() {
     if (soundAudio === null) {
@@ -82,7 +104,6 @@ export const Track = ({ navigation }) => {
       await soundAudio.playAsync()
     }
   }
-
   async function pauseSound() {
     if (soundAudio) {
       await soundAudio.pauseAsync() // Pause the audio
@@ -105,13 +126,20 @@ export const Track = ({ navigation }) => {
     return null
   }
 
+  const handleMoreClick = () => {
+    // Navigate to "YourNewPage" screen when the container is clicked
+    const params = { image: image, artist:artist, title: title, trackId: trackId }
+    navigation.navigate('TrackInfo', params)
+  }
+
   return (
     <View style={styles.container}>
+      <BackgroundImage style={styles.container} src={image} blurRadius={90}>
       <LinearGradient
-        colors={['#121212', '#5C4C3F', '#9A7E66']}
+        colors={['#121212', 'transparent']}
         start={{ x: 0, y: 1 }}
         end={{ x: 0, y: 0 }}
-        locations={[0.6, 0.8, 1]}
+        locations={[0.2, 1]}
         style={styles.linearGradient}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -123,9 +151,9 @@ export const Track = ({ navigation }) => {
 
             <Text style={styles.headtxt}>{aorP}</Text>
 
-          <TouchableOpacity onPress={() => console.log('more')}>
-            <Icon style={styles.icon} name='more' size={25} />
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleMoreClick()}>
+              <Icon style={styles.icon} name='more' size={25} />
+            </TouchableOpacity>
           </View>
 
           <Image style={styles.img} src={image} />
@@ -159,7 +187,9 @@ export const Track = ({ navigation }) => {
             </Text>
           </View>
         </ScrollView>
+        <ConfirmationPopup isVisible={isModalVisible}></ConfirmationPopup>
       </LinearGradient>
+      </BackgroundImage>
     </View>
   )
 }
@@ -212,7 +242,7 @@ const styles = StyleSheet.create({
   lyrics: {
     height: 'auto',
     width: 350,
-    backgroundColor: '#665959',
+    backgroundColor: '#333',
     borderRadius: 10,
     padding: 30,
     paddingBottom: 40,
