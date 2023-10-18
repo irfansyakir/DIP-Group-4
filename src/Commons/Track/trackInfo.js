@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font';
 import { createIconSetFromIcoMoon } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { BackgroundImage } from '@rneui/base'
+import { queue_addToQueue, queue_updateQueue } from '../../Utilities/Firebase/queue_functions';
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -21,19 +22,28 @@ return(
 )
 }
 
-
 export const TrackInfo = () => {
   // Initialize navigation
+  
   const navigation = useNavigation()
   const route = useRoute()
   const img = route.params.image
   const title = route.params.title
   const artist = route.params.artist
+  const trackId = route.params.trackId
   const [fontsLoaded] = useFonts({
     IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
   });
   if (!fontsLoaded) {
     return null;
+  }
+
+  const handleClick = () => {
+    if(trackId){
+      // const roomID='123qweasd'
+      queue_updateQueue({queueList: ["05XoZNL3OMdegGO0SnrHWD", "05XoZNL3OMdegGO0SnrHWDsdf", "05XoZNL3OMdegGO0SnrHWDsdjhfb"]})
+      navigation.navigate('Track', {setpop: true})
+    }
   }
   
   return (
@@ -52,13 +62,14 @@ export const TrackInfo = () => {
     {/* album, hide, addsong, addqueue, user, users */}
       {/* <Item text='Hide song' iconname = 'hide'></Item> */}
       <Item text='Add to playlist' iconname = 'addsong' ></Item>
-      <Item text='Add to queue' iconname = 'addqueue'></Item>
+      <Item text='Add to queue' iconname = 'addqueue' do={() =>handleClick()}></Item>
       <Item text='View album' iconname = 'album'></Item>
-      <Item text='View artist' iconname = 'user'></Item>
-      <Item text='Song credits' iconname = 'users'></Item>
+      {/* <Item text='View artist' iconname = 'user'></Item>
+      <Item text='Song credits' iconname = 'users'></Item> */}
       <TouchableOpacity style={styles.segment1} onPress={() => navigation.goBack()} > 
         <Text style={styles.text}>Close</Text>
       </TouchableOpacity>
+      
     </LinearGradient>
     </BackgroundImage>
   </View>

@@ -16,6 +16,7 @@ import { useRoute } from '@react-navigation/native'
 import { GetPlaylistDetails, GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
 import { BackgroundImage } from '@rneui/base'
+import { ConfirmationPopup } from './confirm'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -35,6 +36,9 @@ export const Track = ({ navigation }) => {
   const [songUrl, setSongUrl] = useState('')
   const [aorP, setAorP]= useState('')
   const [soundAudio, setSoundAudio] = useState(null)
+
+  const { setpop } = route.params
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const getPlaylistData = async () => {
     // fetch data on load
@@ -69,10 +73,27 @@ export const Track = ({ navigation }) => {
       console.error(error)
     }
   }
-
   useEffect(() => {
     getPlaylistData()
   }, [])
+
+  useEffect(()=>{
+  const listener = navigation.addListener('focus', () => {
+    if (setpop === true){
+      setModalVisible(true);
+      console.log("modal appears")
+
+      setTimeout( () => {
+        setModalVisible(false);
+        console.log("modal gone")
+      }, 2000)
+
+      navigation.setParams({ setpop: false })
+    }
+  })
+
+  return listener;
+  },[navigation, setpop])
 
   async function playSound() {
     if (soundAudio === null) {
@@ -83,7 +104,6 @@ export const Track = ({ navigation }) => {
       await soundAudio.playAsync()
     }
   }
-
   async function pauseSound() {
     if (soundAudio) {
       await soundAudio.pauseAsync() // Pause the audio
@@ -106,16 +126,15 @@ export const Track = ({ navigation }) => {
     return null
   }
 
-  const handleMoreClick = (trackId) => {
+  const handleMoreClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
-    const params = { image: image, artist:artist, title: title  }
+    const params = { image: image, artist:artist, title: title, trackId: trackId }
     navigation.navigate('TrackInfo', params)
   }
 
   return (
     <View style={styles.container}>
       <BackgroundImage style={styles.container} src={image} blurRadius={90}>
-        
       <LinearGradient
         colors={['#121212', 'transparent']}
         start={{ x: 0, y: 1 }}
@@ -168,6 +187,7 @@ export const Track = ({ navigation }) => {
             </Text>
           </View>
         </ScrollView>
+        <ConfirmationPopup isVisible={isModalVisible}></ConfirmationPopup>
       </LinearGradient>
       </BackgroundImage>
     </View>
