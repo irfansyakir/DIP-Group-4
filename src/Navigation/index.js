@@ -1,11 +1,11 @@
 import * as React from 'react'
-import {NavigationContainer} from "@react-navigation/native";
+import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 import { Home } from '../Screens/Home'
-import { Search } from '../Screens/Search'
+import { Search, SearchClick } from '../Screens/Search'
 import { RadioRooms } from '../Screens/RadioRooms'
 import { Profile } from '../Screens/Profile'
 import { EditProfile } from '../Screens/Profile/EditProfile'
@@ -17,14 +17,17 @@ import { Playlist } from '../Screens/Playlist'
 import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
-import {Queue} from "../Screens/Queue";
-import {Chatroom} from "../Screens/Chatroom";
+import { Queue } from '../Screens/Queue'
+import { Chatroom } from '../Screens/Chatroom'
+import { CreateRoom } from "../Screens/RadioRooms/Components/CreateRoom";
 
 // Track
 import { Track } from '../Commons/Track/track'
+import { TrackInfo } from '../Commons/Track/trackInfo'
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
+const SearchStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
@@ -68,7 +71,7 @@ function HomeTabs() {
       })}
     >
       <Tab.Screen name='Home' component={Home} />
-      <Tab.Screen name='Search' component={Search} />
+      <Tab.Screen name='Search' component={SearchStackNavigator} />
       <Tab.Screen name='RadioRooms' component={RadioRooms} />
       <Tab.Screen name='Profile' component={ProfileStackNavigator} />
       <Tab.Screen name='TestAPI' component={TestAPI} />
@@ -91,12 +94,31 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen name='ProfileTab' component={Profile} />
       <ProfileStack.Screen name='EditProfile' component={EditProfile} />
       <ProfileStack.Screen name='Track' component={Track} />
+      
+      <ProfileStack.Group screenOptions={{ presentation: 'modal' }}>
+        <ProfileStack.Screen name="TrackInfo" component={TrackInfo} />
+      </ProfileStack.Group>
     </ProfileStack.Navigator>
   )
 }
+function SearchStackNavigator(){
+  return(
+    <SearchStack.Navigator screenOptions={{ headerShown: false }}>
+      <SearchStack.Screen name='SearchTab' component={Search} />
+      <SearchStack.Screen name="SearchClick" component={SearchClick} />
+      <SearchStack.Screen name='Track' component={Track} />
+      <SearchStack.Group screenOptions={{ presentation: 'modal' }}>
+        <SearchStack.Screen name="TrackInfo" component={TrackInfo} />
+      </SearchStack.Group>
+    </SearchStack.Navigator>
+  )
+}
+
 
 export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
+  const wholeState = useAuthStore((state) => state)
+  console.log(wholeState)
 
   return (
     <React.Fragment>
@@ -109,11 +131,12 @@ export const Navigation = () => {
       >
         {isLoggedIn ? (
           <Fragment>
-              <Stack.Screen name='RootHome' component={HomeTabs} />
-              <Stack.Screen name='EditProfile' component={EditProfile} />
-              <Stack.Screen name="Queue" component={Queue} />
-              <Stack.Screen name="Playlist" component={Playlist} />
-              <Stack.Screen name="Chatroom" component={Chatroom} />
+            <Stack.Screen name='RootHome' component={HomeTabs} />
+            <Stack.Screen name='EditProfile' component={EditProfile} />
+            <Stack.Screen name='Queue' component={Queue} />
+            <Stack.Screen name='Playlist' component={Playlist} />
+            <Stack.Screen name='Chatroom' component={Chatroom} />
+            <Stack.Screen name='CreateRoom' component={CreateRoom} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
