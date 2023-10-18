@@ -23,7 +23,7 @@ import { CreateRoom } from "../Screens/RadioRooms/Components/CreateRoom";
 
 // Track
 import { Track } from '../Commons/Track/track'
-
+import { TrackInfo } from '../Commons/Track/trackInfo'
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
@@ -94,20 +94,26 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen name='ProfileTab' component={Profile} />
       <ProfileStack.Screen name='EditProfile' component={EditProfile} />
       <ProfileStack.Screen name='Track' component={Track} />
-      {/*<ProfileStack.Screen name='CreateRoom' component={CreateRoom} />*/}
+      
+      <ProfileStack.Group screenOptions={{ presentation: 'modal' }}>
+        <ProfileStack.Screen name="TrackInfo" component={TrackInfo} />
+      </ProfileStack.Group>
     </ProfileStack.Navigator>
   )
 }
-
 function SearchStackNavigator(){
   return(
     <SearchStack.Navigator screenOptions={{ headerShown: false }}>
       <SearchStack.Screen name='SearchTab' component={Search} />
       <SearchStack.Screen name="SearchClick" component={SearchClick} />
       <SearchStack.Screen name='Track' component={Track} />
+      <SearchStack.Group screenOptions={{ presentation: 'modal' }}>
+        <SearchStack.Screen name="TrackInfo" component={TrackInfo} />
+      </SearchStack.Group>
     </SearchStack.Navigator>
   )
 }
+
 
 export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
