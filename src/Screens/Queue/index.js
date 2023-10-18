@@ -12,9 +12,19 @@ import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-ge
 import { GetQueue } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { red, white } from 'color-name';
+import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
 
 
 export const Queue = ({navigation}) => {
+      // --------------------------------------------------------------------------------------------------> Firebase Listener
+
+    const userId = ''
+    const [userQueue] = useUserCurrentQueue(userId)
+
+    useEffect(() => {
+        console.log('userQueue: ', userQueue)
+    }, [userQueue])
+  // --------------------------------------------------------------------------------------------------> Firebase Listener
 
     const [play, setPlay] = useState(false);
     const accessToken = useAuthStore((state) => state.accessToken)
@@ -63,13 +73,6 @@ export const Queue = ({navigation}) => {
     useEffect(() => {
         console.log(queue);
     }, [queue])    
-
-    // const onItemMove = (fromIndex, toIndex) => {
-    //     const updatedItems = [...items];
-    //     const [movedItem] = updatedItems.splice(fromIndex, 1);
-    //     updatedItems.splice(toIndex, 0, movedItem);
-    //     setItems(updatedItems);
-    // };
 
     // Generating list of songs
     const generateSongs = () => {

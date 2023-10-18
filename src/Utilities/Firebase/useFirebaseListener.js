@@ -47,6 +47,21 @@ export function useCurrentQueue(roomID){
   return [currentQueue]
 }
 
+export function useUserCurrentQueue(userID){
+  const [userQueue, setUserQueue] = useState()
+  const userQueueRef = ref(db, `/queue/${userID}`)
+
+  useEffect(() => {
+    onValue(userQueueRef, (snapshot) => {
+      const data = snapshot.val();
+      // console.log(data)
+      setUserQueue(data)
+    });
+  }, []);
+
+  return [userQueue]
+}
+
 export function useMessageListener(roomID){
   const [messages, setMessages] = useState()
   const messagesRef = ref(db, `/messages/${roomID}`)
