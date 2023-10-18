@@ -63,7 +63,7 @@ export const Chatroom = () => {
         const newMessage = {
           text: obj.message,
           id: id++,        
-          timestamp: formattedTime, 
+          timestamp: formattedTime,
           right: right,
           username: obj.username,
         }
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginLeft: 22,
     marginRight: 88,
-    fontWeight: '700',
+    // fontWeight: 700,
   },
 
   viewQueueBtn: {
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'black',
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
   },
   musicPlayer: {
     width: 380,
@@ -265,11 +265,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  
+
   roomCodeTitle: {
     color: 'white',
     fontSize: 12,
-    fontWeight: 400,
+    // fontWeight: 400,
     marginTop: 7,
     marginLeft: 16
   },
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   roomCode: {
     fontSize: 17,
     color: 'white',
-    fontWeight: 700,
+    // fontWeight: 700,
     marginTop: 8,
     marginLeft: 16
   },
