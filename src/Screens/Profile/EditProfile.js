@@ -60,8 +60,7 @@ export const EditProfile = () => {
 
   const handleSaveChangesClick = () => {
     changeDisplayName(displayName)
-    changeProfileUrl(result.uri)
-    console.log('saved ' + displayName + ', ' + result.uri)
+    changeProfileUrl(profileUrl)
     navigation.navigate('ProfileTab')
   }
     // retrieve state data from stores
