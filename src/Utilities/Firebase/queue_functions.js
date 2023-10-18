@@ -48,16 +48,16 @@ export async function queue_removeQueue({roomID}){
   }
 }
 
-// TrackInfo -> Add to queue button
-export async function queue_addToQueue({roomID, trackId}){
-  if (!roomID) {
-    throw new Error("roomID is missing in queue_addToQueue.");
-  }
-  try {
-    await push(child(dbRef, `queue/${roomID}/`), trackId);
-    await console.log("song added successfully")
-  }catch (e) {
-    console.log(e)
-    throw e
-  }
-}
+// Test
+// export async function queue_addToQueue({roomID, trackId}){
+//   if (!roomID) {
+//     throw new Error("roomID is missing in queue_addToQueue.");
+//   }
+//   try {
+//     await push(child(dbRef, `queue/${roomID}/`), trackId);
+//     await console.log("song added successfully")
+//   }catch (e) {
+//     console.log(e)
+//     throw e
+//   }
+// }
