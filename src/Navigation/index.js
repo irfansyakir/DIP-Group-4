@@ -28,6 +28,7 @@ import { Track } from '../Commons/Track/track'
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
 const SearchStack = createNativeStackNavigator()
+const RadioRoomStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
@@ -72,7 +73,7 @@ function HomeTabs() {
     >
       {/* <Tab.Screen name='Home' component={Home} /> */}
       <Tab.Screen name='Search' component={Search} />
-      <Tab.Screen name='RadioRooms' component={RadioRooms} />
+      <Tab.Screen name='RadioRooms' component={RadioRoomStackNavigator} />
       <Tab.Screen name='Profile' component={ProfileStackNavigator} />
       <Tab.Screen name='TestAPI' component={TestAPI} />
     </Tab.Navigator>
@@ -106,6 +107,15 @@ function SearchStackNavigator(){
       <SearchStack.Screen name="SearchClick" component={SearchClick} />
       <SearchStack.Screen name='Track' component={Track} />
     </SearchStack.Navigator>
+  )
+}
+
+function RadioRoomStackNavigator(){
+  return (
+    <RadioRoomStack.Navigator screenOptions={{ headerShown: false }}>
+      <RadioRoomStack.Screen name='RadioRoom' component={RadioRooms} />
+      <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
+    </RadioRoomStack.Navigator>
   )
 }
 

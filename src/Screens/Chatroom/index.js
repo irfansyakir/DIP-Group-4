@@ -17,16 +17,20 @@ import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 import { message_setMessage } from '../../Utilities/Firebase/messages_functions'
 import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
 import {useMessageListener} from '../../Utilities/Firebase/useFirebaseListener';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ImageBackground } from 'react-native-web';
 
 
-export const Chatroom = () => {
+export const Chatroom = ({route, navigation}) => {
+  const { roomID } = route.params;
+  const inset = useSafeAreaInsets();
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
   const [username, setUsername] = useState('');
   //const username = 'darkstealthexe';
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
-  const roomID = '123birds';
+
   const [chatRefresh] = useMessageListener(roomID);
   const [messageOnLoad, setMessagesLoad] = useState(false);
 
@@ -102,6 +106,10 @@ export const Chatroom = () => {
 
   useEffect(() => {
     getMessages();
+
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
   }, [username, chatRefresh])
 
 
@@ -151,10 +159,17 @@ export const Chatroom = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={{
+        flexDirection: 'column',
+        alignItems: 'center',
+        paddingTop: inset.top,
+        paddingBottom: inset.bottom
+        
+   
+      }}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
     >
-      <View style={styles.container}>
+      <View >
         <View style={styles.topContainer}>
           <Text style={styles.roomName}>Room Name</Text>
           <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
@@ -168,7 +183,7 @@ export const Chatroom = () => {
         <View style={styles.roomCodeView}>
           <Text style={styles.roomCodeTitle}>Room Code</Text>
             <View style={styles.roomCodeContainer}> 
-              <Text style={styles.roomCode}>rkaiRnl</Text>
+              <Text style={styles.roomCode}>{roomID}</Text>
               <Text style={styles.numberListening}>237 LISTENING</Text>
             </View>
         </View>
@@ -213,7 +228,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: 'blue',
+    backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Purple_website.svg/1200px-Purple_website.svg.png")',
+    
   },
   topContainer: {
     marginTop: 15,
@@ -240,6 +256,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'black',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   musicPlayer: {
     width: 380,
@@ -268,24 +285,24 @@ const styles = StyleSheet.create({
   
   roomCodeTitle: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 400,
     marginTop: 7,
     marginLeft: 16
   },
 
   roomCode: {
-    fontSize: 17,
+    fontSize: 20,
     color: 'white',
     fontWeight: 700,
-    marginTop: 8,
+    marginTop: 4,
     marginLeft: 16
   },
 
   numberListening : {
     fontSize: 10,
     color: '#FFE457',
-    marginLeft: 240,
+    marginLeft: 200,
     marginRight: 10
   },
 
