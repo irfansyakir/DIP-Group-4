@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ImageBackground,
 } from 'react-native';
 
 import { useAuthStore } from '../../Store/useAuthStore'
@@ -18,8 +19,6 @@ import { message_setMessage } from '../../Utilities/Firebase/messages_functions'
 import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
 import {useMessageListener} from '../../Utilities/Firebase/useFirebaseListener';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ImageBackground } from 'react-native-web';
-
 
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
@@ -27,12 +26,10 @@ export const Chatroom = ({route, navigation}) => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
   const [username, setUsername] = useState('');
-  //const username = 'darkstealthexe';
+  //const username = 'darkstealthexe'; // use this when unable to log in to spotify
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
-
   const [chatRefresh] = useMessageListener(roomID);
-  const [messageOnLoad, setMessagesLoad] = useState(false);
 
   const getInitialProfileData = async () => {
     // fetch data on load
@@ -47,19 +44,21 @@ export const Chatroom = ({route, navigation}) => {
   }
 
   const getMessages = async () => { 
+    // fetch messages from firebase
     try {
-
       const messages = await message_getMessage({ roomId:roomID});
       const newMessagesArray = [];
       let id = 0;
-      messages.map(obj => obj.toJSON()).forEach(obj => {
 
+      messages.map(obj => obj.toJSON()).forEach(obj => {
         const date = new Date(obj.timestamp);
         const hours = date.getHours();
         const minutes = date.getMinutes();
         const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         let right = true;
 
+        // if the message's sender's username is the same as the current user's username,
+        // the chat bubble will be on the right side
         if (obj.username != username) {
             right = false;
         }
@@ -72,29 +71,20 @@ export const Chatroom = ({route, navigation}) => {
           username: obj.username,
         }
 
-        //console.log(newMessage);
+
         newMessagesArray.push(newMessage);   
       })
 
       setChatMessages(newMessagesArray);
       
-    
-      
-      // Now you can work with the sorted messages
     } catch (error) {
       console.error("Error while getting messages:", error);
     }
   }
 
-  const updateMessages = async () => { 
-    console.log(chatRefresh);
-
-  }
-
   useEffect(() => {
     getInitialProfileData();
   }, [])
-
 
 
   // Use useEffect to scroll to the bottom when chatMessages change
@@ -106,7 +96,6 @@ export const Chatroom = ({route, navigation}) => {
 
   useEffect(() => {
     getMessages();
-
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
@@ -134,6 +123,9 @@ export const Chatroom = ({route, navigation}) => {
         username: username,
       };
 
+      // Update the chatMessages state with the new message
+      setChatMessages([...chatMessages, newMessage]);
+
       console.log('sending message: ' + message);
       message_setMessage( {
           roomId: roomID,
@@ -141,9 +133,6 @@ export const Chatroom = ({route, navigation}) => {
           message: message,
           timestamp: now.getTime(),
       });
-
-      // Update the chatMessages state with the new message
-      setChatMessages([...chatMessages, newMessage]);
 
       // Clear the input field
       setMessage('');
@@ -154,8 +143,6 @@ export const Chatroom = ({route, navigation}) => {
     }
   };
 
-  // heyu
-  
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -163,19 +150,20 @@ export const Chatroom = ({route, navigation}) => {
         flexDirection: 'column',
         alignItems: 'center',
         paddingTop: inset.top,
-        paddingBottom: inset.bottom
-        
-   
+        paddingBottom: inset.bottom 
       }}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
     >
-      <View >
+      
+      <View>
+    
         <View style={styles.topContainer}>
           <Text style={styles.roomName}>Room Name</Text>
           <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
             <Text style={styles.buttonText}>View Queue</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.musicPlayer}>
           <Text>Music Player</Text>
         </View>
@@ -188,26 +176,21 @@ export const Chatroom = ({route, navigation}) => {
             </View>
         </View>
         
-
         <ScrollView
           style={styles.chatbox} // Apply styles to the ScrollView
           ref={scrollViewRef} // Use the ref here
-
           keyboardShouldPersistTaps="handled"
         >
-          {chatMessages.map((messageItem) => (
-            
+          {chatMessages.map((messageItem) => (  
             <MessageBubble 
               key={messageItem.id} 
               text={messageItem.text} 
               timestamp={messageItem.timestamp}
               right={messageItem.right} 
               username={messageItem.username}
-            />
-            
+            />   
           ))}
         </ScrollView>
-
 
         <TextInput
           style={styles.message}
@@ -229,7 +212,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Purple_website.svg/1200px-Purple_website.svg.png")',
-    
   },
   topContainer: {
     marginTop: 15,
