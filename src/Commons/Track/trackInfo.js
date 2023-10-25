@@ -3,7 +3,9 @@ import { StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from 'expo-font';
 import { createIconSetFromIcoMoon } from '@expo/vector-icons';
-
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { BackgroundImage } from '@rneui/base'
+import { queue_addToQueue, queue_updateQueue } from '../../Utilities/Firebase/queue_functions';
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -21,102 +23,105 @@ return(
 }
 
 export const TrackInfo = () => {
-
+  // Initialize navigation
+  
+  const navigation = useNavigation()
+  const route = useRoute()
+  const img = route.params.image
+  const title = route.params.title
+  const artist = route.params.artist
+  const trackId = route.params.trackId
   const [fontsLoaded] = useFonts({
     IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
   });
-
   if (!fontsLoaded) {
     return null;
   }
 
-  function do1(){
-    console.log('hehe');
+  const handleClick = () => {
+    if(trackId){
+      // const roomID='123qweasd'
+      queue_updateQueue({queueList: ["05XoZNL3OMdegGO0SnrHWD", "05XoZNL3OMdegGO0SnrHWDsdf", "05XoZNL3OMdegGO0SnrHWDsdjhfb"]})
+      navigation.navigate('Track', {setpop: true})
+    }
   }
-  function do2(){
-    console.log('haha');
-  }
-  function do3(){
-    console.log('hoho');
-  }
-
+  
   return (
   <View style={styles.container}>
+    <BackgroundImage style={styles.container} src={img} blurRadius={90}>
     <LinearGradient
-      colors={['#121212', '#5C4C3F', '#9A7E66']}
+      colors={['#121212', 'transparent']}
       start={{ x: 0, y: 1 }}
       end={{ x: 0, y: 0 }}
-      locations={[0.6, 0.8, 1]}
+      locations={[0.5, 1]}
       style={styles.linearGradient}
     >
-      <Image style={styles.img} source ={ require('../../../assets/songimgtest.jpg')}/>
-      <Text style={styles.title}>Nightlight</Text>
-      <Text style={styles.desc}>crescent moon • Album name</Text>
-
+      <Image style={styles.img} src = {img}/>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.desc}>{artist}</Text>
     {/* album, hide, addsong, addqueue, user, users */}
-      <Item text='Hide song' iconname = 'hide' do = {do1}></Item>
-      <Item text='Add to playlist' iconname = 'addsong' do = {do2}></Item>
-      <Item text='Add to queue' iconname = 'addqueue'></Item>
+      {/* <Item text='Hide song' iconname = 'hide'></Item> */}
+      <Item text='Add to playlist' iconname = 'addsong' ></Item>
+      <Item text='Add to queue' iconname = 'addqueue' do={() =>handleClick()}></Item>
       <Item text='View album' iconname = 'album'></Item>
-      <Item text='View artist' iconname = 'user'></Item>
-      <Item text='Song credits' iconname = 'users'></Item>
-
-      <TouchableOpacity style={styles.segment1} onPress={() => console.log('bye')} > 
+      {/* <Item text='View artist' iconname = 'user'></Item>
+      <Item text='Song credits' iconname = 'users'></Item> */}
+      <TouchableOpacity style={styles.segment1} onPress={() => navigation.goBack()} > 
         <Text style={styles.text}>Close</Text>
       </TouchableOpacity>
+      
     </LinearGradient>
+    </BackgroundImage>
   </View>
-
   );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      
-    },linearGradient: {
-      flex: 1,
-      alignItems: 'center',
-      // justifyContent: 'center',
-    }, title:{
-      color: '#FFF',
-      textAlign: 'center',
-      marginTop:30,
-      /* Heading 2 */
-      fontSize: 17,
-      fontWeight: 'bold',
-    }, desc:{
-      color: '#B3B3B3',
-      marginTop:5,
-      marginBottom:32,
-      /* Body 3 */
-      fontSize: 15,
-    }, segment:{
-      display: 'flex',
-      flexDirection:  'row',
-      width:320,
-      padding: 16,
-
-      // CHECK SIZE OF SEGMENT
-      // borderColor: '#bbb',
-      // borderWidth: 1,
-      // borderStyle: "dashed",
-      // borderRadius: 10,
-    },text:{
-      color: '#FFF',
-      fontSize: 16,
-    }, img:{
-      width: 164,
-      height: 164,
-      borderRadius:10,
-      marginTop:100,
-    }, icon:{
-      marginRight:15,
-      color: "#FFF",
-    }, segment1:{
-      display: 'flex',
-      flexDirection:  'row',
-      padding: 16,
-      bottom: -90
-    },
+  container: {
+    flex: 1,
+    margin: 0,
+  },linearGradient: {
+    flex: 1,
+    alignItems: 'center',
+    // justifyContent: 'center',
+  }, title:{
+    color: '#FFF',
+    textAlign: 'center',
+    marginTop:30,
+    /* Heading 2 */
+    fontSize: 17,
+    fontWeight: 'bold',
+  }, desc:{
+    color: '#B3B3B3',
+    marginTop:5,
+    marginBottom:32,
+    /* Body 3 */
+    fontSize: 15,
+  }, segment:{
+    display: 'flex',
+    flexDirection:  'row',
+    width:320,
+    padding: 16,
+    // CHECK SIZE OF SEGMENT
+    // borderColor: '#bbb',
+    // borderWidth: 1,
+    // borderStyle: "dashed",
+    // borderRadius: 10,
+  },text:{
+    color: '#FFF',
+    fontSize: 16,
+  }, img:{
+    width: 164,
+    height: 164,
+    borderRadius:10,
+    marginTop:100,
+  }, icon:{
+    marginRight:15,
+    color: "#FFF",
+  }, segment1:{
+    display: 'flex',
+    flexDirection:  'row',
+    padding: 16,
+    bottom: -60
+  },
 });

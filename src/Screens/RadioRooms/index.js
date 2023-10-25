@@ -27,7 +27,6 @@ export const RadioRooms = () => {
   };
 
   const goToChatroom = () => { 
-    
     navigation.navigate('Chatroom', {
       roomID: '123birds',
     })

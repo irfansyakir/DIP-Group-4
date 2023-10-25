@@ -1,12 +1,17 @@
-import {child, get, update} from "firebase/database";
+import {child, get, update, push} from "firebase/database";
 import {dbRef} from "../../../firebaseConfig";
 
 export async function queue_updateQueue({roomID, queueList = null}){
-  if (!roomID) {
-    throw new Error("roomID is missing in queue_updateQueue.");
-  }
   const updates = {};
-  updates[`/queue/${roomID}`] = queueList
+  console.log("inside the queue function: ", roomID, queueList)
+
+  if (!roomID) {
+    const newRoomId = push(child(dbRef, `/queues`)).key;
+    updates[`/queue/${newRoomId}`] = queueList
+  }
+  else{
+    updates[`/queue/${roomID}`] = queueList
+  }
 
   try {
     await update(dbRef, updates)
@@ -42,3 +47,17 @@ export async function queue_removeQueue({roomID}){
     throw e
   }
 }
+
+// Test
+// export async function queue_addToQueue({roomID, trackId}){
+//   if (!roomID) {
+//     throw new Error("roomID is missing in queue_addToQueue.");
+//   }
+//   try {
+//     await push(child(dbRef, `queue/${roomID}/`), trackId);
+//     await console.log("song added successfully")
+//   }catch (e) {
+//     console.log(e)
+//     throw e
+//   }
+// }

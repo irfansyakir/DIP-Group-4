@@ -66,7 +66,7 @@ export const Chatroom = ({route, navigation}) => {
         const newMessage = {
           text: obj.message,
           id: id++,        
-          timestamp: formattedTime, 
+          timestamp: formattedTime,
           right: right,
           username: obj.username,
         }
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginLeft: 22,
     marginRight: 88,
-    fontWeight: '700',
+    // fontWeight: 700,
   },
 
   viewQueueBtn: {
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  
+
   roomCodeTitle: {
     color: 'white',
     fontSize: 10,
