@@ -15,6 +15,7 @@ import { AntDesign } from '@expo/vector-icons'
 import { GetRecentlyPlayed } from '../../Utilities/SpotifyApi/Utils'
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { GetCurrentUserProfile} from '../../Utilities/SpotifyApi/Utils'
 import { useNavigation } from '@react-navigation/native' // Import useNavigation
 //Danish's Home Page
 //Needs testing first
@@ -32,6 +33,7 @@ export const Home = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const [recentlyPlayed, setRecentlyPlayed] = useState([])
   const [playlists, setPlaylists] = useState([])
+  const changeUserId = useAuthStore((state) => state.changeUserId)
 
   const getRecentlyPlayed = async () => {
     try {
@@ -81,9 +83,24 @@ export const Home = () => {
     }
   }
 
+  const getUserID = async () => {
+    try {
+        const userProfileData = await GetCurrentUserProfile({
+            accessToken: accessToken,
+        })
+
+        const currUserId = userProfileData.id
+        changeUserId(currUserId)
+        console.log('User ID:', currUserId)
+    } catch (error) {
+      console.error(error)
+    }
+  } 
+
   useEffect(() => {
     getRecentlyPlayed()
     getPlaylistData()
+    getUserID()
   }, [])
 
   return (
