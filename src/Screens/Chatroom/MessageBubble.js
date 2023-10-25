@@ -69,7 +69,7 @@ const stylesLeft = StyleSheet.create({
   messageContainer: {
     alignItems: 'flex-start', // Align messages to the right
     marginBottom: 10,
-    marginRight: 10
+    marginLeft: 10
   },
 
   messageContainerLeft: {

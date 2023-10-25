@@ -8,12 +8,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ImageBackground,
 } from 'react-native';
-
+import { Image } from 'expo-image'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useAuthStore } from '../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
-import background from './background.png';
+import background from './background.jpg';
 import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 import { message_setMessage } from '../../Utilities/Firebase/messages_functions'
 import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
@@ -104,6 +104,7 @@ export const Chatroom = ({route, navigation}) => {
 
   const handleButtonPress = () => {
     // Handle button press action here for the view queue button
+    
   };
 
   const sendMessage = () => {
@@ -150,13 +151,22 @@ export const Chatroom = ({route, navigation}) => {
         flexDirection: 'column',
         alignItems: 'center',
         paddingTop: inset.top,
-        paddingBottom: inset.bottom 
+        
+        
       }}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
     >
+     <LinearGradient
+          colors={['#6369D1', '#42559E', '#101010']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          locations={[0, 0.3, 0.6]}
+          style={styles.background}
+        />
       
-      <View>
-    
+      <View >
+        
+
         <View style={styles.topContainer}>
           <Text style={styles.roomName}>Room Name</Text>
           <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
@@ -306,6 +316,13 @@ const styles = StyleSheet.create({
     marginLeft: 22,
     marginRight: 22,
     paddingLeft: 10, // Add some left padding for the text input
+  },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
 });
 
