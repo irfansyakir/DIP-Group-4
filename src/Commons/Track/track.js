@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useRef} from 'react'
+import React, {useEffect} from 'react'
 import {
   StyleSheet,
   Text,
@@ -11,12 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import { Play } from './play'
-import { useAuthStore } from '../../Store/useAuthStore'
-import { useRoute } from '@react-navigation/native'
-import { GetPlaylistDetails, GetTrack } from '../../Utilities/SpotifyApi/Utils'
-import { Audio } from 'expo-av'
-import { BackgroundImage } from '@rneui/base'
-import { ConfirmationPopup } from './confirm'
+import { useMusicStore } from '../../Store/useMusicStore'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -25,98 +20,11 @@ const Icon = createIconSetFromIcoMoon(
 )
 
 export const Track = ({ navigation }) => {
-  // temporary: get first track of playlist ID
-  const accessToken = useAuthStore((state) => state.accessToken)
-  const route = useRoute()
-  const { playlistId } = route.params
-  const { trackId } = route.params
-  const [image, setImage] = useState('')
-  const [title, setTitle] = useState('Loading...')
-  const [artist, setArtist] = useState('')
-  const [songUrl, setSongUrl] = useState('')
-  const [aorP, setAorP]= useState('')
-  const [soundAudio, setSoundAudio] = useState(null)
-
-  const { setpop } = route.params
-  const [isModalVisible, setModalVisible] = useState(false);
-
-  const getPlaylistData = async () => {
-    // fetch data on load
-    try {
-      console.log(playlistId)
-      if (playlistId === undefined){
-        
-        const trackData = await GetTrack({
-          accessToken: accessToken,
-          trackId: trackId,
-        })
-        setImage(trackData.album.images[0].url)
-        setTitle(trackData.name)
-        setArtist(trackData.artists[0].name)
-        setSongUrl(trackData.preview_url)
-        setAorP(trackData.album.name)
-  
-      } else{
-        const playlistData = await GetPlaylistDetails({
-          accessToken: accessToken,
-          playlistId: playlistId,
-          limit: 4,
-        })
-        setImage(playlistData.items[0].track.album.images[0].url)
-        setTitle(playlistData.items[0].track.name)
-        setArtist(playlistData.items[0].track.artists[0].name)
-        setSongUrl(playlistData.items[0].track.preview_url)
-        setAorP(playlistData.items[0].track.album.name)
-      }
-
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  const songInfo = useMusicStore((state) => state.songInfo)
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
   useEffect(() => {
-    getPlaylistData()
+    return () => changeCurrentPage("Not Track")
   }, [])
-
-  useEffect(()=>{
-  const listener = navigation.addListener('focus', () => {
-    if (setpop === true){
-      setModalVisible(true);
-      console.log("modal appears")
-
-      setTimeout( () => {
-        setModalVisible(false);
-        console.log("modal gone")
-      }, 2000)
-
-      navigation.setParams({ setpop: false })
-    }
-  })
-
-  return listener;
-  },[navigation, setpop])
-
-  async function playSound() {
-    if (soundAudio === null) {
-      const { sound } = await Audio.Sound.createAsync({ uri: songUrl })
-      setSoundAudio(sound)
-      await sound.playAsync()
-    } else {
-      await soundAudio.playAsync()
-    }
-  }
-  async function pauseSound() {
-    if (soundAudio) {
-      await soundAudio.pauseAsync() // Pause the audio
-    }
-  }
-
-  useEffect(() => {
-    return soundAudio
-      ? () => {
-          soundAudio.unloadAsync()
-        }
-      : undefined
-  }, [soundAudio])
 
   const [fontsLoaded] = useFonts({
     IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
@@ -126,42 +34,41 @@ export const Track = ({ navigation }) => {
     return null
   }
 
-  const handleMoreClick = () => {
-    // Navigate to "YourNewPage" screen when the container is clicked
-    const params = { image: image, artist:artist, title: title, trackId: trackId }
-    navigation.navigate('TrackInfo', params)
-  }
+
 
   return (
     <View style={styles.container}>
-      <BackgroundImage style={styles.container} src={image} blurRadius={90}>
       <LinearGradient
-        colors={['#121212', 'transparent']}
+        colors={['#121212', '#5C4C3F', '#9A7E66']}
         start={{ x: 0, y: 1 }}
         end={{ x: 0, y: 0 }}
-        locations={[0.2, 1]}
+        locations={[0.6, 0.8, 1]}
         style={styles.linearGradient}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* TOP BAR */}
           <View style={styles.topbar}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              onPress={() => {
+                changeCurrentPage(navigation.pop())
+              }}
+            >
               <Icon style={styles.icon} name='down' size={20} />
             </TouchableOpacity>
 
-            <Text style={styles.headtxt}>{aorP}</Text>
+            <Text style={styles.headtxt}>{songInfo.songAlbum}</Text>
 
-            <TouchableOpacity onPress={() => handleMoreClick()}>
+            <TouchableOpacity onPress={() => console.log('more')}>
               <Icon style={styles.icon} name='more' size={25} />
             </TouchableOpacity>
           </View>
 
-          <Image style={styles.img} src={image} />
+          <Image style={styles.img} src={songInfo.coverUrl} />
 
           <View style={styles.midbar}>
             <View>
-              <Text style={styles.title}>{title}</Text>
-              <Text style={styles.desc}>{artist}</Text>
+              <Text style={styles.title}>{songInfo.songTitle}</Text>
+              <Text style={styles.desc}>{songInfo.songArtist}</Text>
             </View>
             <TouchableOpacity onPress={() => console.log('queue')}>
               <Icon
@@ -172,7 +79,7 @@ export const Track = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          <Play handlePlay={playSound} handlePause={pauseSound}></Play>
+          <Play />
 
           <View style={styles.lyrics}>
             <Text style={styles.lyrhead}>Lyrics</Text>
@@ -187,9 +94,7 @@ export const Track = ({ navigation }) => {
             </Text>
           </View>
         </ScrollView>
-        <ConfirmationPopup isVisible={isModalVisible}></ConfirmationPopup>
       </LinearGradient>
-      </BackgroundImage>
     </View>
   )
 }
@@ -242,7 +147,7 @@ const styles = StyleSheet.create({
   lyrics: {
     height: 'auto',
     width: 350,
-    backgroundColor: '#333',
+    backgroundColor: '#665959',
     borderRadius: 10,
     padding: 30,
     paddingBottom: 40,
@@ -275,6 +180,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     width: 250,
     textAlign: 'center',
-    maxHeight:30
+    maxHeight: 30,
   },
 })

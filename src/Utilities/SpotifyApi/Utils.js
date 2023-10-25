@@ -69,16 +69,13 @@ export async function GetPlaylistDetails({
   offset = 0,
 }) {
   try {
-    let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
-    const extraParams = new URLSearchParams({ limit: limit, offset: offset })
-    url = url + '?' + extraParams
+    let url = `https://api.spotify.com/v1/playlists/${playlistId}`
     const playlistResponse = await fetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     })
-    // console.log(playlistResponse)
 
     if (playlistResponse.status === 200) {
       const playlistData = await playlistResponse.json()
