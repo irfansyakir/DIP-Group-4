@@ -9,26 +9,27 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-
+import { Image } from 'expo-image'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useAuthStore } from '../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
-import background from './background.png';
+import background from './background.jpg';
 import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 import { message_setMessage } from '../../Utilities/Firebase/messages_functions'
 import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
 import {useMessageListener} from '../../Utilities/Firebase/useFirebaseListener';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-
-export const Chatroom = () => {
+export const Chatroom = ({route, navigation}) => {
+  const { roomID } = route.params;
+  const inset = useSafeAreaInsets();
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
   const [username, setUsername] = useState('');
-  //const username = 'darkstealthexe';
+  //const username = 'darkstealthexe'; // use this when unable to log in to spotify
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
-  const roomID = '123birds';
   const [chatRefresh] = useMessageListener(roomID);
-  const [messageOnLoad, setMessagesLoad] = useState(false);
 
   const getInitialProfileData = async () => {
     // fetch data on load
@@ -43,19 +44,21 @@ export const Chatroom = () => {
   }
 
   const getMessages = async () => { 
+    // fetch messages from firebase
     try {
-
       const messages = await message_getMessage({ roomId:roomID});
       const newMessagesArray = [];
       let id = 0;
-      messages.map(obj => obj.toJSON()).forEach(obj => {
 
+      messages.map(obj => obj.toJSON()).forEach(obj => {
         const date = new Date(obj.timestamp);
         const hours = date.getHours();
         const minutes = date.getMinutes();
         const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         let right = true;
 
+        // if the message's sender's username is the same as the current user's username,
+        // the chat bubble will be on the right side
         if (obj.username != username) {
             right = false;
         }
@@ -68,29 +71,20 @@ export const Chatroom = () => {
           username: obj.username,
         }
 
-        //console.log(newMessage);
+
         newMessagesArray.push(newMessage);   
       })
 
       setChatMessages(newMessagesArray);
       
-    
-      
-      // Now you can work with the sorted messages
     } catch (error) {
       console.error("Error while getting messages:", error);
     }
   }
 
-  const updateMessages = async () => { 
-    console.log(chatRefresh);
-
-  }
-
   useEffect(() => {
     getInitialProfileData();
   }, [])
-
 
 
   // Use useEffect to scroll to the bottom when chatMessages change
@@ -102,11 +96,15 @@ export const Chatroom = () => {
 
   useEffect(() => {
     getMessages();
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
   }, [username, chatRefresh])
 
 
   const handleButtonPress = () => {
     // Handle button press action here for the view queue button
+    
   };
 
   const sendMessage = () => {
@@ -126,6 +124,9 @@ export const Chatroom = () => {
         username: username,
       };
 
+      // Update the chatMessages state with the new message
+      setChatMessages([...chatMessages, newMessage]);
+
       console.log('sending message: ' + message);
       message_setMessage( {
           roomId: roomID,
@@ -133,9 +134,6 @@ export const Chatroom = () => {
           message: message,
           timestamp: now.getTime(),
       });
-
-      // Update the chatMessages state with the new message
-      setChatMessages([...chatMessages, newMessage]);
 
       // Clear the input field
       setMessage('');
@@ -146,21 +144,36 @@ export const Chatroom = () => {
     }
   };
 
-  // heyu
-  
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={{
+        flexDirection: 'column',
+        alignItems: 'center',
+        paddingTop: inset.top,
+        
+        
+      }}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
     >
-      <View style={styles.container}>
+     <LinearGradient
+          colors={['#6369D1', '#42559E', '#101010']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          locations={[0, 0.3, 0.6]}
+          style={styles.background}
+        />
+      
+      <View >
+        
+
         <View style={styles.topContainer}>
           <Text style={styles.roomName}>Room Name</Text>
           <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
             <Text style={styles.buttonText}>View Queue</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.musicPlayer}>
           <Text>Music Player</Text>
         </View>
@@ -168,31 +181,26 @@ export const Chatroom = () => {
         <View style={styles.roomCodeView}>
           <Text style={styles.roomCodeTitle}>Room Code</Text>
             <View style={styles.roomCodeContainer}> 
-              <Text style={styles.roomCode}>rkaiRnl</Text>
+              <Text style={styles.roomCode}>{roomID}</Text>
               <Text style={styles.numberListening}>237 LISTENING</Text>
             </View>
         </View>
         
-
         <ScrollView
           style={styles.chatbox} // Apply styles to the ScrollView
           ref={scrollViewRef} // Use the ref here
-
           keyboardShouldPersistTaps="handled"
         >
-          {chatMessages.map((messageItem) => (
-            
+          {chatMessages.map((messageItem) => (  
             <MessageBubble 
               key={messageItem.id} 
               text={messageItem.text} 
               timestamp={messageItem.timestamp}
               right={messageItem.right} 
               username={messageItem.username}
-            />
-            
+            />   
           ))}
         </ScrollView>
-
 
         <TextInput
           style={styles.message}
@@ -213,7 +221,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: 'blue',
+    backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Purple_website.svg/1200px-Purple_website.svg.png")',
   },
   topContainer: {
     marginTop: 15,
@@ -239,7 +247,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'black',
-    // fontWeight: 'bold',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   musicPlayer: {
     width: 380,
@@ -268,24 +277,24 @@ const styles = StyleSheet.create({
 
   roomCodeTitle: {
     color: 'white',
-    fontSize: 12,
-    // fontWeight: 400,
+    fontSize: 10,
+    fontWeight: 400,
     marginTop: 7,
     marginLeft: 16
   },
 
   roomCode: {
-    fontSize: 17,
+    fontSize: 20,
     color: 'white',
-    // fontWeight: 700,
-    marginTop: 8,
+    fontWeight: 700,
+    marginTop: 4,
     marginLeft: 16
   },
 
   numberListening : {
     fontSize: 10,
     color: '#FFE457',
-    marginLeft: 240,
+    marginLeft: 200,
     marginRight: 10
   },
 
@@ -307,6 +316,13 @@ const styles = StyleSheet.create({
     marginLeft: 22,
     marginRight: 22,
     paddingLeft: 10, // Add some left padding for the text input
+  },
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
 });
 

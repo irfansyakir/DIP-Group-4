@@ -50,17 +50,17 @@ const stylesRight = StyleSheet.create({
 
   youText: {
     color: '#13151E',
-    fontSize: 10,
+    fontSize: 15,
     marginLeft: 5
   },
   messageText: {
     color: '#13151E',
-    fontSize: 10,
+    fontSize: 15,
     marginLeft: 5
   },
   timestampText: {
     color: '#F8F8FA',
-    fontSize: 7,
+    fontSize: 10,
     marginLeft: 5
   },
 });
@@ -69,7 +69,7 @@ const stylesLeft = StyleSheet.create({
   messageContainer: {
     alignItems: 'flex-start', // Align messages to the right
     marginBottom: 10,
-    marginRight: 10
+    marginLeft: 10
   },
 
   messageContainerLeft: {
@@ -90,17 +90,17 @@ const stylesLeft = StyleSheet.create({
 
   usernameText: {
     color: '#EEEEEE',
-    fontSize: 10,
+    fontSize: 15,
     marginLeft: 5
   },
   messageText: {
     color: '#EEEEEE',
-    fontSize: 10,
+    fontSize: 15,
     marginLeft: 5
   },
   timestampText: {
     color: '#F8F8FA',
-    fontSize: 7,
+    fontSize: 10,
     marginLeft: 5
   },
 });

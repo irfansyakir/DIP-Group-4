@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -10,6 +11,7 @@ import { RadioRooms } from '../Screens/RadioRooms'
 import { Profile } from '../Screens/Profile'
 import { EditProfile } from '../Screens/Profile/EditProfile'
 import { Login } from '../Screens/Login'
+
 
 import { Fragment } from 'react'
 import { useAuthStore } from '../Store/useAuthStore'
@@ -28,6 +30,7 @@ import { useMusicStore } from '../Store/useMusicStore'
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
 const SearchStack = createNativeStackNavigator()
+const RadioRoomStack = createNativeStackNavigator()
 const HomeStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
@@ -73,7 +76,7 @@ function HomeTabs() {
     >
       <Tab.Screen name='Home' component={HomeStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='Search' component={SearchStackNavigator} options={{unmountOnBlur: true}}/>
-      <Tab.Screen name='RadioRooms' component={RadioRooms} />
+      <Tab.Screen name='RadioRooms' component={RadioRoomStackNavigator} />
       <Tab.Screen name='Profile' component={ProfileStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='TestAPI' component={TestAPI} />
     </Tab.Navigator>
@@ -120,6 +123,15 @@ function SearchStackNavigator() {
       <SearchStack.Screen name='Track' component={Track} />
       <SearchStack.Screen name='Playlist' component={Playlist} />
     </SearchStack.Navigator>
+  )
+}
+
+function RadioRoomStackNavigator(){
+  return (
+    <RadioRoomStack.Navigator screenOptions={{ headerShown: false }}>
+      <RadioRoomStack.Screen name='RadioRoom' component={RadioRooms} />
+      <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
+    </RadioRoomStack.Navigator>
   )
 }
 
