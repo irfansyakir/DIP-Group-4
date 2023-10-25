@@ -74,6 +74,17 @@
     ],
     "room_id_2": { ... },
     "room_id_3": { ... }
+
+
+
+  "user_queue":{
+    "user_id_1":[
+        "track_id_1", 
+        "track_id_2", 
+        "track_id_3"
+    ],
+    "user_id_2": { ... },
+    "user_id_3": { ... }
   }
 }
 ```

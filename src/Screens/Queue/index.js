@@ -9,9 +9,14 @@ import Draggable from 'react-native-draggable';
 import DraggableFlatList from "react-native-draggable-flatlist";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-gesture-handler';
-import { GetQueue } from '../../Utilities/SpotifyApi/Utils'
+import { GetQueue, GetCurrentUserProfile} from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { red, white } from 'color-name';
+import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
+import {
+    userQueue_getQueue,
+    userQueue_updateQueue,
+} from '../../Utilities/Firebase/user_queue_functions'
 
 
 export const Queue = ({navigation}) => {
@@ -20,7 +25,17 @@ export const Queue = ({navigation}) => {
     const accessToken = useAuthStore((state) => state.accessToken)
     const [currPlaying, setCurrPlaying] = useState([])
     const [queue, setQueue] = useState([])
+    const userId = useAuthStore((state) => state.userId)
 
+    // --------------------------------------------------------------------------------------------------> Firebase Listener
+
+    const [userQueue] = useUserCurrentQueue(userId)
+
+    useEffect(() => {
+        console.log('userQueue: ', userQueue)
+    }, [userQueue])
+
+    // --------------------------------------------------------------------------------------------------> Firebase Listener
 
     const getQueue = async () => {
 
@@ -49,8 +64,6 @@ export const Queue = ({navigation}) => {
                 })
             })
             setQueue(currQueue)
-
-            console.log('done2')
         } catch (error) {
           console.error(error)
         }
@@ -58,18 +71,7 @@ export const Queue = ({navigation}) => {
 
     const toggleImage = () => {
       setPlay(!play)
-    };
-
-    useEffect(() => {
-        console.log(queue);
-    }, [queue])    
-
-    // const onItemMove = (fromIndex, toIndex) => {
-    //     const updatedItems = [...items];
-    //     const [movedItem] = updatedItems.splice(fromIndex, 1);
-    //     updatedItems.splice(toIndex, 0, movedItem);
-    //     setItems(updatedItems);
-    // };
+    }; 
 
     // Generating list of songs
     const generateSongs = () => {
@@ -101,8 +103,14 @@ export const Queue = ({navigation}) => {
     };
 
     useEffect(() => {
-        console.log('done')
+        
         getQueue()
+        userQueue_updateQueue(userId, queue)
+
+        // if ( userQueue_getQueue(userId) == null ) {
+        //     getQueue()
+        //     userQueue_updateQueue(userId, queue)
+        // }
     }, [])
     
     return (

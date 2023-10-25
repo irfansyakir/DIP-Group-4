@@ -2,6 +2,8 @@ import { Button } from '@rneui/themed'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useSpotifyAuthenticate } from '../../Utilities/SpotifyApi/useSpotifyAuthenticate'
+import { useEffect, useState, useRef } from 'react';
+import { GetCurrentUserProfile} from '../../Utilities/SpotifyApi/Utils'
 
 export const Login = () => {
   const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
