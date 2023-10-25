@@ -15,7 +15,11 @@ import { AntDesign } from '@expo/vector-icons'
 import { GetRecentlyPlayed } from '../../Utilities/SpotifyApi/Utils'
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
-import { useNavigation } from '@react-navigation/native' // Import useNavigation
+import { useMusicStore } from '../../Store/useMusicStore'
+import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
+import { Audio } from 'expo-av'
+import { useNavigation } from '@react-navigation/native'
+import { debounce } from '../../Utilities/Functions/debounce'
 //Danish's Home Page
 //Needs testing first
 
@@ -32,6 +36,47 @@ export const Home = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const [recentlyPlayed, setRecentlyPlayed] = useState([])
   const [playlists, setPlaylists] = useState([])
+  const soundObject = useMusicStore((state) => state.soundObject)
+  const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
+  const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
+  const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+  const navigation = useNavigation()
+
+  const handleTrackClick = (trackId) => {
+    const createSoundObject = async (uri) => {
+      // clear previous song
+      if (soundObject) {
+        changeIsPlaying(false)
+        soundObject.unloadAsync()
+      }
+      const { sound } = await Audio.Sound.createAsync({ uri: uri })
+      changeSoundObject(sound)
+      changeIsPlaying(true)
+    }
+
+    const getTrackData = async () => {
+      try {
+        const trackData = await GetTrack({
+          accessToken: accessToken,
+          trackId: trackId,
+        })
+        changeSongInfo(
+          trackData.album.images[0].url,
+          trackData.name,
+          trackData.artists[0].name,
+          trackData.album.name
+        )
+        createSoundObject(trackData.preview_url)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    getTrackData()
+  }
+
+  const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
   const getRecentlyPlayed = async () => {
     try {
@@ -48,15 +93,9 @@ export const Home = () => {
         })
       })
       setRecentlyPlayed(currRecentlyPlayed)
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      console.error(err)
     }
-  }
-
-  const handlePlaylistClick = (playlistId) => {
-    // Navigate to "YourNewPage" screen when the container is clicked
-    //const params = { playlistId: playlistId }
-    //navigation.navigate('Track', params)
   }
 
   const getPlaylistData = async () => {
@@ -113,10 +152,14 @@ export const Home = () => {
           style={{ marginHorizontal: 10 }}
           horizontal={true}
           data={recentlyPlayed}
-          keyExtractor={(item) => item.id}
+          keyExtractor={() => Math.random() * 10}
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                debouncedTrackClick(item.id)
+              }}
+            >
               <Image
                 style={{
                   width: 100,
@@ -168,7 +211,7 @@ export const Home = () => {
           </Text>
         </View>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity
             style={{
               width: 50,
@@ -192,14 +235,17 @@ export const Home = () => {
           >
             Create Playlist
           </Text>
-        </View>
+        </View> */}
 
         <View style={styles.playlistContainer}>
           {playlists.map((playlist) => {
             return (
               <TouchableOpacity
                 key={playlist.id}
-                onPress={() => handlePlaylistClick(playlist.id)}
+                onPress={() => {
+                  changeCurrentPage('Playlist')
+                  navigation.navigate('Playlist', playlist.id)
+                }}
               >
                 {renderTableRow(
                   playlist.photoUrl,
