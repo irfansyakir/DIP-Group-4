@@ -16,6 +16,7 @@ import { Entypo } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BoldText, LightText, MediumText } from '../UI/styledText'
 import { GetPlaylistDetails } from '../../Utilities/SpotifyApi/Utils'
+import { GetPlaylistSongs } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { COLORS } from '../../Constants'
 import SingleSong from '../Songs/SingleSong'
@@ -46,8 +47,26 @@ export const Playlist = ({ route }) => {
       setCoverUrl(playlistData.images[0].url)
       setFollowers(playlistData.followers.total)
       setTotalSongs(playlistData.tracks.total)
+      
+      
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const getPlaylistTracks = async () => {
+    try {
+      const playlistData = await GetPlaylistSongs({
+        accessToken: accessToken,
+        playlistId: playlistID,
+      })
+      /*setPlaylistName(playlistData.name)
+      setDescription(playlistData.description || '')
+      setCoverUrl(playlistData.images[0].url)
+      setFollowers(playlistData.followers.total)
+      setTotalSongs(playlistData.tracks.total)*/
       const playlistSongs = []
-      playlistData.tracks.items.map((item) => {
+      playlistData.items.map((item) => {
         playlistSongs.push({
           id: item.track.id,
           coverUrl: item.track.album.images[0].url,
@@ -61,8 +80,10 @@ export const Playlist = ({ route }) => {
     }
   }
 
+
   useEffect(() => {
     getPlaylistData()
+    getPlaylistTracks()
   }, [])
 
   return (
