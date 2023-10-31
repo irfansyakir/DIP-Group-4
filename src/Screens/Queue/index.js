@@ -11,6 +11,8 @@ import "react-native-gesture-handler";
 import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-gesture-handler';
 import { GetQueue, GetCurrentUserProfile} from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { useMusicStore } from '../../Store/useMusicStore'
 import { red, white } from 'color-name';
 import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
 import {
@@ -22,63 +24,20 @@ import {
 export const Queue = ({navigation}) => {
 
     const [play, setPlay] = useState(false);
-    const accessToken = useAuthStore((state) => state.accessToken)
-    const [currPlaying, setCurrPlaying] = useState([])
-    const [queue, setQueue] = useState([])
-    const userId = useAuthStore((state) => state.userId)
 
-    // --------------------------------------------------------------------------------------------------> Firebase Listener
-
-    const [userQueue] = useUserCurrentQueue(userId)
-
-    useEffect(() => {
-        console.log('userQueue: ', userQueue)
-    }, [userQueue])
-
-    // --------------------------------------------------------------------------------------------------> Firebase Listener
-
-    const getQueue = async () => {
-
-        try {
-            const queueData = await GetQueue({
-                accessToken: accessToken,
-            })
-
-            const artistNames = queueData.currently_playing.artists.map(artist => artist.name).join(', ');
-            const currPlaying = {
-                id: queueData.currently_playing.id,
-                title: queueData.currently_playing.name,
-                artist: artistNames,
-                img: queueData.currently_playing.album.images[0].url
-            };
-            setCurrPlaying(currPlaying)
-
-            const currQueue = []
-            queueData.queue.map((curr) => {
-                const queueArtistNames = curr.artists.map(artist => artist.name).join(', ');
-
-                currQueue.push({
-                    id: curr.album.id,
-                    title: curr.name,
-                    artist: queueArtistNames,
-                })
-            })
-            setQueue(currQueue)
-        } catch (error) {
-          console.error(error)
-        }
-    }
+    const storeQueue = useQueueStore((state) => state.queue)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
+    const storeCurrTrack = useMusicStore((state) => state.songInfo)
 
     const toggleImage = () => {
       setPlay(!play)
     }; 
 
-    // Generating list of songs
-    const generateSongs = () => {
-
+    // Generating list of songs from store
+    const generateSongs = () => {        
         return (<DraggableFlatList
-          data={queue}
-          onDragEnd={({data}) => {setQueue(data)}}
+          data={storeQueue}
+          onDragEnd={({data}) => {changeQueue(data)}}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           style={{ height: (47/100)*Math.round(Dimensions.get('window').height)}}
@@ -87,7 +46,7 @@ export const Queue = ({navigation}) => {
                 style={styles.songInQ} 
                 onLongPress={drag} 
                 background={isActive ? "gray300" : "white"} 
-                minPressDuration={150} 
+                minPressDuration={150}
             >
                 <View>
                     <Text style={styles.songName}>{item.title}</Text>
@@ -101,17 +60,6 @@ export const Queue = ({navigation}) => {
         )}
         />);
     };
-
-    useEffect(() => {
-        
-        getQueue()
-        userQueue_updateQueue(userId, queue)
-
-        // if ( userQueue_getQueue(userId) == null ) {
-        //     getQueue()
-        //     userQueue_updateQueue(userId, queue)
-        // }
-    }, [])
     
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -119,14 +67,14 @@ export const Queue = ({navigation}) => {
             <View style={styles.playingNow}>
                 <Image
                     style={styles.playlistImage}
-                    source={currPlaying.img}
-                />
+                    source={storeCurrTrack.coverUrl}
+                /> 
                 <View style={styles.songDets}>
                     <Text style={styles.currSong}>
-                        {currPlaying.title}
+                        {storeCurrTrack.songTitle}
                     </Text>
                     <Text style={styles.currArtistName}>
-                        {currPlaying.artist}
+                        {storeCurrTrack.songArtist}
                     </Text>
                 </View>
             </View>
