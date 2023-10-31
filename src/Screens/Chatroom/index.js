@@ -19,6 +19,7 @@ import { message_setMessage } from '../../Utilities/Firebase/messages_functions'
 import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
 import {useMessageListener} from '../../Utilities/Firebase/useFirebaseListener';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {room_getRoom} from '../../Utilities/Firebase/room_functions';
 
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
@@ -30,6 +31,7 @@ export const Chatroom = ({route, navigation}) => {
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
   const accessToken = useAuthStore((state) => state.accessToken)
   const [chatRefresh] = useMessageListener(roomID);
+  const [roomName, setRoomName] = useState('');
 
   const getInitialProfileData = async () => {
     // fetch data on load
@@ -43,10 +45,16 @@ export const Chatroom = ({route, navigation}) => {
     }
   }
 
+  const getRoomDetails = async () => { 
+    const roomDetails = await room_getRoom({roomID: roomID});
+    console.log('Room Name: '+ roomDetails["room_name"]);
+    setRoomName(roomDetails["room_name"]);
+  }
+
   const getMessages = async () => { 
     // fetch messages from firebase
     try {
-      const messages = await message_getMessage({ roomId:roomID});
+      const messages = await message_getMessage({roomId:roomID});
       const newMessagesArray = [];
       let id = 0;
 
@@ -82,9 +90,15 @@ export const Chatroom = ({route, navigation}) => {
     }
   }
 
+  // call when the screen is first opened
   useEffect(() => {
+    console.log('RoomID: ' + roomID);
     getInitialProfileData();
+    getRoomDetails();
+    
   }, [])
+
+ 
 
 
   // Use useEffect to scroll to the bottom when chatMessages change
@@ -150,9 +164,7 @@ export const Chatroom = ({route, navigation}) => {
       style={{
         flexDirection: 'column',
         alignItems: 'center',
-        paddingTop: inset.top,
-        
-        
+        paddingTop: inset.top,  
       }}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
     >
@@ -168,11 +180,14 @@ export const Chatroom = ({route, navigation}) => {
         
 
         <View style={styles.topContainer}>
-          <Text style={styles.roomName}>Room Name</Text>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.roomName}>{roomName}</Text>
+          </View>
           <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
             <Text style={styles.buttonText}>View Queue</Text>
           </TouchableOpacity>
         </View>
+
 
         <View style={styles.musicPlayer}>
           <Text>Music Player</Text>
@@ -233,7 +248,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginLeft: 22,
     marginRight: 88,
-    // fontWeight: 700,
+    fontWeight: 'bold',
   },
 
   viewQueueBtn: {

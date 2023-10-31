@@ -131,6 +131,8 @@ function RadioRoomStackNavigator(){
     <RadioRoomStack.Navigator screenOptions={{ headerShown: false }}>
       <RadioRoomStack.Screen name='RadioRoom' component={RadioRooms} />
       <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
+      <RadioRoomStack.Screen name='Track' component={Track} />
+      <RadioRoomStack.Screen name='Playlist' component={Playlist} />
     </RadioRoomStack.Navigator>
   )
 }
