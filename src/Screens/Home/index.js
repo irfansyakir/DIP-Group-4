@@ -20,7 +20,6 @@ import { useNavigation } from '@react-navigation/native' // Import useNavigation
 import { useMusicStore } from '../../Store/useMusicStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
-import { useNavigation } from '@react-navigation/native'
 import { debounce } from '../../Utilities/Functions/debounce'
 
 //Danish's Home Page

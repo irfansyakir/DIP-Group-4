@@ -91,6 +91,36 @@ export async function GetPlaylistDetails({
   }
 }
 
+export async function GetPlaylistSongs({
+  accessToken,
+  playlistId,
+  limit = 20,
+  offset = 0,
+}) {
+  try {
+    let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
+    const playlistResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (playlistResponse.status === 200) {
+      const playlistData = await playlistResponse.json()
+      return playlistData
+    } else {
+      console.error(
+        'Error fetching playlist data:',
+        playlistResponse.statusText
+      )
+    }
+  } catch (error) {
+    console.error('Error fetching playlist data:', error)
+  }
+}
+
+
 export async function GetTrack({ accessToken, trackId }) {
   return await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
     method: 'GET',
