@@ -1,5 +1,5 @@
-import {child, get, update, push} from "firebase/database";
-import {dbRef} from "../../../firebaseConfig";
+import {child, get, update, push, query, ref} from "firebase/database";
+import {dbRef, db} from "../../../firebaseConfig";
 
 export async function userQueue_updateQueue({userID, userQueueList = null}){
   const updates = {};
@@ -10,7 +10,7 @@ export async function userQueue_updateQueue({userID, userQueueList = null}){
     updates[`/user_queue/${newUserID}`] = userQueueList
   }
   else{
-    updates[`/user_queue/${userID}`] = userQueueList
+    updates[`/user_queue/${userID}`] = userQueueList 
   }
 
   try {
@@ -26,7 +26,7 @@ export async function userQueue_getQueue({userID}){
     throw new Error("userID is missing in userQueue_getQueue.");
   }
   try {
-    const snapshot = await get(child(dbRef, `/userQueue/${userID}`));
+    const snapshot = await get(child(dbRef, `/user_queue/${userID}`));
     return await snapshot.val()
   }catch (e) {
     console.log(e)
