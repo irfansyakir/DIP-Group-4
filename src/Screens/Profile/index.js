@@ -11,10 +11,16 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native' // Import useNavigation
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useProfileStore } from '../../Store/useProfileStore'
 import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 
 export const Profile = () => {
   const navigation = useNavigation() // Initialize navigation
+  const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
+  const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
+  const changeFollowers = useProfileStore((state) => state.changeFollowers)
+  const storeDisplayName = useProfileStore((state) => state.displayName)
+  const storeProfileUrl = useProfileStore((state) => state.profileUrl)
   const handleButtonClick = () => {
     navigation.navigate('EditProfile')
   }
@@ -65,6 +71,41 @@ export const Profile = () => {
       setDisplayName(profileData.display_name)
       setFollowers(profileData.followers.total)
       setProfileUrl(profileData.images[1].url)
+      changeDisplayName(profileData.display_name)
+      changeFollowers(profileData.followers.total)
+      changeProfileUrl(profileData.images[1].url)
+      console.log(storeDisplayName)
+      console.log('2')
+
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const getChangedProfileData = async () => {
+    // fetch data on load
+    try {
+      const profileData = await GetCurrentUserProfile({
+        accessToken: accessToken,
+      })
+      console.log(storeDisplayName)
+      if (storeDisplayName == profileData.displayName) {
+        setDisplayName(profileData.displayName)
+        console.log('name 1')
+      } else {
+        setDisplayName(storeDisplayName)
+        console.log('name 0')
+      }
+      setFollowers(profileData.followers.total)
+      if (storeProfileUrl == profileData.profileUrl) {
+        setProfileUrl(profileData.images[1].url)
+        console.log('img 1')
+      } else {
+        setProfileUrl(storeProfileUrl)
+        console.log('img 0')
+      }
+      console.log('3')
+
     } catch (error) {
       console.error(error)
     }
@@ -86,8 +127,18 @@ export const Profile = () => {
 
   useEffect(() => {
     getPlaylistData()
-    getInitialProfileData()
-  }, [])
+    if (storeDisplayName == '') {
+      console.log('get initial')
+      getInitialProfileData()
+    } else {
+      console.log('get changed')
+      getChangedProfileData()
+    }
+  }, [storeDisplayName, storeProfileUrl])
+
+  let callFunction = (e) => {
+    setDisplayName(e)
+  }
 
   return (
     <View style={styles.container}>
@@ -273,3 +324,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 })
+
