@@ -4,6 +4,7 @@ import { Image, Text, View, TextInput, Button,
     StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
 import { CheckBox } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
 
 import clouds from  '../../../../../assets/clouds.png'
 import raindrops from '../../../../../assets/raindrops.png'
@@ -15,9 +16,34 @@ import {Stack} from "@rneui/layout";
 export const CreateRoom = ()=> {
     
     const [selectedIndex, setIndex] = React.useState(0);
-
-    const [text, onChangeText] = React.useState('');
+    const [roomName, onChangeText] = React.useState();
+    const [roomDescription, onChangeText2] = React.useState();
     const navigation = useNavigation(); // Initialize navigation
+
+    const handleStartListening = () => {
+        if (roomName.trim() !== '') {
+            console.log('creating room: ' + roomName);
+            room_updateRoom({
+                roomName: roomName,
+                isPublic: isPublic,
+            });
+            navigation.navigate('Chatroom');
+        } else {
+            console.log('no room name!')
+        }
+    }
+
+    const setIsPublic = () => {
+        if (isPublic) {
+            isPublic = false;
+        } else {
+            isPublic = true;
+        }
+    }
+
+    useEffect(() => {
+        isPublic = true;
+    }, [])
   /*  const showMessage = () => {
         const customMessage = "You are about to leave the page.";
         Alert.alert(
@@ -59,15 +85,14 @@ export const CreateRoom = ()=> {
                 <Text style={styles.subtitle}>Room Name</Text>
                 <TextInput
                     style={styles.input}
-                    onChangeText={onChangeText}
-                    value={text}
+                    
+                    value={roomName}
                     placeholder="Type a room name..."
                 />
                 <Text style={styles.subtitle}>Room Description</Text>
                 <TextInput
                     style={styles.input}
-                    onChangeText={onChangeText}
-                    value={text}
+                    value={roomDescription}
                     placeholder="Type a room description..."
                 />
                 <Text style={styles.subtitle}>Settings</Text>
@@ -75,7 +100,7 @@ export const CreateRoom = ()=> {
                 <Stack row align="right" spacing={2}>
                     <CheckBox
                     checked={selectedIndex === 0}
-                    onPress={() => setIndex(0)}
+                    onPress={() => setIndex(1)}
                     iconType="material-community"
                     checkedIcon="radiobox-marked"
                     uncheckedIcon="radiobox-blank"
@@ -85,14 +110,14 @@ export const CreateRoom = ()=> {
                 <Stack row align="right" spacing={2}>
                     <CheckBox
                     checked={selectedIndex === 1}
-                    onPress={() => setIndex(1)}
+                    onPress={[setIsPublic, () => setIndex(0)]}
                     iconType="material-community"
                     checkedIcon="radiobox-marked"
                     uncheckedIcon="radiobox-blank"
                     />
                 </Stack>
                 <View>
-                    <TouchableOpacity style={styles.buttonListen}>
+                    <TouchableOpacity style={styles.buttonListen} onPress={handleStartListening}>
                         <Text style={styles.buttonText}>Start Listening</Text>
                     </TouchableOpacity>
                 </View>
