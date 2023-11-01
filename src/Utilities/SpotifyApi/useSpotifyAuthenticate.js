@@ -32,6 +32,7 @@ const scope = [
   'playlist-read-private',
   'playlist-read-collaborative',
   'user-read-recently-played',
+  'user-read-playback-state',
 ]
 //Todo
 //Add logout function

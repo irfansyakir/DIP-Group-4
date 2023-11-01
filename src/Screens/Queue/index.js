@@ -1,106 +1,86 @@
-import {View, Text, Button, StyleSheet, TouchableOpacity, ScrollView} from 'react-native';
+import {View, Text, Button, StyleSheet, TouchableOpacity, FlatList, PanResponder, Animated, Dimensions} from 'react-native';
 import { Image } from 'expo-image';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import Draggable from 'react-native-draggable';
-import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
+import DraggableFlatList from "react-native-draggable-flatlist";
+import "react-native-gesture-handler";
+import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-gesture-handler';
+import { GetQueue, GetCurrentUserProfile} from '../../Utilities/SpotifyApi/Utils'
+import { useAuthStore } from '../../Store/useAuthStore'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { useMusicStore } from '../../Store/useMusicStore'
+import { red, white } from 'color-name';
+import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
+import {
+    userQueue_getQueue,
+    userQueue_updateQueue,
+} from '../../Utilities/Firebase/user_queue_functions'
+
 
 export const Queue = ({navigation}) => {
 
     const [play, setPlay] = useState(false);
-    // const songs = [...Array(10).keys()];
+
+    const storeQueue = useQueueStore((state) => state.queue)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
+    const storeCurrTrack = useMusicStore((state) => state.songInfo)
 
     const toggleImage = () => {
       setPlay(!play)
-    };
+    }; 
 
-    // Generating list of placeholder songs
-    const generateSongs = () => {
-        const songs = [];
-    
-        for (let i = 0; i < 10; i++) {
-          songs.push(
-                <TouchableOpacity style={styles.songInQ} key={i}>
+    // Generating list of songs from store
+    const generateSongs = () => {        
+        return (<DraggableFlatList
+          data={storeQueue}
+          onDragEnd={({data}) => {changeQueue(data)}}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          style={{ height: (47/100)*Math.round(Dimensions.get('window').height)}}
+          renderItem={({ item, drag, isActive }) => (
+            <TouchableOpacity 
+                style={styles.songInQ} 
+                onLongPress={drag} 
+                background={isActive ? "gray300" : "white"} 
+                minPressDuration={150}
+            >
                 <View>
-                    <Text style={styles.songName}>Song Name</Text>
-                    <Text style={styles.artistName}>Artist Name</Text>
+                    <Text style={styles.songName}>{item.title}</Text>
+                    <Text style={styles.artistName}>{item.artist}</Text>
                 </View>
                 <Image
                     style={styles.draggable}
                     source={require("../../../assets/draggable.png")}
                 />
-                </TouchableOpacity>
-          );
-        }
-        return songs;
+            </TouchableOpacity>
+        )}
+        />);
     };
-
-    // Testing draggable reordering of songs
-    // const reorderSongs = (fromIndex, toIndex) => {
-    //     const updatedSongs = [...songs];
-    //     const [movedSong] = updatedSongs.splice(fromIndex, 1);
-    //     updatedSongs.splice(toIndex, 0, movedSong);
-    //     setSongs(updatedSongs);
-    // };
-
-    // const onGestureEvent = (event, index) => {
-    // if (event.nativeEvent.translationY > 10 && index > 0) {
-    //     // Move down by 10px and swap places
-    //     reorderSongs(index, index - 1);
-    // } else if (event.nativeEvent.translationY < -10 && index < songs.length - 1) {
-    //     // Move up by 10px and swap places
-    //     reorderSongs(index, index + 1);
-    // }
-    // };
-
-    // const onHandlerStateChange = () => {
-    //     // Handle the end of the gesture if needed
-    //   };
-
-    // const generateSongs = () => {
-      
-    //     return songs.map((index) => (
-    //       <PanGestureHandler
-    //         key={index}
-    //         onGestureEvent={(event) => onGestureEvent(event, index)}
-    //         onHandlerStateChange={onHandlerStateChange}
-    //       >
-    //         <TouchableOpacity style={styles.songInQ}>
-    //           <View>
-    //             <Text style={styles.songName}>Song Name</Text>
-    //             <Text style={styles.artistName}>Artist Name</Text>
-    //           </View>
-    //           <Image
-    //             style={styles.draggable}
-    //             source={require("../../assets/draggable.png")}
-    //           />
-    //         </TouchableOpacity>
-    //       </PanGestureHandler>
-    //     ));
-    // };
-      
+    
     return (
-        // <GestureHandlerRootView style={{ flex: 1 }}>
-        <View style={styles.container}>
+        <GestureHandlerRootView style={styles.container}>
             <Text style={styles.header}>Now Playing</Text>
             <View style={styles.playingNow}>
                 <Image
                     style={styles.playlistImage}
-                    source={require("../../../assets/playlistPic1.png")}
-                />
+                    source={storeCurrTrack.coverUrl}
+                /> 
                 <View style={styles.songDets}>
-                    <Text style={styles.currSong}>Song Name</Text>
-                    <Text style={styles.currArtistName}>Artist Name</Text>
+                    <Text style={styles.currSong}>
+                        {storeCurrTrack.songTitle}
+                    </Text>
+                    <Text style={styles.currArtistName}>
+                        {storeCurrTrack.songArtist}
+                    </Text>
                 </View>
             </View>
             <Text style={styles.header}>Next In Queue</Text>
-            <ScrollView>
-                {generateSongs()}
-            </ScrollView>
-            
+
+            {generateSongs()}
             {/* Insert music status bar */}
 
             <View style={styles.musicPlayer}>
@@ -126,19 +106,19 @@ export const Queue = ({navigation}) => {
                         source={require("../../../assets/skipNext.png")}
                     />
                 </TouchableOpacity>
-
             </View>
-        </View>
-        // </GestureHandlerRootView>
+        </GestureHandlerRootView>
     );
 }
 
 const styles = StyleSheet.create({
     container:{
         flex: 1,
+        justifyContent: 'flex-end',
         paddingTop: 10,
         paddingLeft: 25,
         paddingRight: 25,
+        paddingBottom: 80,
         backgroundColor: '#13151e',
     },  
     header: {
@@ -187,10 +167,9 @@ const styles = StyleSheet.create({
         height: 10,
     },
     musicPlayer: {
-        height: 109, 
+        height: 60, 
         flexDirection: 'row',
         justifyContent: 'center',
-        paddingBottom: 20,
         alignItems: 'center',
     },  
     skip: {

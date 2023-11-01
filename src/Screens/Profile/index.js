@@ -24,11 +24,6 @@ export const Profile = () => {
   const handleButtonClick = () => {
     navigation.navigate('EditProfile')
   }
-  const handlePlaylistClick = (playlistId) => {
-    // Navigate to "YourNewPage" screen when the container is clicked
-    const params = { playlistId: playlistId }
-    navigation.navigate('Track', params)
-  }
   const handleSeeAllClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
     navigation.navigate('Home')
@@ -116,6 +111,20 @@ export const Profile = () => {
     }
   }
 
+  const renderTableRow = (imageSource, title, description) => (
+    <View style={styles.tableRow}>
+      <Image
+        style={styles.playlistImage}
+        source={imageSource}
+        contentFit={'fill'}
+      />
+      <View style={styles.textContainer}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.description}>{description}</Text>
+      </View>
+    </View>
+  )
+
   useEffect(() => {
     getPlaylistData()
     if (storeDisplayName == '') {
@@ -164,10 +173,6 @@ export const Profile = () => {
               <Text style={styles.columnBoldText}>{followers}</Text>
               <Text style={styles.columnText}>FOLLOWERS</Text>
             </View>
-            {/* <View style={styles.column}>
-              <Text style={styles.columnBoldText}>43</Text>
-              <Text style={styles.columnText}>FOLLOWING</Text>
-            </View> */}
           </View>
         </View>
         <View>
@@ -178,7 +183,9 @@ export const Profile = () => {
             return (
               <TouchableOpacity
                 key={playlist.id}
-                onPress={() => handlePlaylistClick(playlist.id)}
+                onPress={() => {
+                  navigation.navigate('Playlist', playlist.id)
+                }}
               >
                 {renderTableRow(
                   playlist.coverUrl,
@@ -198,20 +205,6 @@ export const Profile = () => {
     </View>
   )
 }
-
-const renderTableRow = (imageSource, title, description) => (
-  <View style={styles.tableRow}>
-    <Image
-      style={styles.playlistImage}
-      source={imageSource}
-      contentFit={'fill'}
-    />
-    <View style={styles.textContainer}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
-    </View>
-  </View>
-)
 
 const styles = StyleSheet.create({
   seeAllContainer: {

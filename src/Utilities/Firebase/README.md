@@ -27,6 +27,7 @@
       "room_name": "inconspicuous group (real)",
       "last_message": "ghopper: Relay malfunction found. Cause: moth.",
       "last_message_timestamp": 1459361875666,
+      "isPublic": true,
       "dj": ["userID1", "userID2"]
     },
     "room_id_2": { ... },
@@ -66,7 +67,7 @@
 
   
   
-  "queue":{
+  "room_queue":{
     "room_id_1":[
         "track_id_1", 
         "track_id_2", 
@@ -74,6 +75,17 @@
     ],
     "room_id_2": { ... },
     "room_id_3": { ... }
+
+
+
+  "user_queue":{
+    "user_id_1":[
+        "track_id_1", 
+        "track_id_2", 
+        "track_id_3"
+    ],
+    "user_id_2": { ... },
+    "user_id_3": { ... }
   }
 }
 ```

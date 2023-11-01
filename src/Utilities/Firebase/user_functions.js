@@ -7,7 +7,7 @@ async function userExist({userId}){
 }
 
 export async function user_updateUser({userID, username, roomsObjects}){
-  if (!userID && !username && !roomsObjects) {
+  if (userID === null && username === null && roomsObjects === null) {
     throw new Error("One or more required parameters are missing or empty in user_updateUser.");
   }
   const updates = {};
@@ -32,7 +32,7 @@ export async function user_updateUser({userID, username, roomsObjects}){
 }
 
 export async function user_getRooms({userId}) {
-  if (!userId) {
+  if (userId === null) {
     throw new Error("userID is missing or empty in user_getRooms.");
   }
   try {
@@ -44,7 +44,7 @@ export async function user_getRooms({userId}) {
   }
 }
 export async function user_getUsername({userId}) {
-  if (!userId) {
+  if (userId === null) {
     throw new Error("userID is missing or empty in user_getUsername.");
   }
   try {
@@ -56,7 +56,7 @@ export async function user_getUsername({userId}) {
   }
 }
 export async function user_addToRoom({userId, arrayOfRoomIDs}){
-  if (!userId || !arrayOfRoomIDs) {
+  if (userId === null || arrayOfRoomIDs === null) {
     throw new Error("One or more required parameters are missing or empty in user_addToRoom.");
   }
   const updates = {};
@@ -79,7 +79,7 @@ export async function user_addToRoom({userId, arrayOfRoomIDs}){
   }
 }
 export async function user_removeFromRooms({userId, arrayOfRoomIDs}){
-  if (!userId || !arrayOfRoomIDs) {
+  if (userId === null || arrayOfRoomIDs === null) {
     throw new Error("One or more required parameters are missing or empty in user_removeFromRooms.");
   }
   const updates = {};
@@ -102,7 +102,7 @@ export async function user_removeFromRooms({userId, arrayOfRoomIDs}){
   }
 }
 export async function user_removeUser({userId}){
-  if (!userId) {
+  if (userId === null) {
     throw new Error("userID is missing or empty in user_removeUser.");
   }
   try {

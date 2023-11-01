@@ -32,7 +32,7 @@ export function useIsCurrentTrackPlayingListener(roomID){
   return [isCurrentTrackPlaying]
 }
 
-export function useCurrentQueue(roomID){
+export function useRoomCurrentQueue(roomID){
   const [currentQueue, setCurrentQueue] = useState()
   const currentQueueRef = ref(db, `/queue/${roomID}`)
 
@@ -45,6 +45,21 @@ export function useCurrentQueue(roomID){
   }, []);
 
   return [currentQueue]
+}
+
+export function useUserCurrentQueue(userID){
+  const [userQueue, setUserQueue] = useState()
+  const userQueueRef = ref(db, `/user_queue/${userID}`)
+
+  useEffect(() => {
+    onValue(userQueueRef, (snapshot) => {
+      const data = snapshot.val();
+      // console.log(data)
+      setUserQueue(data)
+    });
+  }, []);
+
+  return [userQueue]
 }
 
 export function useMessageListener(roomID){

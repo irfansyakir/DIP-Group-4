@@ -2,7 +2,7 @@ import {child, get, update} from "firebase/database";
 import {dbRef} from "../../../firebaseConfig";
 
 export async function current_track_updateCurrentTrack({roomID, trackId, timeOfLastPlayed, isCurrentTrackPlaying}){
-  if (!roomID) {
+  if (roomID === null) {
     throw new Error("roomID is missing in current_track_updateCurrentTrack.");
   }
   const updates = {};
@@ -31,7 +31,7 @@ export async function current_track_updateCurrentTrack({roomID, trackId, timeOfL
 }
 
 export async function current_track_getCurrentTrack({roomID}){
-  if (!roomID) {
+  if (roomID === null) {
     throw new Error("roomID is missing in current_track_getCurrentTrack.");
   }
   try {
