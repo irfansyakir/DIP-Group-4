@@ -1,6 +1,6 @@
 // Music player bar used in track.js
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
@@ -8,113 +8,134 @@ import Slider from '@react-native-community/slider'
 import { useMusicStore } from '../../Store/useMusicStore'
 
 const Icon = createIconSetFromIcoMoon(
-  require('../../../assets/icomoon/selection.json'),
-  'IcoMoon',
-  'icomoon.ttf'
+    require('../../../assets/icomoon/selection.json'),
+    'IcoMoon',
+    'icomoon.ttf'
 )
 
 export const Play = () => {
-  const isPlaying = useMusicStore((state) => state.isPlaying)
-  const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
-  const [range, setRange] = useState(0)
-  const maxTime = 5
+    const isPlaying = useMusicStore((state) => state.isPlaying)
+    const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+    const position = useMusicStore((state) => state.position)
+    const duration = useMusicStore((state) => state.duration)
+    const changePosition = useMusicStore((state) => state.changePosition)
+    const soundObject = useMusicStore((state) => state.soundObject)
+    const [localPosition, setLocalPosition] = useState(0)
 
-  const [fontsLoaded] = useFonts({
-    IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
-  })
-  if (!fontsLoaded) {
-    return null
-  }
+    useEffect(() => {
+        setLocalPosition(position)
+    }, [position])
 
-  const formatTime = (value) => {
-    const totalSeconds = value * maxTime * 60
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = Math.round(totalSeconds % 60)
-    return `${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}`
-  }
+    const [fontsLoaded] = useFonts({
+        IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
+    })
+    if (!fontsLoaded) {
+        return null
+    }
 
-  const togglePlay = () => {
-    changeIsPlaying(!isPlaying)
-  }
+    const formatTime = (value) => {
+        const totalSeconds = value / 1000
+        const minutes = Math.floor(totalSeconds / 60)
+        const seconds = Math.round(totalSeconds % 60)
+        return `${minutes.toString().padStart(2, '0')}:${seconds
+            .toString()
+            .padStart(2, '0')}`
+    }
 
-  return (
-    <View style={styles.container}>
-      {/* SLIDER */}
-      <Slider
-        style={{ width: 350, height: 40, marginBottom: -5 }}
-        minimumValue={0}
-        maximumValue={1}
-        value={range}
-        onValueChange={(value) => setRange(value)}
-        minimumTrackTintColor='#FFFFFF'
-        maximumTrackTintColor='#777777'
-        thumbTintColor='#FFF'
-      />
+    const togglePlay = () => {
+        changeIsPlaying(!isPlaying)
+    }
 
-      {/* NUMBERS */}
-      <View style={styles.progress}>
-        <Text style={styles.text}>{formatTime(range)}</Text>
-        <Text style={styles.text}>{formatTime(1)}</Text>
-      </View>
+    const handleSlider = async (value) => {
+        changePosition(value)
+        await soundObject.setPositionAsync(value)
+    }
 
-      {/* CONTROLS */}
-      <View style={styles.controls}>
-        <TouchableOpacity>
-          <Icon style={styles.icon} name='shuffle' size={25} />
-        </TouchableOpacity>
+    return (
+        <View style={styles.container}>
+            {/* SLIDER */}
+            <Slider
+                style={{ width: 350, height: 40, marginBottom: -5 }}
+                minimumValue={0}
+                maximumValue={duration}
+                value={localPosition}
+                onValueChange={(value) => setLocalPosition(value)}
+                onSlidingComplete={(value) => handleSlider(value)}
+                minimumTrackTintColor='#FFFFFF'
+                maximumTrackTintColor='#777777'
+                thumbTintColor='#FFF'
+            />
 
-        <TouchableOpacity>
-          <Icon style={styles.icon} name='back' size={30} />
-        </TouchableOpacity>
+            {/* NUMBERS */}
+            <View style={styles.progress}>
+                <Text style={styles.text}>{formatTime(localPosition)}</Text>
+                <Text style={styles.text}>{formatTime(duration)}</Text>
+            </View>
 
-        <TouchableOpacity onPress={togglePlay}>
-          <Icon
-            style={styles.icon}
-            name={isPlaying ? 'pause' : 'play'} // Set the name based on the state
-            size={65}
-          />
-        </TouchableOpacity>
+            {/* CONTROLS */}
+            <View style={styles.controls}>
+                <TouchableOpacity>
+                    <Icon style={styles.icon} name='shuffle' size={25} />
+                </TouchableOpacity>
 
-        <TouchableOpacity>
-          <Icon style={[styles.icon, styles.rot]} name='back' size={30} />
-        </TouchableOpacity>
+                <TouchableOpacity>
+                    <Icon style={styles.icon} name='back' size={30} />
+                </TouchableOpacity>
 
-        <TouchableOpacity>
-          <Icon style={[styles.icon, styles.rot]} name='repeat' size={25} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  )
+                <TouchableOpacity onPress={togglePlay}>
+                    <Icon
+                        style={styles.icon}
+                        name={isPlaying ? 'pause' : 'play'} // Set the name based on the state
+                        size={65}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity>
+                    <Icon
+                        style={[styles.icon, styles.rot]}
+                        name='back'
+                        size={30}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity>
+                    <Icon
+                        style={[styles.icon, styles.rot]}
+                        name='repeat'
+                        size={25}
+                    />
+                </TouchableOpacity>
+            </View>
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingBottom: 10,
-  },
-  progress: {
-    width: 350,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  text: {
-    color: '#B2B2B2',
-    fontSize: 12,
-  },
-  controls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 10,
-    paddingBottom: 35,
-    paddingTop: 20,
-  },
-  icon: {
-    color: '#FFF',
-  },
-  rot: {
-    transform: [{ rotateY: '180deg' }],
-  },
+    container: {
+        flex: 1,
+        paddingBottom: 10,
+    },
+    progress: {
+        width: 350,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    text: {
+        color: '#B2B2B2',
+        fontSize: 12,
+    },
+    controls: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 10,
+        paddingBottom: 35,
+        paddingTop: 20,
+    },
+    icon: {
+        color: '#FFF',
+    },
+    rot: {
+        transform: [{ rotateY: '180deg' }],
+    },
 })

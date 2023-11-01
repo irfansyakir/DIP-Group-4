@@ -1,10 +1,14 @@
 import { Button } from '@rneui/themed'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useQueueStore } from '../../Store/useQueueStore'
 import { useSpotifyAuthenticate } from '../../Utilities/SpotifyApi/useSpotifyAuthenticate'
-import { useEffect, useState, useRef } from 'react';
-import { GetCurrentUserProfile} from '../../Utilities/SpotifyApi/Utils'
+import { useEffect, useState, useRef } from 'react'
+import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
+import { BoldText } from '../../Commons/UI/styledText'
+import { Box } from '@rneui/layout'
+import { LinearGradient } from 'expo-linear-gradient'
+import { View, Image } from 'react-native'
+import { COLORS } from '../../Constants'
 import { GetQueue } from '../../Utilities/SpotifyApi/Utils'
 import {
   userQueue_getQueue,
@@ -54,7 +58,7 @@ export const Login = () => {
         console.log('User Queue:', currQueue)
 
         userQueue_updateQueue({
-            userID: userId, 
+            userID: userId,
             userQueueList: currQueue,
         })
 
@@ -70,55 +74,85 @@ export const Login = () => {
   // - update isLoggedIn state => changeIsLoggedIn(true)
   // optional: add 'you're being redirected to spotify' page, 'failed login' page
 
-  return (
-    <SafeAreaView
-      style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-    >
-      <Button
-        title='Dummy Login'
-        onPress={() => changeIsLoggedIn(true)}
-        loadingProps={{ size: 'small', color: 'white' }}
-        buttonStyle={{
-          backgroundColor: 'rgba(111, 202, 186, 1)',
-          borderRadius: 5,
-        }}
-        titleStyle={{ fontWeight: 'bold', fontSize: 23 }}
-        containerStyle={{
-          marginHorizontal: 100,
-          height: 50,
-          width: 200,
-          marginVertical: 10,
-        }}
-      />
-
-      <Button
-        title='SpotifyLogin'
-        onPress={() => {
-          apiLogin().then(() => {
-            userQueue_getQueue({userID: userId}).then(checkQueue => {
-              if (checkQueue) {
-                changeQueue(checkQueue)
-                console.log('queue from firebase')
-              } else {
-                getQueue()
-                console.log('queue from API')
-              }
-            });  
-          })
-        }}
-        loadingProps={{ size: 'small', color: 'white' }}
-        buttonStyle={{
-          backgroundColor: 'rgba(111, 202, 186, 1)',
-          borderRadius: 5,
-        }}
-        titleStyle={{ fontWeight: 'bold', fontSize: 23 }}
-        containerStyle={{
-          marginHorizontal: 100,
-          height: 50,
-          width: 200,
-          marginVertical: 10,
-        }}
-      />
-    </SafeAreaView>
-  )
+    return (
+        <View
+            style={{
+                flex: 1,
+            }}
+        >
+            <LinearGradient
+                colors={['#13151E', '#41BBC4']}
+                start={{ x: 0, y: 1 }}
+                end={{ x: 1, y: 0 }}
+                locations={[0.6, 1]}
+                style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}
+            >
+                <Image
+                    style={{
+                        resizeMode: 'contain',
+                        position: 'absolute',
+                        left: 0,
+                        bottom: 0,
+                    }}
+                    source={require('../../../assets/loginIllustration.png')}
+                />
+                <Box
+                    style={{
+                        display: 'flex',
+                        flex: 1,
+                        padding: 'auto',
+                        alignItems: 'center',
+                        marginTop: 100,
+                    }}
+                >
+                    <BoldText style={{ fontSize: 24, color: 'white' }}>
+                        Share & Discover.
+                    </BoldText>
+                    <BoldText style={{ fontSize: 24, color: 'white' }}>
+                        Only on JamStream.
+                    </BoldText>
+                </Box>
+            </LinearGradient>
+            <Button
+                title='Log in'
+                onPress={() => {
+                    apiLogin().then(() => {
+                      userQueue_getQueue({userID: userId}).then(checkQueue => {
+                        if (checkQueue) {
+                          changeQueue(checkQueue)
+                          console.log('queue from firebase')
+                        } else {
+                          getQueue()
+                          console.log('queue from API')
+                        }
+                      });
+                    })
+                }}
+                buttonStyle={{
+                    backgroundColor: COLORS.primary,
+                    borderRadius: 20,
+                    margin: 50,
+                    paddingVertical: 10,
+                }}
+                titleStyle={{
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    color: COLORS.dark,
+                }}
+                containerStyle={{
+                    width: '100%',
+                    position: 'absolute',
+                    bottom: 100,
+                    left: 0,
+                    shadowColor: '#0ff',
+                    shadowOpacity: 0.2,
+                    shadowRadius: 10,
+                }}
+            />
+        </View>
+    )
 }
