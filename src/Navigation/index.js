@@ -21,6 +21,7 @@ import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 import { Queue } from '../Screens/Queue'
 import { Chatroom } from '../Screens/RadioRooms/Components/Chatroom'
 import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
+import { RadioRoomQueue } from '../Screens/RadioRooms/Components/RadioRoomQueue'
 
 // Track
 import { Track } from '../Commons/Track/track'
@@ -130,6 +131,7 @@ function RadioRoomStackNavigator(){
     <RadioRoomStack.Navigator screenOptions={{ headerShown: false }}>
       <RadioRoomStack.Screen name='RadioRoom' component={RadioRooms} />
       <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
+      <RadioRoomStack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
       <RadioRoomStack.Screen name='Track' component={Track} />
       <RadioRoomStack.Screen name='Playlist' component={Playlist} />
     </RadioRoomStack.Navigator>
@@ -158,6 +160,7 @@ export const Navigation = () => {
             <Stack.Screen name='Chatroom' component={Chatroom} />
             <Stack.Screen name='CreateRoom' component={CreateRoom} />
             <Stack.Screen name='Track' component={Track} />
+            <Stack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />

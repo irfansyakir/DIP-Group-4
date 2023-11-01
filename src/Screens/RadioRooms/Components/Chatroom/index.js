@@ -20,6 +20,7 @@ import { message_getMessage } from '../../../../Utilities/Firebase/messages_func
 import {useMessageListener} from '../../../../Utilities/Firebase/useFirebaseListener';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {room_getRoom} from '../../../../Utilities/Firebase/room_functions';
+import { useNavigation } from "@react-navigation/native";
 
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
@@ -116,9 +117,9 @@ export const Chatroom = ({route, navigation}) => {
   }, [username, chatRefresh])
 
 
-  const handleButtonPress = () => {
+  const goToRoomQueue = () => {
     // Handle button press action here for the view queue button
-
+    navigation.navigate('RadioRoomQueue');
   };
 
   const sendMessage = () => {
@@ -183,15 +184,14 @@ export const Chatroom = ({route, navigation}) => {
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
             <Text style={styles.roomName}>{roomName}</Text>
           </View>
-          <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
+          <TouchableOpacity style={styles.viewQueueBtn} onPress={goToRoomQueue}>
             <Text style={styles.buttonText}>View Queue</Text>
           </TouchableOpacity>
         </View>
 
-        {/*disabled for now.*/}
-        {/*<View style={styles.musicPlayer}>*/}
-        {/*  <Text>Music Player</Text>*/}
-        {/*</View>*/}
+        <View style={styles.musicPlayer}>
+         <Text>Music Player</Text>
+        </View>
 
         <View style={styles.roomCodeView}>
           <Text style={styles.roomCodeTitle}>Room Code</Text>
