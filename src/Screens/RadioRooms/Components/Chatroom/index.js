@@ -188,10 +188,10 @@ export const Chatroom = ({route, navigation}) => {
           </TouchableOpacity>
         </View>
 
-
-        <View style={styles.musicPlayer}>
-          <Text>Music Player</Text>
-        </View>
+        {/*disabled for now.*/}
+        {/*<View style={styles.musicPlayer}>*/}
+        {/*  <Text>Music Player</Text>*/}
+        {/*</View>*/}
 
         <View style={styles.roomCodeView}>
           <Text style={styles.roomCodeTitle}>Room Code</Text>
@@ -326,6 +326,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginLeft: 22,
     marginRight: 22,
+    marginBottom: '30%',
     paddingLeft: 10, // Add some left padding for the text input
   },
   background: {
