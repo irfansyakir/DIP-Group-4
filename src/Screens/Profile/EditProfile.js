@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
 import {
     StyleSheet,
     Text,
@@ -12,43 +13,93 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useProfileStore } from '../../Store/useProfileStore'
 import { useMusicStore } from '../../Store/useMusicStore'
+import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 
 export const EditProfile = () => {
     const [text, onChangeText] = React.useState('')
     const navigation = useNavigation() // Initialize navigation
     const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
+    const changeDisplayName = useProfileStore(
+        (state) => state.changeDisplayName
+    )
+    const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
+    const storeDisplayName = useProfileStore((state) => state.displayName)
+    const storeProfileUrl = useProfileStore((state) => state.profileUrl)
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
-    const showMessage = () => {
-        const customMessage = 'You are about to leave the page.'
-        Alert.alert(
-            'Save Changes?',
-            customMessage, // Set your custom message here
-            [
-                {
-                    text: 'Yes',
-                    onPress: () => navigation.navigate('ProfileTab'),
-                },
-                {
-                    text: 'Cancel',
-                    onPress: () => console.log('No Pressed'),
-                },
-            ],
-            { cancelable: true }
-        )
-    }
+    // managing state for playlist
+    const [displayName, setDisplayName] = useState('')
+    const [profileUrl, setProfileUrl] = useState('')
+
     const handleButtonClick = () => {
-        navigation.navigate('Profile')
+        navigation.navigate('ProfileTab')
     }
+
+    //const handleProfileImageClick = () => {
+    //  changeProfileUrl(profileUrl)
+    //  console.log('saved ' + profileUrl)
+    //  navigation.navigate('ProfileTab')
+    //}
+
+    const handleProfileImageClick = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        })
+        if (!result.canceled) {
+            setProfileUrl(result.assets[0].uri)
+        }
+    }
+
     const handleContainerClick = () => {
-        // Navigate to "YourNewPage" screen when the container is clicked
-        // navigation.navigate('Home');
         if (soundObject) {
             soundObject.unloadAsync()
             changeSoundObject(null)
         }
         changeIsLoggedIn(false)
+        // Navigate to "YourNewPage" screen when the container is clicked
+        // navigation.navigate('Home');
+    }
+
+    const handleSaveChangesClick = () => {
+        changeDisplayName(displayName)
+        changeProfileUrl(profileUrl)
+        navigation.navigate('ProfileTab')
+    }
+    // retrieve state data from stores
+    const accessToken = useAuthStore((state) => state.accessToken)
+
+    const getInitialProfileData = async () => {
+        // fetch data on load
+        try {
+            const profileData = await GetCurrentUserProfile({
+                accessToken: accessToken,
+            })
+            if (storeDisplayName == profileData.display_name) {
+                setDisplayName(profileData.display_name)
+            } else {
+                setDisplayName(storeDisplayName)
+            }
+            if (storeProfileUrl == profileData.profileUrl) {
+                setProfileUrl(profileData.images[1].url)
+            } else {
+                setProfileUrl(storeProfileUrl)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    useEffect(() => {
+        getInitialProfileData()
+    }, [])
+
+    let callFunction = (e) => {
+        setDisplayName(e)
     }
 
     return (
@@ -63,7 +114,7 @@ export const EditProfile = () => {
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.buttonBack}
-                    onPress={showMessage}
+                    onPress={handleButtonClick}
                 >
                     <Image
                         style={styles.backImage}
@@ -75,16 +126,16 @@ export const EditProfile = () => {
             </View>
             <View style={styles.body}>
                 <ScrollView>
-                    <Text style={styles.nameText}>maya</Text>
+                    <Text style={styles.nameText}>{displayName}</Text>
                     <Image
                         style={styles.profileImage}
-                        source={require('../../../assets/image-3.png')}
+                        source={profileUrl}
                         contentFit={'fill'}
                     />
                     <View>
                         <TouchableOpacity
                             style={styles.button}
-                            onPress={handleButtonClick}
+                            onPress={handleProfileImageClick}
                         >
                             <Text style={styles.buttonText}>Change photo</Text>
                         </TouchableOpacity>
@@ -92,11 +143,17 @@ export const EditProfile = () => {
                     <Text style={styles.boldText}>Edit username</Text>
                     <TextInput
                         style={styles.input}
-                        onChangeText={onChangeText}
-                        value={text}
-                        placeholder='Type a username...'
+                        onChangeText={callFunction}
+                        value={displayName}
+                        placeholder='Type a new username...'
                     />
                     <View>
+                        <TouchableOpacity
+                            style={styles.buttonLogout}
+                            onPress={handleSaveChangesClick}
+                        >
+                            <Text style={styles.buttonText}>Save Changes</Text>
+                        </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.buttonLogout}
                             onPress={handleContainerClick}
@@ -162,7 +219,7 @@ const styles = StyleSheet.create({
     nameText: {
         fontWeight: 'bold',
         color: 'white',
-        fontSize: 50,
+        fontSize: 36,
         alignSelf: 'center',
     },
     profileText: {
@@ -171,7 +228,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         paddingTop: 10,
         paddingBottom: 10,
-        marginLeft: 100,
+        marginLeft: 110,
     },
 
     input: {
