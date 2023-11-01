@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react'
 import {
-  StyleSheet,
   Text,
   View,
   Image,
@@ -12,6 +11,9 @@ import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import { Play } from './play'
 import { useMusicStore } from '../../Store/useMusicStore'
+import { BackgroundImage } from '@rneui/base'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { COLORS } from '../../Constants'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -20,6 +22,7 @@ const Icon = createIconSetFromIcoMoon(
 )
 
 export const Track = ({ navigation }) => {
+  const insets = useSafeAreaInsets()
   const songInfo = useMusicStore((state) => state.songInfo)
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
   useEffect(() => {
@@ -35,55 +38,126 @@ export const Track = ({ navigation }) => {
   }
 
 
-
   return (
-    <View style={styles.container}>
+    <View style={{
+      flex: 1,
+      backgroundColor: COLORS.dark,
+    }}>
+      <BackgroundImage style={{flex:1}} src={songInfo.coverUrl} blurRadius={90}>
       <LinearGradient
-        colors={['#121212', '#5C4C3F', '#9A7E66']}
+        colors={['#121212', 'transparent']}
         start={{ x: 0, y: 1 }}
         end={{ x: 0, y: 0 }}
-        locations={[0.6, 0.8, 1]}
-        style={styles.linearGradient}
+        locations={[0.3, 1]}
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          }}
       >
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{alignItems:'center',paddingTop: insets.top,}}>
           {/* TOP BAR */}
-          <View style={styles.topbar}>
+          <View style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            height: 'auto',
+            width: '90%',
+            marginTop: 15,}}
+          >
             <TouchableOpacity
               onPress={() => {
                 changeCurrentPage(navigation.pop())
               }}
             >
-              <Icon style={styles.icon} name='down' size={20} />
+              <Icon style={{color: '#FFF'}} name='down' size={20} />
             </TouchableOpacity>
 
-            <Text style={styles.headtxt}>{songInfo.songAlbum}</Text>
+            <Text style={{color: '#FFF',
+              /* Heading 3 */
+              fontSize: 14,
+              fontWeight: 'bold',
+              width: 250,
+              textAlign: 'center',
+              textShadowColor: COLORS.dark,
+              textShadowOffset: {height: 1},
+              textShadowRadius: 3,
+              maxHeight: 30,}}>{songInfo.songAlbum}</Text>
 
-            <TouchableOpacity onPress={() => console.log('more')}>
-              <Icon style={styles.icon} name='more' size={25} />
+            <TouchableOpacity 
+              onPress={() => {
+                changeCurrentPage(navigation.navigate('SearchClick'))
+              }}
+            >
+              <Icon style={{color: '#FFF'}} name='more' size={25} />
             </TouchableOpacity>
           </View>
 
-          <Image style={styles.img} src={songInfo.coverUrl} />
+          <Image 
+          style={{
+            width: '90%',
+            aspectRatio: 1,
+            borderRadius: 10,
+            marginTop: 20,}} 
+            src={songInfo.coverUrl} />
 
-          <View style={styles.midbar}>
+          {/* TITLE, DESC, QUEUE BUTTON */}
+          <View style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: 350,}}
+          >
             <View>
-              <Text style={styles.title}>{songInfo.songTitle}</Text>
-              <Text style={styles.desc}>{songInfo.songArtist}</Text>
+              <Text style={{
+                color: '#FFF',
+                marginTop: 30,
+                /* Heading 1 */
+                fontSize: 25,
+                fontWeight: 'bold',}}>{songInfo.songTitle}</Text>
+              <Text style={{
+                color: '#B3B3B3',
+                marginTop: 5,
+                marginBottom: 7,
+                /* Body 3 */
+                fontSize: 15,}}>{songInfo.songArtist}</Text>
             </View>
             <TouchableOpacity onPress={() => console.log('queue')}>
               <Icon
-                style={[styles.icon, styles.marg]}
+                style={{
+                  color: '#FFF',
+                  marginRight: 10,
+                  marginTop: 15,}}
                 name='viewqueue'
                 size={33}
               />
             </TouchableOpacity>
           </View>
-
+          
+          {/* SLIDER, PLAY BUTTON */}
           <Play />
 
-          <View style={styles.lyrics}>
-            <Text style={styles.lyrhead}>Lyrics</Text>
-            <Text style={styles.text}>
+          {/* LYRICS */}
+          <View style={{
+            height: 'auto',
+            width: '95%',
+            backgroundColor: '#333',
+            borderRadius: 10,
+            padding: 30,
+            paddingBottom: 40,
+            marginBottom: 100,}}
+          >
+            <Text style={{
+              color: '#FFF',
+              /* Heading 2 */
+              fontSize: 17,
+              fontWeight: 'bold',}}>Lyrics</Text>
+            <Text style={{
+              color: '#FFF',
+              fontSize: 16,
+              marginTop: 25,
+              lineHeight: 25,}}
+            >
               "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
               enim ad minim veniam, quis nostrud exercitation ullamco laboris
@@ -95,91 +169,7 @@ export const Track = ({ navigation }) => {
           </View>
         </ScrollView>
       </LinearGradient>
+      </BackgroundImage>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  linearGradient: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  icon: {
-    color: '#FFF',
-  },
-
-  img: {
-    width: 350,
-    height: 350,
-    borderRadius: 10,
-    marginTop: 20,
-  },
-
-  midbar: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: 350,
-  },
-  title: {
-    color: '#FFF',
-    marginTop: 30,
-    /* Heading 1 */
-    fontSize: 25,
-    fontWeight: 'bold',
-  },
-  desc: {
-    color: '#B3B3B3',
-    marginTop: 5,
-    marginBottom: 7,
-    /* Body 3 */
-    fontSize: 15,
-  },
-  marg: {
-    marginRight: 10,
-    marginTop: 15,
-  },
-
-  lyrics: {
-    height: 'auto',
-    width: 350,
-    backgroundColor: '#665959',
-    borderRadius: 10,
-    padding: 30,
-    paddingBottom: 40,
-    marginBottom: 100,
-  },
-  lyrhead: {
-    color: '#FFF',
-    /* Heading 2 */
-    fontSize: 17,
-    fontWeight: 'bold',
-  },
-  text: {
-    color: '#FFF',
-    fontSize: 16,
-    marginTop: 25,
-    lineHeight: 25,
-  },
-  topbar: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    height: 'auto',
-    width: 350,
-    marginTop: 60,
-  },
-  headtxt: {
-    color: '#FFF',
-    /* Heading 3 */
-    fontSize: 14,
-    fontWeight: 'bold',
-    width: 250,
-    textAlign: 'center',
-    maxHeight: 30,
-  },
-})

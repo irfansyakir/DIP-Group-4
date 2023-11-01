@@ -138,7 +138,7 @@ export const SearchClick = () => {
         <Image style={styles.img} src={item.coverUrl} />
         <View>
           {/* TITLE AND ARTIST */}
-          <Text style={{ color: '#FFF', fontSize: SIZES.medium }}>
+          <Text numberOfLines={1} ellipsizeMode='tail' style={{color:'#FFF', width: 280, fontSize: SIZES.medium,}}>
             {item.title}
           </Text>
           <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
