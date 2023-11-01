@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from 'react';
+import {child, get, update, push} from "firebase/database";
+import {dbRef} from "../../../../../firebaseConfig";
 //import { Image } from 'expo-image';
 import { Image, Text, View, TextInput, Button, 
     StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
@@ -16,20 +18,27 @@ import {Stack} from "@rneui/layout";
 export const CreateRoom = ()=> {
     
     const [selectedIndex, setIndex] = React.useState(0);
-    const [roomName, onChangeText] = React.useState();
-    const [roomDescription, onChangeText2] = React.useState();
+    const [roomName, setRoomName] = useState('');
+    const [roomDescription, setRoomDescription] = useState('');
     const navigation = useNavigation(); // Initialize navigation
 
     const handleStartListening = () => {
-        if (roomName.trim() !== '') {
+        console.log(roomName)
+        if (roomName != '') {
             console.log('creating room: ' + roomName);
+            console.log(roomDescription, isPublic);
+            const roomID = push(child(dbRef, `/rooms`)).key;
             room_updateRoom({
+                roomID: roomID,
                 roomName: roomName,
+                roomDescription: roomDescription,
                 isPublic: isPublic,
             });
-            navigation.navigate('Chatroom');
+            navigation.navigate('Chatroom', {
+                roomID: roomID,
+            })
         } else {
-            console.log('no room name!')
+            console.log('no room name!');
         }
     }
 
@@ -37,15 +46,27 @@ export const CreateRoom = ()=> {
         if (isPublic) {
             isPublic = false;
             console.log('isPublic is false!')
+            //() => setIndex(0);
         } else {
             isPublic = true;
             console.log('isPublic is true!')
+            //() => setIndex(1);
         }
     }
 
     useEffect(() => {
+        console.log('hello')
         isPublic = true;
+        console.log(isPublic)
     }, [])
+
+    let callNameFunction = (e) => {
+        setRoomName(e)
+    }
+
+    let callDescFunction = (e) => {
+        setRoomDescription(e)
+    }
   /*  const showMessage = () => {
         const customMessage = "You are about to leave the page.";
         Alert.alert(
@@ -81,20 +102,21 @@ export const CreateRoom = ()=> {
                 <Image
                     source={clouds} />
                 <Image
-                  source={palmTrees} />
+                    source={palmTrees} />
                 <Image
-                  source={raindrops} />
+                    source={raindrops} />
                 <Text style={styles.subtitle}>Room Name</Text>
                 <TextInput
                     style={styles.input}
-                    
                     value={roomName}
+                    onChangeText={callNameFunction}
                     placeholder="Type a room name..."
                 />
                 <Text style={styles.subtitle}>Room Description</Text>
                 <TextInput
                     style={styles.input}
                     value={roomDescription}
+                    onChangeText={callDescFunction}
                     placeholder="Type a room description..."
                 />
                 <Text style={styles.subtitle}>Settings</Text>
@@ -102,7 +124,7 @@ export const CreateRoom = ()=> {
                 <Stack row align="right" spacing={2}>
                     <CheckBox
                     checked={selectedIndex === 0}
-                    onPress={[setIsPublic, () => setIndex(1)]}
+                    onPress={setIsPublic}
                     iconType="material-community"
                     checkedIcon="radiobox-marked"
                     uncheckedIcon="radiobox-blank"
@@ -112,7 +134,7 @@ export const CreateRoom = ()=> {
                 <Stack row align="right" spacing={2}>
                     <CheckBox
                     checked={selectedIndex === 1}
-                    onPress={[setIsPublic, () => setIndex(0)]}
+                    onPress={setIsPublic}
                     iconType="material-community"
                     checkedIcon="radiobox-marked"
                     uncheckedIcon="radiobox-blank"

@@ -40,7 +40,7 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
       updates[`/rooms/${newRoomId}/djList`] = djList
     }
     if(isPublic){
-      updates[`/rooms/${roomID}/isPublic`] = isPublic
+      updates[`/rooms/${newRoomId}/isPublic`] = isPublic
     }
   }
 
