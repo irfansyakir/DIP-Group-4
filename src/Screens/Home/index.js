@@ -14,13 +14,19 @@ import {
 import { AntDesign } from '@expo/vector-icons'
 import { GetRecentlyPlayed } from '../../Utilities/SpotifyApi/Utils'
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
+import { GetQueue } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 import { useNavigation } from '@react-navigation/native' // Import useNavigation
 import { useMusicStore } from '../../Store/useMusicStore'
+import { useQueueStore } from '../../Store/useQueueStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
 import { debounce } from '../../Utilities/Functions/debounce'
+import {
+  userQueue_getQueue,
+  userQueue_updateQueue,
+} from '../../Utilities/Firebase/user_queue_functions'
 
 //Danish's Home Page
 //Needs testing first
@@ -38,13 +44,16 @@ export const Home = () => {
     const accessToken = useAuthStore((state) => state.accessToken)
     const [recentlyPlayed, setRecentlyPlayed] = useState([])
     const [playlists, setPlaylists] = useState([])
-    const changeUserId = useAuthStore((state) => state.changeUserId)
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const navigation = useNavigation()
+
+    const [userId, setUserId] = useState()
+    const changeUserId = useAuthStore((state) => state.changeUserId)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
 
     const handleTrackClick = (trackId) => {
         const createSoundObject = async (uri) => {
@@ -124,24 +133,77 @@ export const Home = () => {
     }
 
     const getUserID = async () => {
-        try {
-            const userProfileData = await GetCurrentUserProfile({
-                accessToken: accessToken,
-            })
+      try {
+          const userProfileData = await GetCurrentUserProfile({
+              accessToken: accessToken,
+          })
 
-        const currUserId = userProfileData.id
-        changeUserId(currUserId)
-        // console.log('User ID:', currUserId)
-    } catch (error) {
-      console.error(error)
+          const currUserId = userProfileData.id
+          changeUserId(currUserId)
+          setUserId(currUserId)
+      } catch (error) {
+          console.error(error)   
+      }
+    } 
+
+      // Getting queue from API and saving in queueStore
+    const getQueue = async () => {
+      const currQueue = []
+
+      try {
+          const queueData = await GetQueue({
+              accessToken: accessToken,
+          })
+
+          if(queueData.currently_playing){
+              const artistNames = queueData.currently_playing.artists.map(artist => artist.name).join(', ');
+              const currPlaying = {
+                  id: queueData.currently_playing.id,
+                  title: queueData.currently_playing.name,
+                  artist: artistNames,
+                  img: queueData.currently_playing.album.images[0].url
+              };
+              console.log(currPlaying.title)
+
+              await queueData.queue.map((curr) => {
+              const queueArtistNames = curr.artists.map(artist => artist.name).join(', ');
+
+              currQueue.push({
+                  id: curr.id,
+                  title: curr.name,
+                  artist: queueArtistNames,
+                  })
+              })
+          }
+          changeQueue(currQueue)
+
+          userQueue_updateQueue({
+              userID: userId,
+              userQueueList: currQueue,
+          })
+
+      } catch (error) {
+        console.error(error)
+      }
     }
-  } 
 
     useEffect(() => {
         getRecentlyPlayed()
         getPlaylistData()
-        getUserID()
+        getUserID()        
     }, [])
+
+    useEffect(() => {
+      if (userId) {
+        userQueue_getQueue({userID: userId}).then(checkQueue => {
+          if (checkQueue) {
+            changeQueue(checkQueue)
+          } else {
+            getQueue()
+          }
+        });
+      }
+    }, [userId])
 
     return (
         <View

@@ -6,6 +6,7 @@ import {
   GetUserPlaylists,
 } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useQueueStore } from '../../Store/useQueueStore'
 import { useNavigation } from '@react-navigation/native'
 import {
   current_track_updateCurrentTrack,
@@ -20,6 +21,7 @@ import {
 export const TestAPI = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const signOut = useAuthStore((state) => state.signOut)
+  const delStoreQueue = useQueueStore((state) => state.delStoreQueue)
 
   const navigation = useNavigation() // Initialize navigation
 
@@ -86,7 +88,7 @@ export const TestAPI = () => {
       >
         Go to Playlist
       </Button>
-      <Button title={'Log Out'} onPress={signOut} />
+      <Button title={'Log Out'} onPress={() => {signOut(); delStoreQueue()}} />
       <Button
         onPress={() => {
           navigation.navigate('Chatroom')
