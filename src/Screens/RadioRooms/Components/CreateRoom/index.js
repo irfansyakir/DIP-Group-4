@@ -36,8 +36,10 @@ export const CreateRoom = ()=> {
     const setIsPublic = () => {
         if (isPublic) {
             isPublic = false;
+            console.log('isPublic is false!')
         } else {
             isPublic = true;
+            console.log('isPublic is true!')
         }
     }
 
@@ -100,7 +102,7 @@ export const CreateRoom = ()=> {
                 <Stack row align="right" spacing={2}>
                     <CheckBox
                     checked={selectedIndex === 0}
-                    onPress={() => setIndex(1)}
+                    onPress={[setIsPublic, () => setIndex(1)]}
                     iconType="material-community"
                     checkedIcon="radiobox-marked"
                     uncheckedIcon="radiobox-blank"
