@@ -11,15 +11,15 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useAuthStore } from '../../Store/useAuthStore'
+import { useAuthStore } from '../../../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
 import background from './background.jpg';
-import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
-import { message_setMessage } from '../../Utilities/Firebase/messages_functions'
-import { message_getMessage } from '../../Utilities/Firebase/messages_functions';
-import {useMessageListener} from '../../Utilities/Firebase/useFirebaseListener';
+import { GetCurrentUserProfile } from '../../../../Utilities/SpotifyApi/Utils'
+import { message_setMessage } from '../../../../Utilities/Firebase/messages_functions'
+import { message_getMessage } from '../../../../Utilities/Firebase/messages_functions';
+import {useMessageListener} from '../../../../Utilities/Firebase/useFirebaseListener';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import {room_getRoom} from '../../Utilities/Firebase/room_functions';
+import {room_getRoom} from '../../../../Utilities/Firebase/room_functions';
 
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
@@ -45,16 +45,16 @@ export const Chatroom = ({route, navigation}) => {
     }
   }
 
-  const getRoomDetails = async () => { 
+  const getRoomDetails = async () => {
     const roomDetails = await room_getRoom({roomID: roomID});
     console.log('Room Name: '+ roomDetails["room_name"]);
     setRoomName(roomDetails["room_name"]);
   }
 
-  const getMessages = async () => { 
+  const getMessages = async () => {
     // fetch messages from firebase
     try {
-      const messages = await message_getMessage({roomId:roomID});
+      const messages = await message_getMessage({roomID:roomID});
       const newMessagesArray = [];
       let id = 0;
 
@@ -68,23 +68,23 @@ export const Chatroom = ({route, navigation}) => {
         // if the message's sender's username is the same as the current user's username,
         // the chat bubble will be on the right side
         if (obj.username != username) {
-            right = false;
+          right = false;
         }
-      
+
         const newMessage = {
           text: obj.message,
-          id: id++,        
+          id: id++,
           timestamp: formattedTime,
           right: right,
           username: obj.username,
         }
 
 
-        newMessagesArray.push(newMessage);   
+        newMessagesArray.push(newMessage);
       })
 
       setChatMessages(newMessagesArray);
-      
+
     } catch (error) {
       console.error("Error while getting messages:", error);
     }
@@ -95,10 +95,10 @@ export const Chatroom = ({route, navigation}) => {
     console.log('RoomID: ' + roomID);
     getInitialProfileData();
     getRoomDetails();
-    
+
   }, [])
 
- 
+
 
 
   // Use useEffect to scroll to the bottom when chatMessages change
@@ -118,18 +118,18 @@ export const Chatroom = ({route, navigation}) => {
 
   const handleButtonPress = () => {
     // Handle button press action here for the view queue button
-    
+
   };
 
   const sendMessage = () => {
     if (message.trim() !== '') {
-      
+
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, '0');
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const currentTime = `${hours}:${minutes}`;
       const right = true;
-      
+
       const newMessage = {
         text: message,
         id: chatMessages.length.toString(),
@@ -143,10 +143,10 @@ export const Chatroom = ({route, navigation}) => {
 
       console.log('sending message: ' + message);
       message_setMessage( {
-          roomId: roomID,
-          username: username,
-          message: message,
-          timestamp: now.getTime(),
+        roomID: roomID,
+        username: username,
+        message: message,
+        timestamp: now.getTime(),
       });
 
       // Clear the input field
@@ -164,20 +164,20 @@ export const Chatroom = ({route, navigation}) => {
       style={{
         flexDirection: 'column',
         alignItems: 'center',
-        paddingTop: inset.top,  
+        paddingTop: inset.top,
       }}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
     >
-     <LinearGradient
-          colors={['#6369D1', '#42559E', '#101010']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          locations={[0, 0.3, 0.6]}
-          style={styles.background}
-        />
-      
+      <LinearGradient
+        colors={['#6369D1', '#42559E', '#101010']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        locations={[0, 0.3, 0.6]}
+        style={styles.background}
+      />
+
       <View >
-        
+
 
         <View style={styles.topContainer}>
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
@@ -192,28 +192,28 @@ export const Chatroom = ({route, navigation}) => {
         <View style={styles.musicPlayer}>
           <Text>Music Player</Text>
         </View>
-        
+
         <View style={styles.roomCodeView}>
           <Text style={styles.roomCodeTitle}>Room Code</Text>
-            <View style={styles.roomCodeContainer}> 
-              <Text style={styles.roomCode}>{roomID}</Text>
-              <Text style={styles.numberListening}>237 LISTENING</Text>
-            </View>
+          <View style={styles.roomCodeContainer}>
+            <Text style={styles.roomCode}>{roomID}</Text>
+            <Text style={styles.numberListening}>237 LISTENING</Text>
+          </View>
         </View>
-        
+
         <ScrollView
           style={styles.chatbox} // Apply styles to the ScrollView
           ref={scrollViewRef} // Use the ref here
           keyboardShouldPersistTaps="handled"
         >
-          {chatMessages.map((messageItem) => (  
-            <MessageBubble 
-              key={messageItem.id} 
-              text={messageItem.text} 
+          {chatMessages.map((messageItem) => (
+            <MessageBubble
+              key={messageItem.id}
+              text={messageItem.text}
               timestamp={messageItem.timestamp}
-              right={messageItem.right} 
+              right={messageItem.right}
               username={messageItem.username}
-            />   
+            />
           ))}
         </ScrollView>
 
@@ -248,7 +248,6 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginLeft: 22,
     marginRight: 88,
-    fontWeight: 'bold',
   },
 
   viewQueueBtn: {
@@ -262,7 +261,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'black',
-    fontWeight: 'bold',
     fontSize: 16,
   },
   musicPlayer: {
@@ -293,7 +291,6 @@ const styles = StyleSheet.create({
   roomCodeTitle: {
     color: 'white',
     fontSize: 10,
-    fontWeight: 400,
     marginTop: 7,
     marginLeft: 16
   },
@@ -301,7 +298,6 @@ const styles = StyleSheet.create({
   roomCode: {
     fontSize: 20,
     color: 'white',
-    fontWeight: 700,
     marginTop: 4,
     marginLeft: 16
   },

@@ -464,7 +464,7 @@ export const RadioRooms = () => {
     <ScrollView style={styles.container}>
       <View style={styles.textContainer}>
         <Svg width="100%" height="100%">
-          <SvgText x="10" y="20" fontSize="25" fill="white" fontWeight="bold">
+          <SvgText x="10" y="20" fontSize="25" fill="white">
             RadioRooms
           </SvgText>
         </Svg>
@@ -479,7 +479,7 @@ export const RadioRooms = () => {
             y="27"
             fontSize="17"
             fill="black"
-            fontWeight="bold"
+            // fontWeight="bold"
             textAnchor="middle"
           >
             Create Room +
@@ -557,7 +557,7 @@ export const RadioRooms = () => {
                     y="60%"
                     fontSize="14"
                     fill={selectedRoom === item.id ? "black" : "black"}
-                    fontWeight="bold"
+                    // fontWeight="bold"
                     textAnchor="middle"
                   >
                     Join Room
@@ -610,7 +610,7 @@ const styles = StyleSheet.create({
     // position: "absolute",
     fontSize: 17,
     color: "white",
-    fontWeight: "bold",
+    // fontWeight: "bold",
     marginLeft: 10,
     marginTop: 120,
   },
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: "white",
-    fontWeight: "bold",
+    // fontWeight: "bold",
   },
   joinButton: {
     backgroundColor: "#41BBC4",
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
   },
   trackTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    // fontWeight: "bold",
     color: "white",
   },
   trackSubtitle: {

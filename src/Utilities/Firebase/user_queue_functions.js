@@ -10,7 +10,7 @@ export async function userQueue_updateQueue({userID, userQueueList = null}){
     updates[`/user_queue/${newUserID}`] = userQueueList
   }
   else{
-    updates[`/user_queue/${userID}`] = userQueueList 
+    updates[`/user_queue/${userID}`] = userQueueList
   }
 
   try {
@@ -22,7 +22,7 @@ export async function userQueue_updateQueue({userID, userQueueList = null}){
   }
 }
 export async function userQueue_getQueue({userID}){
-  if (!userID) {
+  if (userID === null) {
     throw new Error("userID is missing in userQueue_getQueue.");
   }
   try {
@@ -34,7 +34,7 @@ export async function userQueue_getQueue({userID}){
   }
 }
 export async function userQueue_removeQueue({userID}){
-  if (!userID) {
+  if (userID === null) {
     throw new Error("userID is missing in userQueue_removeQueue.");
   }
   const updates = {};

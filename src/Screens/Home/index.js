@@ -131,7 +131,7 @@ export const Home = () => {
 
         const currUserId = userProfileData.id
         changeUserId(currUserId)
-        console.log('User ID:', currUserId)
+        // console.log('User ID:', currUserId)
     } catch (error) {
       console.error(error)
     }

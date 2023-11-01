@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { NavigationContainer } from '@react-navigation/native'
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -20,7 +19,7 @@ import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 import { Queue } from '../Screens/Queue'
-import { Chatroom } from '../Screens/Chatroom'
+import { Chatroom } from '../Screens/RadioRooms/Components/Chatroom'
 import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
 
 // Track

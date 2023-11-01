@@ -5,7 +5,7 @@ import { useQueueStore } from '../../Store/useQueueStore'
 import { useSpotifyAuthenticate } from '../../Utilities/SpotifyApi/useSpotifyAuthenticate'
 import { useEffect, useState, useRef } from 'react';
 import { GetCurrentUserProfile} from '../../Utilities/SpotifyApi/Utils'
-import { GetQueue} from '../../Utilities/SpotifyApi/Utils'
+import { GetQueue } from '../../Utilities/SpotifyApi/Utils'
 import {
   userQueue_getQueue,
   userQueue_updateQueue,
@@ -21,31 +21,37 @@ export const Login = () => {
 
   // Getting queue from API and saving in queueStore
   const getQueue = async () => {
+    const currQueue = []
 
     try {
         const queueData = await GetQueue({
             accessToken: accessToken,
         })
 
-        const artistNames = await queueData.currently_playing.artists.map(artist => artist.name).join(', ');
-        const currPlaying = {
-            id: queueData.currently_playing.id,
-            title: queueData.currently_playing.name,
-            artist: artistNames,
-            img: queueData.currently_playing.album.images[0].url
-        };
+        // console.log('queue data:', queueData)
 
-        const currQueue = []
-        await queueData.queue.map((curr) => {
+        if(queueData.currently_playing){
+            const artistNames = queueData.currently_playing.artists.map(artist => artist.name).join(', ');
+            const currPlaying = {
+              id: queueData.currently_playing.id,
+              title: queueData.currently_playing.name,
+              artist: artistNames,
+              img: queueData.currently_playing.album.images[0].url
+          };
+
+          await queueData.queue.map((curr) => {
             const queueArtistNames = curr.artists.map(artist => artist.name).join(', ');
 
             currQueue.push({
-                id: curr.id,
-                title: curr.name,
-                artist: queueArtistNames,
+              id: curr.id,
+              title: curr.name,
+              artist: queueArtistNames,
             })
-        })
+          })
+        }
         changeQueue(currQueue)
+        console.log('User ID:', userId)
+        console.log('User Queue:', currQueue)
 
         userQueue_updateQueue({
             userID: userId, 

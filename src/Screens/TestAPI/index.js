@@ -8,29 +8,9 @@ import {
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useNavigation } from '@react-navigation/native'
 import {
-  user_addToRoom,
-  user_getRooms,
-  user_removeFromRooms,
-  user_removeUser,
-} from '../../Utilities/Firebase/user_functions'
-import {
-  room_getRoom,
-  room_removeRoom,
-  room_updateRoom,
-} from '../../Utilities/Firebase/room_functions'
-import {
-  message_getMessage,
-  message_setMessage,
-} from '../../Utilities/Firebase/messages_functions'
-import {
-  current_track_getCurrentTrack,
   current_track_updateCurrentTrack,
 } from '../../Utilities/Firebase/current_track_functions'
 import { useEffect, useState } from 'react'
-import {
-  queue_getQueue,
-  queue_updateQueue,
-} from '../../Utilities/Firebase/queue_functions'
 import { useSpotifyRefresh } from '../../Utilities/SpotifyApi/useSpotifyAuthenticate'
 import {
   useIsCurrentTrackPlayingListener,

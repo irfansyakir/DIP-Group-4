@@ -1,8 +1,8 @@
 import {child, get, update, push} from "firebase/database";
 import {dbRef} from "../../../firebaseConfig"
 
-export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, djList}){
-  if (!roomID && !roomName && !last_message && !last_message_timestamp && !djList) {
+export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, djList, isPublic}){
+  if (roomID === null && roomName === null && last_message === null && last_message_timestamp === null && djList === null && isPublic === null) {
     throw new Error("One or more required parameters are missing or empty in room_updateRoom.");
   }
   const updates = {};
@@ -20,6 +20,9 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     if(djList){
       updates[`/rooms/${roomID}/djList`] = djList
     }
+    if(isPublic){
+      updates[`/rooms/${roomID}/isPublic`] = isPublic
+    }
   }
   else {
     const newRoomId = push(child(dbRef, `/rooms`)).key;
@@ -36,6 +39,9 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     if(djList){
       updates[`/rooms/${newRoomId}/djList`] = djList
     }
+    if(isPublic){
+      updates[`/rooms/${roomID}/isPublic`] = isPublic
+    }
   }
 
   try {
@@ -48,7 +54,7 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
 }
 
 export async function room_getRoom({roomID}){
-  if (!roomID) {
+  if (roomID === null) {
     throw new Error("roomId is missing in room_getRoom.");
   }
   try {
@@ -61,7 +67,7 @@ export async function room_getRoom({roomID}){
 }
 
 export async function room_removeRoom({roomID}){
-  if (!roomID) {
+  if (roomID === null) {
     throw new Error("roomId is missing in room_removeRoom.");
   }
   const updates = {};

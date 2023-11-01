@@ -188,10 +188,9 @@ export async function GetQueue({ accessToken }) {
       },
     })
 
-    
-
     if (dataResponse.status === 200) {
       const data = await dataResponse.json()
+      // console.log("data: ", data)
       return data
     } else {
       console.error('Error fetching queue:', dataResponse.statusText)
