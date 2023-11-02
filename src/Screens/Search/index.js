@@ -1,12 +1,10 @@
 import {
   Text,
-  StyleSheet,
   TouchableOpacity,
   View,
   TextInput,
   FlatList,
   Image,
-  Pressable,
 } from 'react-native'
 import { COLORS, SIZES } from '../../Constants'
 import { BoldText, MediumText } from '../../Commons/UI/styledText'
@@ -19,18 +17,27 @@ import { SearchTrack } from '../../Utilities/SpotifyApi/Utils'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { debounce } from '../../Utilities/Functions/debounce'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export const Search = () => {
+  const insets = useSafeAreaInsets()
   const navigation = useNavigation() // Initialize navigation
 
   return (
     <View style={{ backgroundColor: COLORS.dark, flex: 1 }}>
-      <View style={{ padding: 20, paddingTop: 70 }}>
-        <BoldText style={{ color: COLORS.light, fontSize: 25 }}>
+      <View style={{ padding: 20, paddingTop: insets.top,}}>
+        <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
           Search
         </BoldText>
         <TouchableOpacity
-          style={styles.button}
+          style={{
+            backgroundColor: COLORS.light,
+            padding: 10,
+            paddingLeft: 20,
+            marginTop: 15,
+            borderRadius: 7,
+            flexDirection: 'row',
+            alignItems: 'center',}}
           activeOpacity={1}
           onPress={() => {
             navigation.navigate('SearchClick')
@@ -46,6 +53,7 @@ export const Search = () => {
 
 // search fr fr
 export const SearchClick = () => {
+  const insets = useSafeAreaInsets()
   // Initialize navigation
   const navigation = useNavigation()
   const soundObject = useMusicStore((state) => state.soundObject)
@@ -135,10 +143,14 @@ export const SearchClick = () => {
         }}
       >
         {/* SONG IMAGE */}
-        <Image style={styles.img} src={item.coverUrl} />
+        <Image style={{
+          width: 50,
+          height: 50,
+          borderRadius: 10,
+          marginRight: 15,}} src={item.coverUrl} />
         <View>
           {/* TITLE AND ARTIST */}
-          <Text style={{ color: '#FFF', fontSize: SIZES.medium }}>
+          <Text numberOfLines={1} ellipsizeMode='tail' style={{color:'#FFF', width: 280, fontSize: SIZES.medium,}}>
             {item.title}
           </Text>
           <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
@@ -149,12 +161,26 @@ export const SearchClick = () => {
 
   return (
     <View style={{ backgroundColor: COLORS.dark, flex: 1 }}>
-      <View style={styles.container}>
-        <View style={styles.sbar}>
+      <View style={{
+        paddingTop: insets.top, 
+        padding: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',}}>
+        <View style={{
+          marginTop: 20,
+          flexDirection: 'row',
+          backgroundColor: '#333',
+          borderRadius: 10,
+          alignItems: 'center',
+          paddingHorizontal: 10,}}>
           <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
           <TextInput
             autoFocus={true}
-            style={styles.input}
+            style={{
+              color: COLORS.light,
+              width: 250,
+              fontSize: SIZES.medium,
+              padding: 10,}}
             placeholder='What do you want to listen to?'
             placeholderTextColor={COLORS.grey}
             value={input}
@@ -162,7 +188,7 @@ export const SearchClick = () => {
           />
         </View>
         <TouchableOpacity onPress={backButton}>
-          <Text style={{ color: COLORS.light, marginTop: 10 }}>cancel</Text>
+          <Text style={{ color: COLORS.light, marginTop: 30 }}>cancel</Text>
         </TouchableOpacity>
       </View>
 
@@ -176,40 +202,3 @@ export const SearchClick = () => {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    paddingTop: 70,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  button: {
-    backgroundColor: COLORS.light,
-    padding: 10,
-    paddingLeft: 20,
-    marginTop: 15,
-    borderRadius: 7,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sbar: {
-    flexDirection: 'row',
-    backgroundColor: '#333',
-    borderRadius: 10,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  input: {
-    color: COLORS.light,
-    width: 250,
-    fontSize: SIZES.medium,
-    padding: 10,
-  },
-  img: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    marginRight: 15,
-  },
-})
