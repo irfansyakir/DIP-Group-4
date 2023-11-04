@@ -1,7 +1,7 @@
 import {child, get, update, push, remove, ref} from "firebase/database";
 import {db, dbRef} from "../../../firebaseConfig"
 
-export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, djList, isPublic, usersObject}){
+export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, dj, isPublic, users}){
   if (roomID === null && roomName === null && last_message === null && last_message_timestamp === null && djList === null && isPublic === null) {
     throw new Error("One or more required parameters are missing or empty in room_updateRoom.");
   }
@@ -17,14 +17,14 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     if(last_message_timestamp){
       updates[`/rooms/${roomID}/last_message_timestamp`] = last_message
     }
-    if(djList){
-      updates[`/rooms/${roomID}/djList`] = djList
+    if(dj){
+      updates[`/rooms/${roomID}/dj`] = dj
     }
     if(isPublic){
       updates[`/rooms/${roomID}/isPublic`] = isPublic
     }
-    if(usersObject){
-      updates[`/rooms/${roomID}/users`] = usersObject
+    if(users){
+      updates[`/rooms/${roomID}/users`] = users
     }
   }
   else {
@@ -39,14 +39,14 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     if(last_message_timestamp){
       updates[`/rooms/${newRoomId}/last_message_timestamp`] = last_message
     }
-    if(djList){
-      updates[`/rooms/${newRoomId}/djList`] = djList
+    if(dj){
+      updates[`/rooms/${newRoomId}/djList`] = dj
     }
     if(isPublic){
       updates[`/rooms/${roomID}/isPublic`] = isPublic
     }
-    if(usersObject){
-      updates[`/rooms/${roomID}/users`] = usersObject
+    if(users){
+      updates[`/rooms/${roomID}/users`] = users
     }
   }
 

@@ -107,9 +107,10 @@ export function CurrentlyPlaying({ currentPage }) {
                 alignItems: 'center',
                 paddingHorizontal: 20,
                 paddingVertical: 10,
-                display: currentPage === 'Track' ? 'none' : 'flex',
+                display: (currentPage === 'Track' || currentPage === 'Chatroom') ? 'none' : 'flex',
             }}
             onPress={() => {
+                // console.log(currentPage)
                 navigation.navigate('Track')
                 changeCurrentPage('Track')
             }}
