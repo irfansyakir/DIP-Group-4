@@ -9,6 +9,11 @@ const COLORS = {
   grey: '#9A9A9A',
   trackLyrics: '#665959',
   trackBG: 'linear-gradient(180deg, #836E55 0%, #4C4134 48.44%, #15120F 100%)',
+
+  // Theme
+  blue: '#41BBC4',
+  darkblue: '#303847',
+  yellow: '#FFE457'
 }
 
 const SIZES = {

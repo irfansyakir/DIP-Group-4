@@ -1,8 +1,8 @@
 import {child, get, update, push} from "firebase/database";
 import {dbRef} from "../../../firebaseConfig"
 
-export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, djList, isPublic}){
-  if (roomID === null && roomName === null && last_message === null && last_message_timestamp === null && djList === null && isPublic === null) {
+export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, djList}){
+  if (!roomID && !roomName && !last_message && !last_message_timestamp && !djList) {
     throw new Error("One or more required parameters are missing or empty in room_updateRoom.");
   }
   const updates = {};
@@ -20,8 +20,8 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     if(djList){
       updates[`/rooms/${roomID}/djList`] = djList
     }
-    if(isPublic){
-      updates[`/rooms/${roomID}/isPublic`] = isPublic
+    if(roomID){
+      updates[`/rooms/${newRoomId}/id`] = roomID
     }
   }
   else {
@@ -39,8 +39,8 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     if(djList){
       updates[`/rooms/${newRoomId}/djList`] = djList
     }
-    if(isPublic){
-      updates[`/rooms/${roomID}/isPublic`] = isPublic
+    if(roomID){
+      updates[`/rooms/${newRoomId}/id`] = roomID
     }
   }
 
@@ -54,7 +54,7 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
 }
 
 export async function room_getRoom({roomID}){
-  if (roomID === null) {
+  if (!roomID) {
     throw new Error("roomId is missing in room_getRoom.");
   }
   try {
@@ -66,8 +66,18 @@ export async function room_getRoom({roomID}){
   }
 }
 
+export async function room_getAllRooms(){
+  try {
+    const snapshot = await get(child(dbRef, `/rooms`));
+    return await snapshot.val()
+  }catch (e) {
+    console.log(e)
+    throw e
+  }
+}
+
 export async function room_removeRoom({roomID}){
-  if (roomID === null) {
+  if (!roomID) {
     throw new Error("roomId is missing in room_removeRoom.");
   }
   const updates = {};
