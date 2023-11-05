@@ -1,109 +1,51 @@
-// MessageBubble.js
-
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, } from 'react-native';
+import { COLORS, SIZES } from '../../../../Constants';
+import { BoldText } from '../../../../Commons/UI/styledText';
 
 const MessageBubble = ({ text, timestamp, right, username}) => {
- 
 
-  if (right) {
-    return (
-        <View style={stylesRight.messageContainer}>
-          <View style={stylesRight.messageBubble}>
-            <Text style={stylesRight.youText}>You</Text>
-            <Text style={stylesRight.messageText}>{text}</Text>
-            <Text style={stylesRight.timestampText}>{timestamp}</Text>
-          </View>
-        </View>
-    );
-  }
+if (right) {
+return (
+  // Your messages
+  <View style={{ alignItems: 'flex-end', marginBottom:10,}}>
+    <View style={{
+      backgroundColor: COLORS.primary, // Background color of the message bubble
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      borderRadius:15,
+      borderBottomRightRadius: 0,
+      maxWidth: '90%',
+    }}>
+      <Text style={{ color: COLORS.dark,fontSize: SIZES.sm,}}>{text}</Text>
+      <Text style={{ color: COLORS.darkblue, fontSize: SIZES.xSmall, alignSelf:'flex-end'}}>{timestamp}</Text>
+    </View>
+  </View>
+);
+}
 
-  else {
-    return (
-      <View style={stylesLeft.messageContainer}>
-        <View style={stylesLeft.messageBubble}>
-          <Text style={stylesLeft.usernameText}>{username}</Text>
-          <Text style={stylesLeft.messageText}>{text}</Text>
-          <Text style={stylesLeft.timestampText}>{timestamp}</Text>
-        </View>
-      </View>
-  );
-  }
+// Other people's messages
+else {
+return (
+  <View style={{ alignItems: 'flex-start', marginBottom:10,}}>
+    <View style={{
+      backgroundColor: COLORS.darkbluesat,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius:15,
+      borderBottomLeftRadius: 0,
+      maxWidth: '90%',
+      alignItems:'flex-start'
+    }}>
+      <Text style={{ color: COLORS.light, fontSize: SIZES.small,}}>{username}</Text>
+      <Text style={{ color: COLORS.white,fontSize: SIZES.sm,}}>{text}</Text>
+      <Text style={{ color: COLORS.grey, fontSize: SIZES.xSmall, alignSelf:'flex-end'}}>{timestamp}</Text>
+
+    </View>
+    
+  </View>
+);
+}
 };
-
-const stylesRight = StyleSheet.create({
-  messageContainer: {
-    alignItems: 'flex-end', // Align messages to the right
-    marginBottom: 10,
-    marginRight: 10
-  },
-
-  messageBubble: {
-    backgroundColor: '#41BBC4', // Background color of the message bubble
-    padding: 10,
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 0,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    maxWidth: '80%', // Limit the message width to 80% of the container
-  },
-
-  youText: {
-    color: '#13151E',
-    fontSize: 15,
-    marginLeft: 5
-  },
-  messageText: {
-    color: '#13151E',
-    fontSize: 15,
-    marginLeft: 5
-  },
-  timestampText: {
-    color: '#F8F8FA',
-    fontSize: 10,
-    marginLeft: 5
-  },
-});
-
-const stylesLeft = StyleSheet.create({
-  messageContainer: {
-    alignItems: 'flex-start', // Align messages to the right
-    marginBottom: 10,
-    marginLeft: 10
-  },
-
-  messageContainerLeft: {
-    alignItems: 'flex-start', // Align messages to the right
-    marginBottom: 10,
-    marginRight: 10
-  },
-
-  messageBubble: {
-    backgroundColor: '#1F3142', // Background color of the message bubble
-    padding: 10,
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 0,
-    maxWidth: '80%', // Limit the message width to 80% of the container
-  },
-
-  usernameText: {
-    color: '#EEEEEE',
-    fontSize: 15,
-    marginLeft: 5
-  },
-  messageText: {
-    color: '#EEEEEE',
-    fontSize: 15,
-    marginLeft: 5
-  },
-  timestampText: {
-    color: '#F8F8FA',
-    fontSize: 10,
-    marginLeft: 5
-  },
-});
-
 
 export default MessageBubble;

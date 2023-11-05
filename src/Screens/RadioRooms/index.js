@@ -116,7 +116,7 @@ export const RadioRooms = () => {
        {/* JOIN BUTTON */}
         {selectedRoom === item.id ?
         <TouchableOpacity style={{
-          backgroundColor: COLORS.blue,
+          backgroundColor: COLORS.primary,
           borderRadius: 20,
           justifyContent: "center",
           alignItems: "center",
@@ -183,7 +183,6 @@ export const RadioRooms = () => {
         fontSize: SIZES.large,
         color: COLORS.light,
         marginTop: 20,
-        marginBottom: 10,
         }}>Recommended for you</BoldText>
 
       <FlatList

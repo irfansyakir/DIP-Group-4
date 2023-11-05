@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'; // Import useRef and useEffect
 import {
-  StyleSheet,
   Text,
   View,
   TouchableOpacity,
@@ -9,17 +8,18 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { Image } from 'expo-image'
-import { LinearGradient } from 'expo-linear-gradient'
+import { Ionicons } from '@expo/vector-icons'
+import { BackgroundImage } from '@rneui/base';
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import MessageBubble from './MessageBubble';
-import background from './background.jpg';
 import { GetCurrentUserProfile } from '../../../../Utilities/SpotifyApi/Utils'
 import { message_setMessage } from '../../../../Utilities/Firebase/messages_functions'
 import { message_getMessage } from '../../../../Utilities/Firebase/messages_functions';
 import {useMessageListener} from '../../../../Utilities/Firebase/useFirebaseListener';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {room_getRoom} from '../../../../Utilities/Firebase/room_functions';
+import { COLORS, SIZES } from '../../../../Constants';
+import { BoldText } from '../../../../Commons/UI/styledText';
 
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
@@ -32,6 +32,7 @@ export const Chatroom = ({route, navigation}) => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const [chatRefresh] = useMessageListener(roomID);
   const [roomName, setRoomName] = useState('');
+  const [roomImage, setImage] = useState('');
 
   const getInitialProfileData = async () => {
     // fetch data on load
@@ -49,6 +50,7 @@ export const Chatroom = ({route, navigation}) => {
     const roomDetails = await room_getRoom({roomID: roomID});
     console.log('Room Name: '+ roomDetails["room_name"]);
     setRoomName(roomDetails["room_name"]);
+    setImage(roomDetails["image_url"]);
   }
 
   const getMessages = async () => {
@@ -97,9 +99,6 @@ export const Chatroom = ({route, navigation}) => {
     getRoomDetails();
 
   }, [])
-
-
-
 
   // Use useEffect to scroll to the bottom when chatMessages change
   useEffect(() => {
@@ -159,183 +158,123 @@ export const Chatroom = ({route, navigation}) => {
   };
 
   return (
-    <KeyboardAvoidingView
+    <BackgroundImage source={require('./background.jpg')} blurRadius={5} style={{
+    flex:1, padding:10, paddingTop: inset.top,}}>
+      <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{
-        flexDirection: 'column',
-        alignItems: 'center',
-        paddingTop: inset.top,
-      }}
+      style={{flex:1,}}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
-    >
-      <LinearGradient
-        colors={['#6369D1', '#42559E', '#101010']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        locations={[0, 0.3, 0.6]}
-        style={styles.background}
-      />
+      >
 
-      <View >
+      {/* back button */}
+      <TouchableOpacity onPress={() => navigation.goBack()} style={{flexDirection: 'row', alignItems:'center',}}>
+        <Ionicons name='chevron-back' size={30} color={COLORS.light} />
+        <BoldText style= {{color: COLORS.light, fontSize: SIZES.medium}}>Leave Room</BoldText>
+      </TouchableOpacity>
 
-
-        <View style={styles.topContainer}>
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.roomName}>{roomName}</Text>
-          </View>
-          <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
-            <Text style={styles.buttonText}>View Queue</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/*disabled for now.*/}
-        {/*<View style={styles.musicPlayer}>*/}
-        {/*  <Text>Music Player</Text>*/}
-        {/*</View>*/}
-
-        <View style={styles.roomCodeView}>
-          <Text style={styles.roomCodeTitle}>Room Code</Text>
-          <View style={styles.roomCodeContainer}>
-            <Text style={styles.roomCode}>{roomID}</Text>
-            <Text style={styles.numberListening}>237 LISTENING</Text>
-          </View>
-        </View>
-
-        <ScrollView
-          style={styles.chatbox} // Apply styles to the ScrollView
-          ref={scrollViewRef} // Use the ref here
-          keyboardShouldPersistTaps="handled"
-        >
-          {chatMessages.map((messageItem) => (
-            <MessageBubble
-              key={messageItem.id}
-              text={messageItem.text}
-              timestamp={messageItem.timestamp}
-              right={messageItem.right}
-              username={messageItem.username}
-            />
-          ))}
-        </ScrollView>
-
-        <TextInput
-          style={styles.message}
-          placeholder="Message..."
-          multiline={false} // Set to false for a single-line input
-          placeholderTextColor="#888"
-          returnKeyType="done"
-          onChangeText={(text) => setMessage(text)}
-          value={message}
-          onSubmitEditing={sendMessage}
-        />
+      <View style={{flex:1, alignItems:'center',}}>
+      {/* room title, view queue button */}
+      <View style={{
+        flexDirection: 'row',
+        justifyContent:'space-between',
+        alignItems: 'center',
+        marginVertical: 15,
+        width:'95%',}}>
+        <BoldText style={{fontSize: 25, color: 'white'}}>{roomName}</BoldText>
+        <TouchableOpacity style={{
+          paddingVertical:8,
+          paddingHorizontal:30,
+          borderRadius: 20,
+          backgroundColor: COLORS.primary,
+          justifyContent: 'center',
+          alignItems: 'center',}} onPress={handleButtonPress}>
+          <BoldText style={{ color: COLORS.darkblue, fontSize: SIZES.medium,}}>View Queue</BoldText>
+        </TouchableOpacity>
       </View>
+
+      <ScrollView style={{flex:1, width:'100%',}}>
+      {/*disabled for now.*/}
+      <View style={{ height: 100,
+        backgroundColor: COLORS.darkblue, // Make sure to use a valid color code
+        borderRadius: 10,
+        marginBottom: 15, alignItems:'center', justifyContent:'center'}}>
+       <Text style={{color:'white'}}>Music Player placeholder</Text>
+      </View>
+
+      {/* Room Code */}
+      <View style={{
+        height: 70,
+        backgroundColor: COLORS.dark, // Change the color as needed
+        borderRadius: 10,
+        marginBottom: 15,
+        padding:15,}}>
+        <Text style={{color: 'white', fontSize: SIZES.small,}}>Room Code</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent:'space-between'}}>
+          <BoldText style={{ fontSize: SIZES.large,color: COLORS.light,}}>{roomID}</BoldText>
+          <Text style={{fontSize: SIZES.small, color: COLORS.yellow, marginRight:10}}>237 LISTENING</Text>
+        </View>
+      </View>
+
+      {/* Chat box */}
+      <View style={{
+          height: 330,
+          backgroundColor: '#343434', // Change the color as needed
+          borderRadius: 10,
+          padding: 20,
+          marginBottom: 15,}}>
+      <ScrollView ref={scrollViewRef} keyboardShouldPersistTaps="handled">
+        {chatMessages.map((messageItem) => (
+          <MessageBubble
+            key={messageItem.id}
+            text={messageItem.text}
+            timestamp={messageItem.timestamp}
+            right={messageItem.right}
+            username={messageItem.username}
+          />
+        ))}
+      </ScrollView>
+      </View>
+
+      {/* Input message box */}
+      <View style={{
+        flexDirection: 'row',
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent:'space-between',
+      }}>
+        <TextInput
+        style={{ width: '85%',
+        color: COLORS.light, 
+        fontSize: SIZES.medium, 
+        padding: 15,
+        backgroundColor:'#343434',
+        borderRadius:10,}}
+        placeholder="Message..."
+        multiline={false} // Set to false for a single-line input
+        placeholderTextColor= {COLORS.grey}
+        returnKeyType="done"
+        onChangeText={(text) => setMessage(text)}
+        value={message}
+        onSubmitEditing={sendMessage}
+        />
+        <TouchableOpacity style={{
+          width:40,
+          height:40,
+          borderRadius:40,
+          marginRight:5,
+          backgroundColor:COLORS.darkblue,
+          justifyContent:'center',
+          alignItems:'center'}} 
+          onPress={sendMessage}>
+            <Ionicons name={'arrow-up'} size={25} color={COLORS.grey} />
+        </TouchableOpacity>
+      </View>
+      
+      </ScrollView>
+    </View>
     </KeyboardAvoidingView>
+    </BackgroundImage>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Purple_website.svg/1200px-Purple_website.svg.png")',
-  },
-  topContainer: {
-    marginTop: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  roomName: {
-    fontSize: 25,
-    marginLeft: 22,
-    marginRight: 88,
-  },
-
-  viewQueueBtn: {
-    width: 150,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#41BBC4',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 24,
-  },
-  buttonText: {
-    color: 'black',
-    fontSize: 16,
-  },
-  musicPlayer: {
-    width: 380,
-    height: 114,
-    backgroundColor: '#303847', // Make sure to use a valid color code
-    borderRadius: 10,
-    marginLeft: 22,
-    marginRight: 22,
-    marginBottom: 20,
-  },
-  roomCodeView: {
-    width: 380,
-    height: 64,
-    backgroundColor: '#13151E', // Change the color as needed
-    borderRadius: 10,
-    marginLeft: 22,
-    marginRight: 22,
-    marginBottom: 20,
-  },
-
-  roomCodeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-
-  roomCodeTitle: {
-    color: 'white',
-    fontSize: 10,
-    marginTop: 7,
-    marginLeft: 16
-  },
-
-  roomCode: {
-    fontSize: 20,
-    color: 'white',
-    marginTop: 4,
-    marginLeft: 16
-  },
-
-  numberListening : {
-    fontSize: 10,
-    color: '#FFE457',
-    marginLeft: 200,
-    marginRight: 10
-  },
-
-  chatbox: {
-    width: 380,
-    height: 250,
-    backgroundColor: '#343434', // Change the color as needed
-    borderRadius: 10,
-    marginLeft: 22,
-    marginRight: 22,
-    marginBottom: 20,
-  },
-  message: {
-    width: 380,
-    height: 60,
-    color: '#888',
-    backgroundColor: '#343434', // Change the color as needed
-    borderRadius: 10,
-    marginLeft: 22,
-    marginRight: 22,
-    marginBottom: '30%',
-    paddingLeft: 10, // Add some left padding for the text input
-  },
-  background: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-});
 
 export default Chatroom;
