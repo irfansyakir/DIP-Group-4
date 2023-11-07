@@ -8,62 +8,48 @@ import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import DraggableFlatList from "react-native-draggable-flatlist";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-gesture-handler';
-import { useQueueStore } from '../../Store/useQueueStore'
-import { useMusicStore } from '../../Store/useMusicStore'
+import { useQueueStore } from '../../../../Store/useQueueStore'
+import { useMusicStore } from '../../../../Store/useMusicStore'
 import { red, white } from 'color-name';
-import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
-import { Play } from '../../Commons/Track/play'
-import { COLORS } from '../../Constants'
+import { useUserCurrentQueue } from "../../../../Utilities/Firebase/useFirebaseListener";
+import { Play } from '../../../../Commons/Track/play'
+import { COLORS } from '../../../../Constants'
+import { AuthError } from 'expo-auth-session';
 
 const Icon = createIconSetFromIcoMoon(
-    require('../../../assets/icomoon/selection.json'),
+    require('../../../../../assets/icomoon/selection.json'),
     'IcoMoon',
     'icomoon.ttf'
 )
 
-export const Queue = ({navigation}) => {
+export const RoomQueue = ({navigation}) => {
 
     const storeQueue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
 
-    // Generating list of songs from store
     const generateSongs = () => {        
         return (
-        <View style={{flex: 1}}>
-            <DraggableFlatList
-            data={storeQueue}
-            onDragEnd={({data}) => {changeQueue(data)}}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item, drag, isActive }) => (
-                <View style={[styles.songInQ,
-                    {backgroundColor: isActive ? COLORS.secondary : item.backgroundColor}
-                ]}
-                >
-                    <View> 
-                        <Text style={styles.songName}>{item.title}</Text>
-                        <Text style={styles.artistName}>{item.artist}</Text>
-                    </View>
-                    <TouchableOpacity 
-                        style={{
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            height: '100%',
-                            width: 52,
-                        }}
-                        onLongPress={drag}
-                        delayLongPress={300}
-                        disabled={isActive}
-                    >
-                        <Image
-                            style={styles.draggable}
-                            source={require("../../../assets/draggable.png")}
-                        />
-                    </TouchableOpacity>
+        <FlatList
+          data={storeQueue}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.songInQ}>
+                <Image 
+                    style={{
+                        width: 45,
+                        height: 45,
+                        borderRadius: 5
+                    }}
+                    source={item.img}
+                />
+                <View style={{ paddingLeft: 10 }}> 
+                    <Text style={styles.songName}>{item.title}</Text>
+                    <Text style={styles.artistName}>{item.artist}</Text>
                 </View>
-            )}/>
-        </View>
+            </View>
+        )}/>
         );
     };
     
@@ -79,9 +65,9 @@ export const Queue = ({navigation}) => {
             }} onPress={() => navigation.goBack()}>
                 {/* <Icon style={styles.icon} name='down'/> */}
             </TouchableOpacity>
-            <Text style={styles.headerTxt}> Queue </Text>
+            <Text style={styles.headerTxt}> ROOM NAME </Text>
             
-            <Text style={[styles.subHeaderTxt, {marginBottom: 8}]}>Now Playing</Text>
+            <Text style={[styles.subHeaderTxt, { marginBottom: 5 }]}>Now Playing</Text>
             <View style={styles.playingNow}>
                 <Image
                     style={styles.playlistImage}
@@ -97,10 +83,8 @@ export const Queue = ({navigation}) => {
                 </View>
             </View>
             
-            <Text style={styles.subHeaderTxt}>Next In Queue</Text>
+            <Text style={styles.subHeaderTxt}>Next from: ROOM NAME</Text>
             {generateSongs()}
-
-            <View style={{height: 170}}><Play/></View>
 
         </GestureHandlerRootView>
         
@@ -112,7 +96,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         paddingTop: 10,
-        backgroundColor: COLORS.dark,
+        paddingBottom: 10,
+        backgroundColor: '#13151e',
     },  
     headerTxt: {
         fontSize: 20,
@@ -129,6 +114,7 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: 'bold',
         color: COLORS.white,
+        // marginBottom: 10,
         paddingLeft: 16,
         paddingRight: 16,
     },
@@ -157,10 +143,10 @@ const styles = StyleSheet.create({
     },
     songInQ: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
         height: 60,
         paddingLeft: 16,
+        // backgroundColor: 'green'
     },
     songName: {
         fontSize: 17,

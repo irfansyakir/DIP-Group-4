@@ -76,10 +76,10 @@ export const TestAPI = () => {
 
       <Button
         onPress={() => {
-          navigation.navigate('Queue')
+          navigation.navigate('RoomQueue')
         }}
       >
-        Go to Queue
+        Go to Room Queue
       </Button>
       <Button
         onPress={() => {

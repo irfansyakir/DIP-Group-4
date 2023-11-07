@@ -21,6 +21,7 @@ import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 import { Queue } from '../Screens/Queue'
 import { Chatroom } from '../Screens/RadioRooms/Components/Chatroom'
 import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
+import { RoomQueue } from '../Screens/RadioRooms/Components/RoomQueue'
 
 // Track
 import { Track } from '../Commons/Track/track'
@@ -132,6 +133,7 @@ function RadioRoomStackNavigator(){
       <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
       <RadioRoomStack.Screen name='Track' component={Track} />
       <RadioRoomStack.Screen name='Playlist' component={Playlist} />
+      <RadioRoomStack.Screen name='RoomQueue' component={RoomQueue} />
     </RadioRoomStack.Navigator>
   )
 }

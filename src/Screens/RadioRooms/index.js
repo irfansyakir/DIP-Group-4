@@ -12,11 +12,17 @@ import {
 import Svg, { Text as SvgText } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthStore } from '../../Store/useAuthStore'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
 
 export const RadioRooms = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation(); // Initialize navigation\
+
+  const userId = useAuthStore((state) => state.userId)
+  const storeQueue = useQueueStore((state) => state.queue)
 
   const handleButtonClick = () => {
     // Navigate to "YourNewPage" screen when the container is clicked
@@ -429,6 +435,7 @@ export const RadioRooms = () => {
       uri: "spotify:track:1czkGv8uzFAqZXAucbmLkv",
     },
   ];
+
   const handleRoomSelect = (roomId) => {
     setSelectedRoom(roomId === selectedRoom ? null : roomId);
   };
@@ -437,6 +444,13 @@ export const RadioRooms = () => {
     navigation.navigate('Chatroom', {
       roomID: '123birds',
     })
+
+    // Save personal queue in queueStore to firebase whenever creating/ joining a room
+    userQueue_updateQueue({
+      userID: userId,
+      userQueueList: storeQueue,
+    })
+    
     // console.log("Clicked!")
   }
 
