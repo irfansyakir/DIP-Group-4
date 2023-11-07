@@ -1,38 +1,101 @@
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
 import {child, get, update, push} from "firebase/database";
 import {dbRef} from "../../../../../firebaseConfig";
-//import { Image } from 'expo-image';
-import { Image, Text, View, TextInput, Button, 
+import { Text, View, TextInput, Button, Switch, 
     StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
-import { CheckBox } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { LinearGradient } from 'expo-linear-gradient';
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
-
 import clouds from  '../../../../../assets/clouds.png'
 import raindrops from '../../../../../assets/raindrops.png'
 import palmTrees from '../../../../../assets/palmtrees.png'
 
-import {Stack} from "@rneui/layout";
-
 
 export const CreateRoom = ()=> {
     
-    const [selectedIndex, setIndex] = React.useState(0);
     const [roomName, setRoomName] = useState('');
     const [roomDescription, setRoomDescription] = useState('');
-    const navigation = useNavigation(); // Initialize navigation
+    const [themeImageUrl, setThemeImageUrl] = useState('');
+    const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+    
+    const [isEnabled, setIsEnabled] = useState(false);
+    const toggleSwitch1 = () => {
+        setIsEnabled(previousState => !previousState);
+        setIsOthersAddSongs();
+    };
+
+    const [isEnabled2, setIsEnabled2] = useState(false);
+    const toggleSwitch2 = () => {
+        setIsEnabled2(previousState => !previousState);
+        setIsPublic();
+    };
+
+    const setIsPublic = () => {
+        if (isPublic == 'yes') {
+            isPublic = 'no';
+            console.log('isPublic is a no')
+            //() => setIndex(0);
+        } else {
+            isPublic = 'yes';
+            console.log('isPublic is a yes')
+            //() => setIndex(1);
+        }
+    }
+
+    const setIsOthersAddSongs = () => {
+        if (isOthersAddSongs == 'yes') {
+            isOthersAddSongs = 'no';
+            console.log('isOthersAddSongs is a no')
+            //() => setIndex(0);
+        } else {
+            isOthersAddSongs = 'yes';
+            console.log('isOthersAddSongs is a yes')
+            //() => setIndex(1);
+        }
+    }
+
+    const [selectedChoice, setSelectedChoice] = useState(null);
+    const handleChoiceClick = (choice) => {
+        setSelectedChoice(choice);
+        if (choice == 1) {
+            setThemeImageUrl('clouds.png');
+        } else if (choice == 2) {
+            setThemeImageUrl('palmTrees.png');
+        } else if (choice == 3) {
+            setThemeImageUrl('raindrops.png');
+        } else {
+            setThemeImageUrl(uploadedImageUrl);
+        }
+        console.log(themeImageUrl);
+      };
+
+    const handleImageClick = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        })
+        if (!result.canceled) {
+            setUploadedImageUrl(result.assets[0].uri);
+        }
+    }
 
     const handleStartListening = () => {
         console.log(roomName)
         if (roomName != '') {
             console.log('creating room: ' + roomName);
-            console.log(roomDescription, isPublic);
-            const roomID = push(child(dbRef, `/rooms`)).key;
+            console.log(roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
+            const roomID = push(child(dbRef, '/rooms')).key;
             room_updateRoom({
                 roomID: roomID,
                 roomName: roomName,
                 roomDescription: roomDescription,
+                themeImageUrl: themeImageUrl,
                 isPublic: isPublic,
+                isOthersAddSongs: isOthersAddSongs,
             });
             navigation.navigate('Chatroom', {
                 roomID: roomID,
@@ -42,22 +105,11 @@ export const CreateRoom = ()=> {
         }
     }
 
-    const setIsPublic = () => {
-        if (isPublic) {
-            isPublic = false;
-            console.log('isPublic is false!')
-            //() => setIndex(0);
-        } else {
-            isPublic = true;
-            console.log('isPublic is true!')
-            //() => setIndex(1);
-        }
-    }
-
     useEffect(() => {
         console.log('hello')
-        isPublic = true;
-        console.log(isPublic)
+        isPublic = 'no';
+        isOthersAddSongs = 'no';
+        console.log(isPublic, isOthersAddSongs)
     }, [])
 
     let callNameFunction = (e) => {
@@ -67,6 +119,9 @@ export const CreateRoom = ()=> {
     let callDescFunction = (e) => {
         setRoomDescription(e)
     }
+
+    const [text, onChangeText] = React.useState('');
+    const navigation = useNavigation(); // Initialize navigation
   /*  const showMessage = () => {
         const customMessage = "You are about to leave the page.";
         Alert.alert(
@@ -93,60 +148,135 @@ export const CreateRoom = ()=> {
 */
     return (
         <View style={styles.container}>
-            <View style={styles.title}>
-                <Text>Create Room</Text>
-            </View>
-            <View style={styles.subtitle}>
+         <LinearGradient
+            colors={['grey', '#42559E', 'black']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            locations={[0, 0.3, 0.6]}
+            style={styles.background}/>
+            
             <ScrollView>
-                <Text>Select a theme</Text>
-                <Image
-                    source={clouds} />
-                <Image
-                    source={palmTrees} />
-                <Image
-                    source={raindrops} />
-                <Text style={styles.subtitle}>Room Name</Text>
+            <View style={styles.body}>
+                <Text style={styles.title}>Create Room</Text>
+            </View>
+            <View style={styles.body}>
+                <Text style={styles.subtitle}>Select a theme</Text>
+                <ScrollView
+                horizontal={true}
+                >
+                <TouchableOpacity
+                        onPress={() => handleChoiceClick(1)}
+                        style={{
+                        borderWidth: 3,
+                        borderRadius: 10,
+                        borderColor: selectedChoice === 1 ? 'white' : 'transparent',
+                        }}
+                    > 
+                <Image style={styles.themeImagestart}
+                 source={clouds}
+                 />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                        onPress={() => handleChoiceClick(2)}
+                        style={{
+                        marginLeft:25,
+                        borderWidth: 3,
+                        borderRadius: 10,
+                        borderColor: selectedChoice === 2 ? 'white' : 'transparent',
+                        }}
+                    > 
+                <Image style={styles.themeImage}
+                 source={palmTrees} 
+                 />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                        onPress={() => handleChoiceClick(3)}
+                        style={{
+                        marginLeft:25,
+                        borderWidth: 3,
+                        borderRadius: 10,
+                        borderColor: selectedChoice === 3 ? 'white' : 'transparent',
+                        }}
+                    > 
+                <Image style={styles.themeImage}
+                 source={raindrops} 
+                 />
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                        onPress={() => handleChoiceClick(4)}
+                        style={{
+                        marginLeft:25,
+                        borderWidth: 3,
+                        borderRadius: 10,
+                        borderColor: selectedChoice === 4 ? 'white' : 'transparent',
+                        }}
+                    > 
+                <Image style={styles.themeImage}
+                 source={themeImageUrl} 
+                 />
+                 </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.imagebutton}
+                            onPress={handleImageClick}
+                        >
+                            <Text style={styles.buttonPlus}>+</Text>
+                            <Text style={styles.buttonPlustext}>Add a theme</Text>
+                        </TouchableOpacity>
+                 </ScrollView>
+                <Text style={styles.name}>Room Name</Text>
                 <TextInput
                     style={styles.input}
-                    value={roomName}
                     onChangeText={callNameFunction}
-                    placeholder="Type a room name..."
+                    value={roomName}
+                    placeholder="Enter a room name..."
                 />
-                <Text style={styles.subtitle}>Room Description</Text>
+                <Text style={styles.name}>Room Description</Text>
                 <TextInput
                     style={styles.input}
-                    value={roomDescription}
                     onChangeText={callDescFunction}
-                    placeholder="Type a room description..."
+                    value={roomDescription}
+                    placeholder="Enter a room description..."
                 />
-                <Text style={styles.subtitle}>Settings</Text>
+                <Text style={styles.name}>Settings</Text>
+                <View
+                    style={{
+                    flexDirection: 'row',
+                    }}>
                 <Text style={styles.setting}>Allow listeners to queue songs</Text>
-                <Stack row align="right" spacing={2}>
-                    <CheckBox
-                    checked={selectedIndex === 0}
-                    onPress={setIsPublic}
-                    iconType="material-community"
-                    checkedIcon="radiobox-marked"
-                    uncheckedIcon="radiobox-blank"
-                    />
-                </Stack>
+                    <View style={{marginLeft: 130}}>
+                        <Switch style={{marginleft: 20}}
+                        trackColor={{false: '#767577', true: '#34bdeb'}}
+                        thumbColor={isEnabled ? '#83b7eb' : '#f4f3f4'}
+                        ios_backgroundColor="#3e3e3e"
+                        onValueChange={toggleSwitch1}
+                        value={isEnabled}
+                        />
+                    </View>
+                </View>
+                <View
+                    style={{
+                    flexDirection: 'row',
+                    }}>
                 <Text style={styles.setting}>Invites only</Text>
-                <Stack row align="right" spacing={2}>
-                    <CheckBox
-                    checked={selectedIndex === 1}
-                    onPress={setIsPublic}
-                    iconType="material-community"
-                    checkedIcon="radiobox-marked"
-                    uncheckedIcon="radiobox-blank"
-                    />
-                </Stack>
-                <View>
+                    <View style={{marginLeft: 260}}>
+                        <Switch
+                        trackColor={{false: '#767577', true: '#34bdeb'}}
+                        thumbColor={isEnabled2 ? '#83b7eb' : '#f4f3f4'}
+                        ios_backgroundColor="#3e3e3e"
+                        onValueChange={toggleSwitch2}
+                        value={isEnabled2}
+                        />
+                    </View>
+                </View>
+                
                     <TouchableOpacity style={styles.buttonListen} onPress={handleStartListening}>
                         <Text style={styles.buttonText}>Start Listening</Text>
                     </TouchableOpacity>
-                </View>
-            </ScrollView>
+
             </View>
+            </ScrollView>
         </View>
        
         
@@ -165,48 +295,77 @@ export const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'start',//'space-between'
-        paddingTop: 80,
+        paddingTop: 20,
         marginSide: 20,
     },
     title: {
         fontWeight: 'bold',
         color: 'white',
-        paddingLeft: 15,
-        fontSize: 20,
-        paddingTop: 20,
+        fontSize: 32,
     },
     subtitle: {
         fontWeight: 'bold',
         color: 'white',
-        paddingLeft: 15,
         fontSize: 18,
+        paddingBottom: 10,
+    },
+    name: {
+        fontWeight: 'bold',
+        color: 'white',
+        paddingTop: 40,
+        fontSize: 18,
+    },
+    body:{
+        paddingLeft: 15,
         paddingTop: 20,
+    },
+    themeImagestart: {
+        width: 80,
+        height: 85,
+        justifyContent: 'left',
+        borderRadius: 10,
+    },
+    themeImage: {
+        width: 80,
+        height: 85,
+        justifyContent: 'left',
+        borderRadius: 10,
     },
     input: {
         height: 40,
-        margin: 12,
+        marginRight: 12,
+        marginTop: 10,
         borderWidth: 1,
         padding: 10,
-        backgroundColor: 'slategrey',
+        backgroundColor: 'grey',
         borderRadius: 5,
     },
     setting: {
-        fontSize: 9,
+        fontSize: 15,
         color: 'white',
-
+        marginTop: 11,
     },
     button: {
         marginTop: 20,
-        backgroundColor: '#41BBC4',
+        backgroundColor: 'primary',
         borderRadius: 50,
         width: 100,
         height: 30,
         justifyContent: 'center',
         alignSelf: 'center',
     },
+    imagebutton: {
+        marginTop: 10,
+        borderRadius: 50,
+        width: 50,
+        height: 50,
+        justifyContent: 'center',
+        alignSelf: 'center',
+        marginLeft:25,
+    },
     buttonListen: {
         marginTop: 30,
-        backgroundColor: '#41BBC4',
+        backgroundColor: '#83b7eb',
         borderRadius: 50,
         width: 300,
         height: 45,
@@ -215,7 +374,7 @@ export const styles = StyleSheet.create({
     },
     buttonBack: {
         marginTop: 10,
-        backgroundColor: '#13151E',
+        backgroundColor: 'dark',
         borderRadius: 50,
         width: 40,
         height: 40,
@@ -227,10 +386,19 @@ export const styles = StyleSheet.create({
         fontSize: 12,
         textAlign: 'center',
     },
+    buttonPlus: {
+        color: '#FFFFFF',
+        fontSize: 30,
+        textAlign: 'center',
+    },
+    buttonPlustext: {
+        color: '#FFFFFF',
+        fontSize: 15,
+        textAlign: 'center',
+    },
     emptyText: {
         fontWeight: 'bold',
-        color: '#13151E',
-        paddingLeft: 15,
+        color: 'dark',
         fontSize: 18,
     },
 });

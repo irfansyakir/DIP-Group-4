@@ -1,8 +1,8 @@
 import {child, get, update, push} from "firebase/database";
 import {dbRef} from "../../../firebaseConfig"
 
-export async function room_updateRoom({roomID, roomName, last_message, last_message_timestamp, djList, isPublic}){
-  if (roomID === null && roomName === null && last_message === null && last_message_timestamp === null && djList === null && isPublic === null) {
+export async function room_updateRoom({roomID, roomName, roomDescription, themeImageUrl, last_message, last_message_timestamp, djList, isPublic, isOthersAddSongs}){
+  if (roomID === null && roomName === null && roomDescription === null && last_message === null && themeImageUrl == null && last_message_timestamp === null && djList === null && isPublic === null && isOthersAddSongs == null) {
     throw new Error("One or more required parameters are missing or empty in room_updateRoom.");
   }
   const updates = {};
@@ -10,6 +10,12 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
   if(roomID){
     if(roomName){
       updates[`/rooms/${roomID}/room_name`] = roomName
+    }
+    if(roomDescription){
+      updates[`/rooms/${roomID}/room_description`] = roomDescription
+    }
+    if(themeImageUrl){
+      updates[`/rooms/${roomID}/themeImageUrl`] = themeImageUrl
     }
     if(last_message){
       updates[`/rooms/${roomID}/last_message`] = last_message
@@ -23,12 +29,21 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     if(isPublic){
       updates[`/rooms/${roomID}/isPublic`] = isPublic
     }
+    if(isOthersAddSongs){
+      updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
+    }
   }
   else {
     const newRoomId = push(child(dbRef, `/rooms`)).key;
 
     if(roomName){
       updates[`/rooms/${newRoomId}/room_name`] = roomName
+    }
+    if(roomDescription){
+      updates[`/rooms/${newRoomId}/room_description`] = roomDescription
+    }
+    if(themeImageUrl){
+      updates[`/rooms/${roomID}/themeImageUrl`] = themeImageUrl
     }
     if(last_message){
       updates[`/rooms/${newRoomId}/last_message`] = last_message
@@ -41,6 +56,9 @@ export async function room_updateRoom({roomID, roomName, last_message, last_mess
     }
     if(isPublic){
       updates[`/rooms/${newRoomId}/isPublic`] = isPublic
+    }
+    if(isOthersAddSongs){
+      updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
     }
   }
 
