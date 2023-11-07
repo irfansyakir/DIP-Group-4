@@ -32,6 +32,13 @@ const SongProgressBar = ({ currentTime, duration }) => {
 }
 export const ChatroomMusicPlayer = ({roomID, roomIsCurrentTrackPlaying, roomCurrentTrackID}) => {
   const screenWidth = Dimensions.get('window').width
+  const navigation = useNavigation()
+  const insets = useSafeAreaInsets()
+
+  const accessToken = useAuthStore((state) => state.accessToken)
+
+  // -------------------------------------------------------------------------------------------------Copy of currentlyPlaying
+
   const songInfo = useMusicStore((state) => state.songInfo)
   const isPlaying = useMusicStore((state) => state.isPlaying)
   const soundObject = useMusicStore((state) => state.soundObject)
@@ -43,13 +50,7 @@ export const ChatroomMusicPlayer = ({roomID, roomIsCurrentTrackPlaying, roomCurr
   const duration = useMusicStore((state) => state.duration)
   const changeDuration = useMusicStore((state) => state.changeDuration)
 
-  const accessToken = useAuthStore((state) => state.accessToken)
   const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
-
-  const navigation = useNavigation()
-  const insets = useSafeAreaInsets()
-
-
 
   const handleTrackClick = (trackId) => {
     const createSoundObject = async (uri) => {

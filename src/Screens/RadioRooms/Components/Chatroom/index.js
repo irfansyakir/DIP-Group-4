@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'; // Import useRef and useEffect
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,7 +17,7 @@ import {message_getMessage, message_setMessage} from '../../../../Utilities/Fire
 import {
   useIsCurrentTrackPlayingListener,
   useMessageListener,
-  useRoomTrackIDListener
+  useRoomTrackIDListener, useTimeOfLastPlayedListener
 } from '../../../../Utilities/Firebase/useFirebaseListener';
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {room_getRoom, room_updateRoom} from '../../../../Utilities/Firebase/room_functions';
@@ -30,20 +30,24 @@ export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
   const accessToken = useAuthStore((state) => state.accessToken)
 
-  // -------------------------------------------------------------------------------------------------Chat
+  // -------------------------------------------------------------------------------------------------Chat Initialization
 
   const inset = useSafeAreaInsets();
-
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
-  const [username, setUsername] = useState('');
   const [roomName, setRoomName] = useState('');
 
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
 
   const [chatRefresh] = useMessageListener(roomID);
 
-  // -------------------------------------------------------------------------------------------------Song Player
+  //TODO: Change to use the one from useProfileStore (not implemented for now)
+  const [username, setUsername] = useState('');
+  const [userID, setUserID] = useState('');
+
+  // -------------------------------------------------------------------------------------------------Song Player Initialization
+
+  //TODO: Resolve conflict between radioroom queue & user queue so that when radioroom song done playing can go to next radioroom song from any page
 
   const currentPage = useMusicStore((state) => state.currentPage)
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
@@ -51,12 +55,15 @@ export const Chatroom = ({route, navigation}) => {
   const [roomUserIDList, setRoomUserIDList] = useState([])
   const [roomDJIDList, setRoomDJIDList] = useState([])
   const [isUserListeningToRoom, setIsUserListeningToRoom] = useState(false)
+  const [isUserDJ, setIsUserDj] = useState(false)
 
   const [roomCurrentTrackID] = useRoomTrackIDListener(roomID)
   const [roomIsCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomID)
+  // const [timeOfLastPlayed, setTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
 
-  //TODO: Merge radioroom queue with user queue somehow so that when radioroom song done playing can go to next radioroom song from any page
+  // -------------------------------------------------------------------------------------------------General Room Functions
 
+  //TODO: Delete getInitialProfileData after useProfileStore is implemented
   const getInitialProfileData = async () => {
     // fetch data on load
     try {
@@ -64,6 +71,7 @@ export const Chatroom = ({route, navigation}) => {
         accessToken: accessToken,
       })
       setUsername(profileData.display_name)
+      setUserID(profileData["id"])
     } catch (error) {
       //console.error(error)
     }
@@ -76,7 +84,10 @@ export const Chatroom = ({route, navigation}) => {
     setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
     // console.log(roomUserIDList)
     setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
+
+    roomDetails["dj"].includes()
   }
+  // -------------------------------------------------------------------------------------------------Message Functions
   const getMessages = async () => {
     // fetch messages from firebase
     try {
@@ -115,71 +126,6 @@ export const Chatroom = ({route, navigation}) => {
       console.error("Error while getting messages:", error);
     }
   }
-
-
-  //hide the usual musicPlayer if in chatroom. Instead, use the ChatroomMusicPlayer
-  //This is if clicking on the player will bring up the Track page, in which the djs can fast forward or something else
-  //If so, then TODO: implement fix on how to do the Music Player, Chatroom Music Player, and the Track Page.
-  //For now, disabled the ChatroomMusicPlayer pressable
-  useFocusEffect(
-    useCallback(() => {
-      const subscribe = navigation.addListener('focus', () => {
-          // console.log("UseCallback Run")
-          // console.log(currentPage)
-          changeCurrentPage("Chatroom")
-      })
-      const unsubscribe = navigation.addListener('blur', () => {
-        // const nextNavigationStateToVisit = navigation.getState()['routes'].at(-1)
-        // if (nextNavigationStateToVisit['name'] === 'Track'){
-        //   changeCurrentPage("Track")
-        // } else{
-        //   changeCurrentPage("Not Track")
-        // }
-        changeCurrentPage("Not Track")
-      })
-      return () => {unsubscribe()}
-    }, [navigation])
-  )
-  // useEffect(() => {
-  //   console.log("useEffect run")
-  //   if(isUserListeningToRoom){
-  //     changeCurrentPage("Chatroom")
-  //   }
-  //   else {
-  //     changeCurrentPage("Not Track")
-  //   }
-  //   console.log(currentPage)
-  // }, [isUserListeningToRoom]);
-
-  // call when the screen is first opened
-  useEffect(() => {
-    // console.log('RoomID: ' + roomID);
-    getInitialProfileData();
-    getRoomDetails();
-    return () => {
-      changeCurrentPage("Not Track")
-    }
-  }, [])
-
-  // Use useEffect to scroll to the bottom when chatMessages change
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [chatMessages]);
-
-  useEffect(() => {
-    getMessages();
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [username, chatRefresh])
-
-  const goToRoomQueue = () => {
-    // Handle button press action here for the view queue button
-    navigation.navigate('RadioRoomQueue');
-  };
-
   const sendMessage = () => {
     if (message.trim() !== '') {
 
@@ -216,6 +162,68 @@ export const Chatroom = ({route, navigation}) => {
       }
     }
   };
+
+  // -------------------------------------------------------------------------------------------------Use Effects
+
+
+  //hide the usual musicPlayer if in chatroom. Instead, use the ChatroomMusicPlayer
+  //This is if clicking on the player will bring up the Track page, in which the djs can fast forward or something else
+  //If so, then TODO: implement fix on how to do the Music Player, Chatroom Music Player, and the Track Page.
+  //For now, disabled the ChatroomMusicPlayer pressable
+  useFocusEffect(
+    useCallback(() => {
+      const subscribe = navigation.addListener('focus', () => {
+          // console.log("UseCallback Run")
+          // console.log(currentPage)
+          changeCurrentPage("Chatroom")
+      })
+      const unsubscribe = navigation.addListener('blur', () => {
+        // const nextNavigationStateToVisit = navigation.getState()['routes'].at(-1)
+        // if (nextNavigationStateToVisit['name'] === 'Track'){
+        //   changeCurrentPage("Track")
+        // } else{
+        //   changeCurrentPage("Not Track")
+        // }
+        changeCurrentPage("Not Track")
+      })
+      return () => {unsubscribe()}
+    }, [navigation])
+  )
+
+  // useEffect(() => {
+  //   console.log("useEffect run")
+  //   if(isUserListeningToRoom){
+  //     changeCurrentPage("Chatroom")
+  //   }
+  //   else {
+  //     changeCurrentPage("Not Track")
+  //   }
+  //   console.log(currentPage)
+  // }, [isUserListeningToRoom]);
+
+  // call when the screen is first opened
+  useEffect(async () => {
+    // console.log('RoomID: ' + roomID);
+    await getInitialProfileData();
+    await getRoomDetails();
+    return () => {
+      changeCurrentPage("Not Track")
+    }
+  }, [])
+
+  // Use useEffect to scroll to the bottom when chatMessages change
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [chatMessages]);
+
+  useEffect(() => {
+    getMessages();
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [username, chatRefresh])
 
   return (
     <KeyboardAvoidingView
@@ -257,7 +265,12 @@ export const Chatroom = ({route, navigation}) => {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.viewQueueBtn} onPress={goToRoomQueue}>
+          <TouchableOpacity
+            style={styles.viewQueueBtn}
+            onPress={() => {
+              navigation.navigate('RadioRoomQueue');
+            }}
+          >
             <Text style={styles.buttonText}>View Queue</Text>
           </TouchableOpacity>
         </View>
@@ -269,6 +282,7 @@ export const Chatroom = ({route, navigation}) => {
               roomID={roomID}
               roomIsCurrentTrackPlaying={roomIsCurrentTrackPlaying}
               roomCurrentTrackID={roomCurrentTrackID}
+              isUserDJ={isUserDJ}
             />
             :
             <TouchableOpacity
