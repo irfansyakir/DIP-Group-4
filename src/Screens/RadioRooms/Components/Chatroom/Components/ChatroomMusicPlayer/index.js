@@ -30,7 +30,7 @@ const SongProgressBar = ({ currentTime, duration }) => {
     </View>
   )
 }
-export const ChatroomMusicPlayer = () => {
+export const ChatroomMusicPlayer = ({roomID, roomIsCurrentTrackPlaying, roomCurrentTrackID}) => {
   const screenWidth = Dimensions.get('window').width
   const songInfo = useMusicStore((state) => state.songInfo)
   const isPlaying = useMusicStore((state) => state.isPlaying)
@@ -48,6 +48,9 @@ export const ChatroomMusicPlayer = () => {
 
   const navigation = useNavigation()
   const insets = useSafeAreaInsets()
+
+
+
   const handleTrackClick = (trackId) => {
     const createSoundObject = async (uri) => {
       // clear previous song
