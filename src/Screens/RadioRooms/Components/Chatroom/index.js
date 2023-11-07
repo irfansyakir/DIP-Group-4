@@ -218,7 +218,7 @@ export const Chatroom = ({route, navigation}) => {
       {/* Chat box */}
       <View style={{
           height: 330,
-          backgroundColor: '#343434', // Change the color as needed
+          backgroundColor: COLORS.darkgrey, // Change the color as needed
           borderRadius: 10,
           padding: 20,
           marginBottom: 15,}}>
@@ -247,7 +247,7 @@ export const Chatroom = ({route, navigation}) => {
         color: COLORS.light, 
         fontSize: SIZES.medium, 
         padding: 15,
-        backgroundColor:'#343434',
+        backgroundColor: COLORS.darkgrey,
         borderRadius:10,}}
         placeholder="Message..."
         multiline={false} // Set to false for a single-line input

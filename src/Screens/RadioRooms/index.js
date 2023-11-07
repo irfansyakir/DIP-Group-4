@@ -106,7 +106,7 @@ export const RadioRooms = () => {
         style={{
           color: COLORS.light,
           fontSize: SIZES.small
-        }}>room description here blbeabadajsndkasndskl</Text>:<View></View>}
+        }}>room description here blbeabadajsndkasndskl</Text>:null}
         <Text style={{color: COLORS.yellow}}>
           100 LISTENING
         </Text>
@@ -128,7 +128,7 @@ export const RadioRooms = () => {
             color: "black",
             fontWeight: "bold",
           }} >Join Room</Text>
-        </TouchableOpacity>: <View></View>}
+        </TouchableOpacity>: null}
         
       </TouchableOpacity>
     </View>

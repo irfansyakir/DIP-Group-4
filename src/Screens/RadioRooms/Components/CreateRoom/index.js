@@ -1,22 +1,17 @@
 import React, { useState } from "react";
-//import { Image } from 'expo-image';
-import { Image, Text, View, TextInput, Button, 
-    StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
-import { CheckBox } from '@rneui/themed';
+import { Image, Text, View, TextInput,
+    StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView,} from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-
-import clouds from  '../../../../../assets/clouds.png'
-import raindrops from '../../../../../assets/raindrops.png'
-import palmTrees from '../../../../../assets/palmtrees.png'
-
-import {Stack} from "@rneui/layout";
-
+import { Ionicons } from "@expo/vector-icons";
+import { COLORS, SIZES } from "../../../../Constants";
+import { BoldText } from "../../../../Commons/UI/styledText";
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export const CreateRoom = ()=> {
-    
+    const insets = useSafeAreaInsets()
     const [selectedIndex, setIndex] = React.useState(0);
-
     const [text, onChangeText] = React.useState('');
+    const [desc, onChangeDesc] = React.useState('');
     const navigation = useNavigation(); // Initialize navigation
   /*  const showMessage = () => {
         const customMessage = "You are about to leave the page.";
@@ -36,152 +31,139 @@ export const CreateRoom = ()=> {
           { cancelable: true }
         );
       };
-
     const handleContainerClick = () => {
         // Navigate to "YourNewPage" screen when the container is clicked
         navigation.navigate('"Room"Room');
     };
 */
     return (
-        <View style={styles.container}>
-            <View style={styles.title}>
-                <Text>Create Room</Text>
-            </View>
-            <View style={styles.subtitle}>
-            <ScrollView>
-                <Text>Select a theme</Text>
-                <Image
-                    source={clouds} />
-                <Image
-                  source={palmTrees} />
-                <Image
-                  source={raindrops} />
-                <Text style={styles.subtitle}>Room Name</Text>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={onChangeText}
-                    value={text}
-                    placeholder="Type a room name..."
-                />
-                <Text style={styles.subtitle}>Room Description</Text>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={onChangeText}
-                    value={text}
-                    placeholder="Type a room description..."
-                />
-                <Text style={styles.subtitle}>Settings</Text>
-                <Text style={styles.setting}>Allow listeners to queue songs</Text>
-                <Stack row align="right" spacing={2}>
-                    <CheckBox
-                    checked={selectedIndex === 0}
-                    onPress={() => setIndex(0)}
-                    iconType="material-community"
-                    checkedIcon="radiobox-marked"
-                    uncheckedIcon="radiobox-blank"
-                    />
-                </Stack>
-                <Text style={styles.setting}>Invites only</Text>
-                <Stack row align="right" spacing={2}>
-                    <CheckBox
-                    checked={selectedIndex === 1}
-                    onPress={() => setIndex(1)}
-                    iconType="material-community"
-                    checkedIcon="radiobox-marked"
-                    uncheckedIcon="radiobox-blank"
-                    />
-                </Stack>
-                <View>
-                    <TouchableOpacity style={styles.buttonListen}>
-                        <Text style={styles.buttonText}>Start Listening</Text>
-                    </TouchableOpacity>
-                </View>
+    <View style={{
+        flex: 1,
+        justifyContent: 'start',
+        backgroundColor: COLORS.dark,
+        paddingTop: insets.top,
+        padding: 20,
+    }}>
+    <KeyboardAvoidingView
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    style={{flex:1,}}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
+    >
+
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{flexDirection: 'row', alignItems:'center',}}>
+        <Ionicons name='chevron-back' size={30} color={COLORS.grey} />
+        </TouchableOpacity>
+
+        <BoldText style={{ color: COLORS.light, fontSize: 25, marginVertical: 10,}}>
+          Create Room
+        </BoldText>
+
+        <ScrollView>
+            <BoldText style={styles.subtitle}>Select a theme</BoldText>
+            <ScrollView horizontal={true} style={{paddingBottom: 20}}>
+                <Image style={styles.image} source={require('../../../../../assets/clouds.png')} />
+                <Image style={styles.image} source={require('../../../../../assets/palmtrees.png')} />
+                <Image style={styles.image} source={require('../../../../../assets/raindrops.png')} />
             </ScrollView>
+            
+            <BoldText style={styles.subtitle}>Room Name</BoldText>
+            <TextInput
+                style={styles.input}
+                onChangeText={onChangeText}
+                value={text}
+                placeholder="Type a room name..."
+                placeholderTextColor={COLORS.grey}
+            />
+            <BoldText style={styles.subtitle}>Room Description</BoldText>
+            <TextInput
+                style={styles.input}
+                onChangeText={onChangeDesc}
+                value={desc}
+                placeholder="Type a room description..."
+                placeholderTextColor={COLORS.grey}
+            />
+
+            <BoldText style={styles.subtitle}>Settings</BoldText>
+
+            <View style = {styles.settingview}>
+                <Text style={styles.setting}>Allow listeners to queue songs</Text>
+                <TouchableOpacity onPress={()=> setIndex(0)}>
+                <View style={styles.radioout}>
+                    {selectedIndex ==0 ? <View style={styles.radioin}></View>: null}
+                </View>
+            </TouchableOpacity>
             </View>
-        </View>
-       
-        
+            
+            <View style = {styles.settingview}>
+            <Text style={styles.setting}>Invites only</Text>
+            <TouchableOpacity onPress={()=> setIndex(1)}>
+                <View style={styles.radioout}>
+                    {selectedIndex ==1 ? <View style={styles.radioin}></View>: null}
+                </View>
+            </TouchableOpacity>
+            </View>
+
+            {/* Start Listening Button */}
+            <TouchableOpacity style={{
+                marginTop: 30,
+                backgroundColor: COLORS.primary,
+                borderRadius: 50,
+                width: '75%',
+                height: 45,
+                justifyContent: 'center',
+                alignItems: 'center',
+                alignSelf: 'center',
+            }}>
+            <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium,}}>Start Listening</BoldText>
+            </TouchableOpacity>
+        </ScrollView>
+    </KeyboardAvoidingView>
+    </View>
             
     );
 }
 
 export const styles = StyleSheet.create({
-    background: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'start',//'space-between'
-        paddingTop: 80,
-        marginSide: 20,
-    },
-    title: {
-        fontWeight: 'bold',
-        color: 'white',
-        paddingLeft: 15,
-        fontSize: 20,
-        paddingTop: 20,
-    },
-    subtitle: {
-        fontWeight: 'bold',
-        color: 'white',
-        paddingLeft: 15,
-        fontSize: 18,
-        paddingTop: 20,
-    },
-    input: {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-        backgroundColor: 'slategrey',
-        borderRadius: 5,
-    },
-    setting: {
-        fontSize: 9,
-        color: 'white',
-
-    },
-    button: {
-        marginTop: 20,
-        backgroundColor: '#41BBC4',
-        borderRadius: 50,
-        width: 100,
-        height: 30,
-        justifyContent: 'center',
-        alignSelf: 'center',
-    },
-    buttonListen: {
-        marginTop: 30,
-        backgroundColor: '#41BBC4',
-        borderRadius: 50,
-        width: 300,
-        height: 45,
-        justifyContent: 'center',
-        alignSelf: 'center',
-    },
-    buttonBack: {
+    subtitle:{
+        color: COLORS.light, 
+        fontSize: SIZES.medium, 
         marginTop: 10,
-        backgroundColor: '#13151E',
-        borderRadius: 50,
-        width: 40,
+        marginBottom:10,
+    },image:{
+        width: 120,
+        height:120,
+        borderRadius:20,
+        marginRight:10,
+    }, input: {
+        color: COLORS.light,
+        fontSize: SIZES.sm,
         height: 40,
-        paddingLeft: 0,
-    },
-    buttonText: {
-        color: '#181414',
-        fontWeight: 'bold',
-        fontSize: 12,
-        textAlign: 'center',
-    },
-    emptyText: {
-        fontWeight: 'bold',
-        color: '#13151E',
-        paddingLeft: 15,
-        fontSize: 18,
+        padding: 10,
+        backgroundColor: COLORS.darkgrey,
+        borderRadius: 5,
+        marginBottom:15,
+    }, 
+
+    setting: {
+        fontSize: SIZES.medium,
+        color: COLORS.light,
+    }, settingview:{
+        flexDirection:'row', 
+        justifyContent:'space-between', 
+        alignItems:'center', 
+        marginVertical:10,
+        marginRight: 5,
+    },radioout:{
+        width:35,
+        height:35,
+        borderColor: COLORS.light,
+        borderRadius: 20,
+        borderWidth: 2.5,
+    }, radioin: { 
+        backgroundColor: COLORS.primary, 
+        height: 24, 
+        width: 24,
+        margin: 3,
+        borderRadius: 20,
     },
 });
