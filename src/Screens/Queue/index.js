@@ -14,6 +14,7 @@ import { red, white } from 'color-name';
 import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
 import { Play } from '../../Commons/Track/play'
 import { COLORS } from '../../Constants'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -26,6 +27,8 @@ export const Queue = ({navigation}) => {
     const storeQueue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
+
+    const insets = useSafeAreaInsets()
 
     // Generating list of songs from store
     const generateSongs = () => {        
@@ -68,18 +71,16 @@ export const Queue = ({navigation}) => {
     };
     
     return (
-        <GestureHandlerRootView style={styles.container}>
-            <TouchableOpacity style={{
-                position: 'absolute',
-                top: 25,
-                left: 26,
-                width: 20,
-                height: 20,
-                backgroundColor: 'red'
-            }} onPress={() => navigation.goBack()}>
-                {/* <Icon style={styles.icon} name='down'/> */}
-            </TouchableOpacity>
-            <Text style={styles.headerTxt}> Queue </Text>
+        <GestureHandlerRootView style={[styles.container, {
+            paddingTop: insets.top,
+            }]}>
+            <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16 }}>
+                <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => navigation.goBack()}>
+                    <Icon style={styles.icon} name='down'/>
+                </TouchableOpacity>
+                <Text style={styles.headerTxt}> Queue </Text>
+                <View style={{height:20, width:20}}></View>
+            </View>
             
             <Text style={[styles.subHeaderTxt, {marginBottom: 8}]}>Now Playing</Text>
             <View style={styles.playingNow}>
@@ -100,7 +101,7 @@ export const Queue = ({navigation}) => {
             <Text style={styles.subHeaderTxt}>Next In Queue</Text>
             {generateSongs()}
 
-            <View style={{height: 170}}><Play/></View>
+            <View style={{height: 170, alignItems: 'center'}}><Play/></View>
 
         </GestureHandlerRootView>
         
@@ -111,15 +112,12 @@ const styles = StyleSheet.create({
     container:{
         flex: 1,
         justifyContent: 'flex-start',
-        paddingTop: 10,
         backgroundColor: COLORS.dark,
     },  
     headerTxt: {
         fontSize: 20,
         fontWeight: 'bold',
         color: COLORS.white,
-        alignSelf: 'center',
-        margin: 10,
     },
     icon:{
         fontSize: 20,
