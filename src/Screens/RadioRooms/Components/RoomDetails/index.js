@@ -6,7 +6,7 @@ export const RoomDetails = ({route, navigation}) => {
 
     useEffect(() => {
         console.log('rooomname: ', roomName)
-        console.log('roomIDs: ', roomUserIDList)
+        console.log('roomUserIDs: ', roomUserIDList)
         console.log('roomDJs: ', roomDJIDList)
     }, []);
     return(

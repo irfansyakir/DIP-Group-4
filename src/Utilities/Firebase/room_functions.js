@@ -2,74 +2,47 @@ import {child, get, update, push, remove, ref} from "firebase/database";
 import {db, dbRef} from "../../../firebaseConfig"
 
 export async function room_updateRoom({roomID, roomName, roomDescription, themeImageUrl, last_message, last_message_timestamp, dj, isPublic, users, isOthersAddSongs}){
-  if (roomID === null && roomName === null && last_message === null && themeImageUrl == null && last_message_timestamp === null && isOthersAddSongs === null && roomDescription === null && dj === null && isPublic === null) {
+  if (roomID === null && roomName === null && last_message === null && themeImageUrl == null && last_message_timestamp === null && isOthersAddSongs === null && roomDescription === null && dj === null && isPublic === null && users === null) {
+    //this is atrocious but too lazy to change
     throw new Error("One or more required parameters are missing or empty in room_updateRoom.");
   }
   const updates = {};
 
-  if(roomID){
-    if(roomName){
-      updates[`/rooms/${roomID}/room_name`] = roomName
-    }
-    if(roomDescription){
-      updates[`/rooms/${roomID}/room_description`] = roomDescription
-    }
-    if(themeImageUrl){
-      updates[`/rooms/${roomID}/themeImageUrl`] = themeImageUrl
-    }
-    if(last_message){
-      updates[`/rooms/${roomID}/last_message`] = last_message
-    }
-    if(last_message_timestamp){
-      updates[`/rooms/${roomID}/last_message_timestamp`] = last_message
-    }
-    if(dj){
-      updates[`/rooms/${roomID}/dj`] = dj
-    }
-    if(isPublic){
-      updates[`/rooms/${roomID}/isPublic`] = isPublic
-    }
-    if(users){
-      updates[`/rooms/${roomID}/users`] = users
-    }
-    if(isOthersAddSongs){
-      updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
-    }
+  if(!roomID){
+    roomID = push(child(dbRef, `/rooms`)).key;
   }
-  else {
-    const newRoomId = push(child(dbRef, `/rooms`)).key;
-
-    if(roomName){
-      updates[`/rooms/${newRoomId}/room_name`] = roomName
-    }
-    if(roomDescription){
-      updates[`/rooms/${newRoomId}/room_description`] = roomDescription
-    }
-    if(themeImageUrl){
-      updates[`/rooms/${roomID}/themeImageUrl`] = themeImageUrl
-    }
-    if(last_message){
-      updates[`/rooms/${newRoomId}/last_message`] = last_message
-    }
-    if(last_message_timestamp){
-      updates[`/rooms/${newRoomId}/last_message_timestamp`] = last_message
-    }
-    if(dj){
-      updates[`/rooms/${newRoomId}/djList`] = dj
-    }
-    if(isPublic){
-      updates[`/rooms/${newRoomId}/isPublic`] = isPublic
-    }
-    if(isOthersAddSongs){
-      updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
-    }
-    if(users){
-      updates[`/rooms/${roomID}/users`] = users
-    }
+  if(roomName){
+    updates[`/rooms/${roomID}/room_name`] = roomName
+  }
+  if(roomDescription){
+    updates[`/rooms/${roomID}/room_description`] = roomDescription
+  }
+  if(themeImageUrl){
+    updates[`/rooms/${roomID}/themeImageUrl`] = themeImageUrl
+  }
+  if(last_message){
+    updates[`/rooms/${roomID}/last_message`] = last_message
+  }
+  if(last_message_timestamp){
+    updates[`/rooms/${roomID}/last_message_timestamp`] = last_message
+  }
+  if(dj){
+    updates[`/rooms/${roomID}/dj`] = dj
+  }
+  if(isPublic){
+    updates[`/rooms/${roomID}/isPublic`] = isPublic
+  }
+  if(users){
+    updates[`/rooms/${roomID}/users`] = users
+  }
+  if(isOthersAddSongs){
+    updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
   }
 
   try {
     await update(dbRef, updates)
+    //returns roomID
+    return roomID
     // await console.log("rooms updated successfully")
   }catch (e) {
     console.log(e)
@@ -118,6 +91,16 @@ export async function room_addUser({roomID, userID, username}){
     await update(dbRef, updates)
   }catch (e) {
     console.log("error in room_addUser")
+    throw e
+  }
+}
+
+export async function room_getAllRooms(){
+  try {
+    const snapshot = await get(child(dbRef, `/rooms`));
+    return await snapshot.val()
+  }catch (e) {
+    console.log(e)
     throw e
   }
 }

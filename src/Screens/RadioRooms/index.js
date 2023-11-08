@@ -35,11 +35,18 @@ export const RadioRooms = (currentPage) => {
     console.log("Fetching rooms...");
     room_getAllRooms()
       .then((roomData) => {
-        console.log("Rooms fetched:", roomData);
+        // console.log("Rooms fetched:", roomData);
+
         // Convert the object to an array
-        const roomsArray = Object.values(roomData);
+
+        let roomsArray = []
+        for (const [key, value] of Object.entries(roomData)) {
+          roomsArray.push({...value, id: key})
+        }
+        //need to do this due to database structure having the id as key because flatlist. This caused me 2 hours of pain
         // Shuffle rooms only when the component mounts or when rooms are fetched
         if (shuffledRooms.length === 0) {
+          // console.log(roomsArray)
           setShuffledRooms(shuffleArray(roomsArray));
         }
       })
@@ -77,7 +84,7 @@ export const RadioRooms = (currentPage) => {
     return shuffledArray;
   }
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }, obj) => (
     <View style={{
       flexDirection: "row",
       alignItems: "center",
@@ -204,7 +211,8 @@ export const RadioRooms = (currentPage) => {
         }}>Recommended for you</BoldText>
 
       <FlatList
-       data={shuffledRooms.slice(0, 5)} // Display a random selection of 5 rooms
+       // data={shuffledRooms.slice(0, 5)} // Display a random selection of 5 rooms
+        data={shuffledRooms} //for now display all rooms cuz easier debugging
        keyExtractor={(item) => item.id}
        renderItem={renderItem}
        style={{marginBottom:150}}

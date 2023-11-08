@@ -3,8 +3,6 @@ import { Image, Text, View, TextInput, Switch,
     StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView,} from 'react-native';
 // import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import {child, get, update, push} from "firebase/database";
-import {dbRef} from "../../../../../firebaseConfig";
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient';
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
@@ -20,58 +18,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 export const CreateRoom = ()=> {
     const insets = useSafeAreaInsets()
     const [selectedIndex, setIndex] = React.useState(0);
-
     const [roomName, setRoomName] = useState('');
     const [roomDescription, setRoomDescription] = useState('');
     const [themeImageUrl, setThemeImageUrl] = useState('');
     const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+    const [isPublic, setIsPublic] = useState(false)
+    const [isOthersAddSongs, setIsOthersAddSongs] = useState(false)
 
     const [isEnabled, setIsEnabled] = useState(false);
-    const toggleSwitch1 = () => {
-        setIsEnabled(previousState => !previousState);
-        setIsOthersAddSongs();
-    };
-
     const [isEnabled2, setIsEnabled2] = useState(false);
-    const toggleSwitch2 = () => {
-        setIsEnabled2(previousState => !previousState);
-        setIsPublic();
-    };
 
-    //You c
-
-    const setIsPublic = () => {
-        if (isPublic == 'yes') {
-            isPublic = 'no';
-            console.log('isPublic is a no')
-            //() => setIndex(0);
-        } else {
-            isPublic = 'yes';
-            console.log('isPublic is a yes')
-            //() => setIndex(1);
-        }
-    }
-
-    const setIsOthersAddSongs = () => {
-        if (isOthersAddSongs == 'yes') {
-            isOthersAddSongs = 'no';
-            console.log('isOthersAddSongs is a no')
-            //() => setIndex(0);
-        } else {
-            isOthersAddSongs = 'yes';
-            console.log('isOthersAddSongs is a yes')
-            //() => setIndex(1);
-        }
+    //have no idea what this is meant to do but its in the original code soo ill just recreate it
+    //use: toggleSwitch(setIsEnabled2) or toggleSwitch(setIsEnabled)
+    const toggleSwitch = (callbackFunction) => {
+      callbackFunction(previousState => !previousState)
     }
 
     const [selectedChoice, setSelectedChoice] = useState(null);
     const handleChoiceClick = (choice) => {
         setSelectedChoice(choice);
-        if (choice == 1) {
+        if (choice === 1) {
             setThemeImageUrl('clouds.png');
-        } else if (choice == 2) {
+        } else if (choice === 2) {
             setThemeImageUrl('palmTrees.png');
-        } else if (choice == 3) {
+        } else if (choice === 3) {
             setThemeImageUrl('raindrops.png');
         } else {
             setThemeImageUrl(uploadedImageUrl);
@@ -79,6 +49,8 @@ export const CreateRoom = ()=> {
         console.log(themeImageUrl);
       };
 
+
+    //TODO: don't forget to implement this for the front end
     const handleImageClick = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -91,50 +63,42 @@ export const CreateRoom = ()=> {
         }
     }
 
-    const handleStartListening = () => {
-        console.log(roomName)
-        if (roomName != '') {
+    //TODO: Get userID here, and put it under users in room_updateRoom, since every room MUST have at least 1 user (it being the creator)
+    //UserID can get from either profileStore (if its implemented) or spotify API prob.
+    const handleStartListening = async () => {
+        // console.log(roomName)
+        if (roomName) {
             console.log('creating room: ' + roomName);
-            console.log(roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
-            const roomID = push(child(dbRef, '/rooms')).key;
+            console.log('room details: ', roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
             room_updateRoom({
-                roomID: roomID,
                 roomName: roomName,
                 roomDescription: roomDescription,
                 themeImageUrl: themeImageUrl,
                 isPublic: isPublic,
                 isOthersAddSongs: isOthersAddSongs,
-            });
-            navigation.navigate('Chatroom', {
-                roomID: roomID,
             })
+              .then(roomID => {
+                navigation.navigate('Chatroom', {
+                  roomID: roomID,
+                })
+              });
         } else {
             console.log('no room name!');
         }
     }
 
     useEffect(() => {
-        console.log('hello')
-        //since there's no isPublic anywhere else in the code, this means tht u
-        //declared isPublic in useEffect. Yeee, don't do this
-        //use a useState instead bro
-        //const [isPublic, setIsPublic] = useState('no')
-        isPublic = 'no';
-        isOthersAddSongs = 'no';
-        console.log(isPublic, isOthersAddSongs)
+        //isPublic and isOthersAddSongs used to be declared here. Don't do that pls. Declare changeable variables on top level instead (using useState)
     }, [])
 
-    let callNameFunction = (e) => {
-        setRoomName(e)
-    }
+    //debugging purposes
+    useEffect(() => {
+      console.log("Data: ", roomName, roomDescription, themeImageUrl, isPublic, isOthersAddSongs)
+    }, [roomName, roomDescription, themeImageUrl, isPublic, isOthersAddSongs])
 
-    let callDescFunction = (e) => {
-        setRoomDescription(e)
-    }
 
-    const [text, onChangeText] = React.useState('');
-    const [desc, onChangeDesc] = React.useState('');
     const navigation = useNavigation(); // Initialize navigation
+
   /*  const showMessage = () => {
         const customMessage = "You are about to leave the page.";
         Alert.alert(
@@ -183,24 +147,46 @@ export const CreateRoom = ()=> {
         <ScrollView>
             <BoldText style={styles.subtitle}>Select a theme</BoldText>
             <ScrollView horizontal={true} style={{paddingBottom: 20}}>
-                <Image style={styles.image} source={require('../../../../../assets/clouds.png')} />
-                <Image style={styles.image} source={require('../../../../../assets/palmtrees.png')} />
-                <Image style={styles.image} source={require('../../../../../assets/raindrops.png')} />
+                <TouchableOpacity
+                  onPress={() => {
+                    setThemeImageUrl('clouds')
+                  }}
+                >
+                  <Image style={styles.image} source={clouds} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setThemeImageUrl('raindrops')
+                  }}
+                >
+                  <Image style={styles.image} source={raindrops} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setThemeImageUrl('palmTrees')
+                  }}
+                >
+                  <Image style={styles.image} source={palmTrees} />
+                </TouchableOpacity>
             </ScrollView>
 
             <BoldText style={styles.subtitle}>Room Name</BoldText>
             <TextInput
                 style={styles.input}
-                onChangeText={onChangeText}
-                value={text}
+                onChangeText={text => {
+                  setRoomName(text)
+                }}
+                value={roomName}
                 placeholder="Type a room name..."
                 placeholderTextColor={COLORS.grey}
             />
             <BoldText style={styles.subtitle}>Room Description</BoldText>
             <TextInput
                 style={styles.input}
-                onChangeText={onChangeDesc}
-                value={desc}
+                onChangeText={text => {
+                  setRoomDescription(text)
+                }}
+                value={roomDescription}
                 placeholder="Type a room description..."
                 placeholderTextColor={COLORS.grey}
             />
@@ -209,33 +195,56 @@ export const CreateRoom = ()=> {
 
           <View style = {styles.settingview}>
             <Text style={styles.setting}>Allow listeners to queue songs</Text>
-            <TouchableOpacity onPress={()=> setIndex(0)}>
+            <TouchableOpacity onPress={()=> setIsOthersAddSongs(true)}>
               <View style={styles.radioout}>
-                {selectedIndex ==0 ? <View style={styles.radioin}></View>: null}
+                {isOthersAddSongs ? <View style={styles.radioin}></View>: null}
               </View>
             </TouchableOpacity>
           </View>
 
           <View style = {styles.settingview}>
             <Text style={styles.setting}>Invites only</Text>
-            <TouchableOpacity onPress={()=> setIndex(1)}>
+            <TouchableOpacity onPress={()=> setIsOthersAddSongs(false)}>
               <View style={styles.radioout}>
-                {selectedIndex ==1 ? <View style={styles.radioin}></View>: null}
+                {!isOthersAddSongs ? <View style={styles.radioin}></View>: null}
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <BoldText style={styles.subtitle}>isPublic?</BoldText>
+
+          <View style = {styles.settingview}>
+            <Text style={styles.setting}>yes</Text>
+            <TouchableOpacity onPress={()=> setIsPublic(true)}>
+              <View style={styles.radioout}>
+                { isPublic ? <View style={styles.radioin}></View>: null}
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <View style = {styles.settingview}>
+            <Text style={styles.setting}>no</Text>
+            <TouchableOpacity onPress={()=> setIsPublic(false)}>
+              <View style={styles.radioout}>
+                { !isPublic ? <View style={styles.radioin}></View>: null}
               </View>
             </TouchableOpacity>
           </View>
 
           {/* Start Listening Button */}
-          <TouchableOpacity style={{
-            marginTop: 30,
-            backgroundColor: COLORS.primary,
-            borderRadius: 50,
-            width: '75%',
-            height: 45,
-            justifyContent: 'center',
-            alignItems: 'center',
-            alignSelf: 'center',
-          }}>
+          <TouchableOpacity
+            style={{
+              marginTop: 30,
+              backgroundColor: COLORS.primary,
+              borderRadius: 50,
+              width: '75%',
+              height: 45,
+              justifyContent: 'center',
+              alignItems: 'center',
+              alignSelf: 'center',
+            }}
+            onPress={handleStartListening}
+          >
             <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium,}}>Start Listening</BoldText>
           </TouchableOpacity>
         </ScrollView>

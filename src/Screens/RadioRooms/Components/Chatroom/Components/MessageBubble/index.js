@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { View, Text, } from 'react-native';
-import { COLORS, SIZES } from '../../../../Constants';
-import { BoldText } from '../../../../Commons/UI/styledText';
+import { COLORS, SIZES } from '../../../../../../Constants';
+import { BoldText } from '../../../../../../Commons/UI/styledText';
 
 const MessageBubble = ({ text, timestamp, right, username}) => {
 

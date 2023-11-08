@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { BackgroundImage } from '@rneui/base';
 
+import chatroomBackground from '../../../../../assets/RadioRoomBackground.jpg'
 
 import {useAuthStore} from '../../../../Store/useAuthStore'
 import MessageBubble from './Components/MessageBubble';
@@ -39,7 +40,7 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   const inset = useSafeAreaInsets();
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
-  const [roomName, setRoomName] = useState('');
+  const [roomName, setRoomName] = useState('Loading...');
   const [roomImage, setImage] = useState('');
 
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
@@ -47,8 +48,8 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   const [chatRefresh] = useMessageListener(roomID);
 
   //TODO: Change to use the one from useProfileStore (not implemented for now)
-  const [username, setUsername] = useState('');
-  const [userID, setUserID] = useState('');
+  const [username, setUsername] = useState('Loading...');
+  const [userID, setUserID] = useState('Loading...');
 
   // -------------------------------------------------------------------------------------------------Song Player Initialization
 
@@ -80,6 +81,8 @@ export const Chatroom = ({route, navigation, currentPage}) => {
       //console.error(error)
     }
   }
+
+  //TODO: Make sure that at least 1 user exist in roomDetails, otherwise got error "Possible unhandled promise rejection, cannot convert undefined value to object"
   const getRoomDetails = async () => {
     const roomDetails = await room_getRoom({roomID: roomID});
     // console.log('Room Name: '+ roomDetails["room_name"]);
@@ -178,7 +181,7 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   //If so, then TODO: implement fix on how to do the Music Player, Chatroom Music Player, and the Track Page.
   //For now, disabled the ChatroomMusicPlayer pressable
 
-  //Merging stuff with xinzhens code. Have no idea about this
+  //Merging stuff with xinzhens code. Have no idea will this be used or not
   // useFocusEffect(
   //   useCallback(() => {
   //     const subscribe = navigation.addListener('focus', () => {
@@ -211,10 +214,10 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   // }, [isUserListeningToRoom]);
 
   // call when the screen is first opened
-  useEffect(async () => {
+  useEffect( () => {
     // console.log('RoomID: ' + roomID);
-    await getInitialProfileData();
-    await getRoomDetails();
+    getInitialProfileData().then();
+    getRoomDetails().then();
     // return () => {
     //   changeCurrentPage("Not Track")
     // }
@@ -238,7 +241,7 @@ export const Chatroom = ({route, navigation, currentPage}) => {
 
 
   return (
-    <BackgroundImage source={require('./background.jpg')} blurRadius={5} style={{
+    <BackgroundImage source={chatroomBackground} blurRadius={5} style={{
     flex:1, padding:10, paddingTop: inset.top,}}>
       <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -263,7 +266,19 @@ export const Chatroom = ({route, navigation, currentPage}) => {
         alignItems: 'center',
         marginVertical: 15,
         width:'95%',}}>
-        <BoldText style={{fontSize: 25, color: 'white'}}>{roomName}</BoldText>
+
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('RoomDetails', {
+              roomName: roomName,
+              roomUserIDList: roomUserIDList,
+              roomDJIDList: roomDJIDList
+            });
+          }}
+        >
+          <BoldText style={{fontSize: 25, color: 'white'}}>{roomName}</BoldText>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={{
             paddingVertical:8,
@@ -272,13 +287,6 @@ export const Chatroom = ({route, navigation, currentPage}) => {
             backgroundColor: COLORS.primary,
             justifyContent: 'center',
             alignItems: 'center',
-          }}
-          onPress={() => {
-            navigation.navigate('RoomDetails', {
-              roomName: roomName,
-              roomUserIDList: roomUserIDList,
-              roomDJIDList: roomDJIDList
-            });
           }}
         >
           <BoldText style={{ color: COLORS.darkblue, fontSize: SIZES.medium,}}>View Queue</BoldText>

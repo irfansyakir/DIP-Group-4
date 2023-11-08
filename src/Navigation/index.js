@@ -78,8 +78,8 @@ function HomeTabs() {
     >
       <Tab.Screen name='Home' component={HomeStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='Search' component={SearchStackNavigator} options={{unmountOnBlur: true}}/>
-      {/*RadioRoom cannot be unmounted because of the music player. If got errors then check check this*/}
-      <Tab.Screen name='RadioRooms' component={RadioRoomStackNavigator}/>
+      {/*Really dont know if radioRoom can be unmounted or not. For now unmount*/}
+      <Tab.Screen name='RadioRooms' component={RadioRoomStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='Profile' component={ProfileStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='TestAPI' component={TestAPI} />
     </Tab.Navigator>
