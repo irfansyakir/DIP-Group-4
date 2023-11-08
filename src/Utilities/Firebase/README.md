@@ -24,6 +24,7 @@
   
   "rooms": {
     "room_id_1": {
+      "id": "room_id",
       "room_name": "inconspicuous group (real)",
       "last_message": "ghopper: Relay malfunction found. Cause: moth.",
       "last_message_timestamp": 1459361875666,
