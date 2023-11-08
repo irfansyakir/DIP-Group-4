@@ -12,6 +12,7 @@ import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import { Play } from './play'
 import { useMusicStore } from '../../Store/useMusicStore'
+import { useNavigation } from '@react-navigation/native'
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -19,9 +20,12 @@ const Icon = createIconSetFromIcoMoon(
   'icomoon.ttf'
 )
 
-export const Track = ({ navigation }) => {
+export const Track = ({   }) => {
   const songInfo = useMusicStore((state) => state.songInfo)
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
+  const navigation = useNavigation() // Initialize navigation
+
   useEffect(() => {
     return () => changeCurrentPage("Not Track")
   }, [])
@@ -70,7 +74,7 @@ export const Track = ({ navigation }) => {
               <Text style={styles.title}>{songInfo.songTitle}</Text>
               <Text style={styles.desc}>{songInfo.songArtist}</Text>
             </View>
-            <TouchableOpacity onPress={() => console.log('queue')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Queue')}>
               <Icon
                 style={[styles.icon, styles.marg]}
                 name='viewqueue'

@@ -163,16 +163,16 @@ export const Home = () => {
                   artist: artistNames,
                   img: queueData.currently_playing.album.images[0].url
               };
-              console.log(currPlaying.title)
 
               await queueData.queue.map((curr) => {
-              const queueArtistNames = curr.artists.map(artist => artist.name).join(', ');
+                const queueArtistNames = curr.artists.map(artist => artist.name).join(', ');
 
-              currQueue.push({
-                  id: curr.id,
-                  title: curr.name,
-                  artist: queueArtistNames,
-                  })
+                currQueue.push({
+                    id: curr.id,
+                    title: curr.name,
+                    artist: queueArtistNames,
+                    img: curr.album.images[0].url
+                    })
               })
           }
           changeQueue(currQueue)
@@ -196,11 +196,7 @@ export const Home = () => {
     useEffect(() => {
       if (userId) {
         userQueue_getQueue({userID: userId}).then(checkQueue => {
-          if (checkQueue) {
-            changeQueue(checkQueue)
-          } else {
-            getQueue()
-          }
+          checkQueue ? changeQueue(checkQueue) : getQueue()
         });
       }
     }, [userId])
