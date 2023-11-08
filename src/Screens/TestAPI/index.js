@@ -17,6 +17,7 @@ import {
   useIsCurrentTrackPlayingListener,
   useTimeOfLastPlayedListener
 } from "../../Utilities/Firebase/useFirebaseListener";
+import {room_addUser, room_removeUser, room_updateRoom} from "../../Utilities/Firebase/room_functions";
 
 export const TestAPI = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
@@ -114,6 +115,23 @@ export const TestAPI = () => {
         }}
       >
         setupCurrentTrack
+      </Button>
+
+      <Button
+        onPress={() => {
+          room_updateRoom({
+            roomID: "-NiAAvDkBNs6vHeQSOd7",
+            usersObject: {
+              "asiduhsfsdgu": {
+                username: "sdgfujbhihhd"
+              },
+              "as4590456094kldfgh90": {
+                username: "hijogni"
+              }
+            }})
+        }}
+      >
+        updateUsersInRoom
       </Button>
 
       <Button

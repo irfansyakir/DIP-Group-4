@@ -32,6 +32,21 @@ export function useIsCurrentTrackPlayingListener(roomID){
   return [isCurrentTrackPlaying]
 }
 
+export function useRoomTrackIDListener(roomID){
+  const [trackID, setTrackID] = useState()
+  const trackIDRef = ref(db, `/current_track/${roomID}/track_id`)
+
+  useEffect(() => {
+    onValue(trackIDRef, (snapshot) => {
+      const data = snapshot.val();
+      // console.log(data)
+      setTrackID(data)
+    });
+  }, []);
+
+  return [trackID]
+}
+
 export function useRoomCurrentQueue(roomID){
   const [currentQueue, setCurrentQueue] = useState()
   const currentQueueRef = ref(db, `/queue/${roomID}`)

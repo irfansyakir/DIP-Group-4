@@ -1,8 +1,8 @@
-import {child, get, update, push} from "firebase/database";
-import {dbRef} from "../../../firebaseConfig"
+import {child, get, update, push, remove, ref} from "firebase/database";
+import {db, dbRef} from "../../../firebaseConfig"
 
-export async function room_updateRoom({roomID, roomName, roomDescription, themeImageUrl, last_message, last_message_timestamp, djList, isPublic, isOthersAddSongs}){
-  if (roomID === null && roomName === null && roomDescription === null && last_message === null && themeImageUrl == null && last_message_timestamp === null && djList === null && isPublic === null && isOthersAddSongs == null) {
+export async function room_updateRoom({roomID, roomName, roomDescription, themeImageUrl, last_message, last_message_timestamp, dj, isPublic, users, isOthersAddSongs}){
+  if (roomID === null && roomName === null && last_message === null && themeImageUrl == null && last_message_timestamp === null && isOthersAddSongs === null && roomDescription === null && dj === null && isPublic === null) {
     throw new Error("One or more required parameters are missing or empty in room_updateRoom.");
   }
   const updates = {};
@@ -23,11 +23,14 @@ export async function room_updateRoom({roomID, roomName, roomDescription, themeI
     if(last_message_timestamp){
       updates[`/rooms/${roomID}/last_message_timestamp`] = last_message
     }
-    if(djList){
-      updates[`/rooms/${roomID}/djList`] = djList
+    if(dj){
+      updates[`/rooms/${roomID}/dj`] = dj
     }
     if(isPublic){
       updates[`/rooms/${roomID}/isPublic`] = isPublic
+    }
+    if(users){
+      updates[`/rooms/${roomID}/users`] = users
     }
     if(isOthersAddSongs){
       updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
@@ -51,14 +54,17 @@ export async function room_updateRoom({roomID, roomName, roomDescription, themeI
     if(last_message_timestamp){
       updates[`/rooms/${newRoomId}/last_message_timestamp`] = last_message
     }
-    if(djList){
-      updates[`/rooms/${newRoomId}/djList`] = djList
+    if(dj){
+      updates[`/rooms/${newRoomId}/djList`] = dj
     }
     if(isPublic){
       updates[`/rooms/${newRoomId}/isPublic`] = isPublic
     }
     if(isOthersAddSongs){
       updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
+    }
+    if(users){
+      updates[`/rooms/${roomID}/users`] = users
     }
   }
 
@@ -95,6 +101,42 @@ export async function room_removeRoom({roomID}){
     // await console.log("room deleted successfully")
   }catch (e) {
     console.log(e)
+    throw e
+  }
+}
+
+export async function room_addUser({roomID, userID, username}){
+  if (roomID === null || userID === null || username === null) {
+    throw new Error("One or more required parameters are missing or empty in room_addUser.");
+  }
+  const updates = {};
+  updates[`/rooms/${roomID}/users/${userID}`] = {
+    username: username
+  }
+
+  try {
+    await update(dbRef, updates)
+  }catch (e) {
+    console.log("error in room_addUser")
+    throw e
+  }
+}
+
+export async function room_removeUser({roomID, userID}){
+  if (roomID === null || userID === null) {
+    throw new Error("One or more required parameters are missing or empty in room_addUser.");
+  }
+  try {
+    remove(ref(db, `/rooms/${roomID}/users/${userID}`))
+      .then(() => {
+        console.log("user deleted from room successfully")
+      })
+      .catch(error => {
+        console.log("Error in deleting user")
+        throw error
+      });
+  }catch (e) {
+    console.log("error in room_addUser")
     throw e
   }
 }

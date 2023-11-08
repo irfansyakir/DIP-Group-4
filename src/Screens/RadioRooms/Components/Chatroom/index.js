@@ -1,38 +1,69 @@
-import React, { useState, useRef, useEffect } from 'react'; // Import useRef and useEffect
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Image } from 'expo-image'
-import { LinearGradient } from 'expo-linear-gradient'
-import { useAuthStore } from '../../../../Store/useAuthStore'
-import MessageBubble from './MessageBubble';
-import background from './background.jpg';
-import { GetCurrentUserProfile } from '../../../../Utilities/SpotifyApi/Utils'
-import { message_setMessage } from '../../../../Utilities/Firebase/messages_functions'
-import { message_getMessage } from '../../../../Utilities/Firebase/messages_functions';
-import {useMessageListener} from '../../../../Utilities/Firebase/useFirebaseListener';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import {room_getRoom} from '../../../../Utilities/Firebase/room_functions';
+import {LinearGradient} from 'expo-linear-gradient'
+import {useAuthStore} from '../../../../Store/useAuthStore'
+import MessageBubble from './Components/MessageBubble';
+import {GetCurrentUserProfile} from '../../../../Utilities/SpotifyApi/Utils'
+import {message_getMessage, message_setMessage} from '../../../../Utilities/Firebase/messages_functions'
+import {
+  useIsCurrentTrackPlayingListener,
+  useMessageListener,
+  useRoomTrackIDListener, useTimeOfLastPlayedListener
+} from '../../../../Utilities/Firebase/useFirebaseListener';
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {room_getRoom, room_updateRoom} from '../../../../Utilities/Firebase/room_functions';
+import {BoldText, MediumText} from "../../../../Commons/UI/styledText";
+import {useMusicStore} from "../../../../Store/useMusicStore";
+import {ChatroomMusicPlayer} from "./Components/ChatroomMusicPlayer";
+import {useFocusEffect} from "@react-navigation/native";
 
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
+  const accessToken = useAuthStore((state) => state.accessToken)
+
+  // -------------------------------------------------------------------------------------------------Chat Initialization
+
   const inset = useSafeAreaInsets();
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
-  const [username, setUsername] = useState('');
-  //const username = 'darkstealthexe'; // use this when unable to log in to spotify
-  const scrollViewRef = useRef(); // Create a ref for the ScrollView
-  const accessToken = useAuthStore((state) => state.accessToken)
-  const [chatRefresh] = useMessageListener(roomID);
   const [roomName, setRoomName] = useState('');
 
+  const scrollViewRef = useRef(); // Create a ref for the ScrollView
+
+  const [chatRefresh] = useMessageListener(roomID);
+
+  //TODO: Change to use the one from useProfileStore (not implemented for now)
+  const [username, setUsername] = useState('');
+  const [userID, setUserID] = useState('');
+
+  // -------------------------------------------------------------------------------------------------Song Player Initialization
+
+  //TODO: Resolve conflict between radioroom queue & user queue so that when radioroom song done playing can go to next radioroom song from any page
+
+  const currentPage = useMusicStore((state) => state.currentPage)
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
+  const [roomUserIDList, setRoomUserIDList] = useState([])
+  const [roomDJIDList, setRoomDJIDList] = useState([])
+  const [isUserListeningToRoom, setIsUserListeningToRoom] = useState(false)
+  const [isUserDJ, setIsUserDj] = useState(false)
+
+  const [roomCurrentTrackID] = useRoomTrackIDListener(roomID)
+  const [roomIsCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomID)
+  // const [timeOfLastPlayed, setTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
+
+  // -------------------------------------------------------------------------------------------------General Room Functions
+
+  //TODO: Delete getInitialProfileData after useProfileStore is implemented
   const getInitialProfileData = async () => {
     // fetch data on load
     try {
@@ -40,17 +71,23 @@ export const Chatroom = ({route, navigation}) => {
         accessToken: accessToken,
       })
       setUsername(profileData.display_name)
+      setUserID(profileData["id"])
     } catch (error) {
       //console.error(error)
     }
   }
-
   const getRoomDetails = async () => {
     const roomDetails = await room_getRoom({roomID: roomID});
-    console.log('Room Name: '+ roomDetails["room_name"]);
+    // console.log('Room Name: '+ roomDetails["room_name"]);
     setRoomName(roomDetails["room_name"]);
-  }
+    //every room MUST have a minimum of 1 user (that is the creator)
+    setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
+    // console.log(roomUserIDList)
+    setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
 
+    roomDetails["dj"].includes()
+  }
+  // -------------------------------------------------------------------------------------------------Message Functions
   const getMessages = async () => {
     // fetch messages from firebase
     try {
@@ -67,7 +104,7 @@ export const Chatroom = ({route, navigation}) => {
 
         // if the message's sender's username is the same as the current user's username,
         // the chat bubble will be on the right side
-        if (obj.username != username) {
+        if (obj.username !== username) {
           right = false;
         }
 
@@ -89,38 +126,6 @@ export const Chatroom = ({route, navigation}) => {
       console.error("Error while getting messages:", error);
     }
   }
-
-  // call when the screen is first opened
-  useEffect(() => {
-    console.log('RoomID: ' + roomID);
-    getInitialProfileData();
-    getRoomDetails();
-
-  }, [])
-
-
-
-
-  // Use useEffect to scroll to the bottom when chatMessages change
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [chatMessages]);
-
-  useEffect(() => {
-    getMessages();
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [username, chatRefresh])
-
-
-  const handleButtonPress = () => {
-    // Handle button press action here for the view queue button
-
-  };
-
   const sendMessage = () => {
     if (message.trim() !== '') {
 
@@ -141,7 +146,7 @@ export const Chatroom = ({route, navigation}) => {
       // Update the chatMessages state with the new message
       setChatMessages([...chatMessages, newMessage]);
 
-      console.log('sending message: ' + message);
+      // console.log('sending message: ' + message);
       message_setMessage( {
         roomID: roomID,
         username: username,
@@ -158,10 +163,73 @@ export const Chatroom = ({route, navigation}) => {
     }
   };
 
+  // -------------------------------------------------------------------------------------------------Use Effects
+
+
+  //hide the usual musicPlayer if in chatroom. Instead, use the ChatroomMusicPlayer
+  //This is if clicking on the player will bring up the Track page, in which the djs can fast forward or something else
+  //If so, then TODO: implement fix on how to do the Music Player, Chatroom Music Player, and the Track Page.
+  //For now, disabled the ChatroomMusicPlayer pressable
+  useFocusEffect(
+    useCallback(() => {
+      const subscribe = navigation.addListener('focus', () => {
+          // console.log("UseCallback Run")
+          // console.log(currentPage)
+          changeCurrentPage("Chatroom")
+      })
+      const unsubscribe = navigation.addListener('blur', () => {
+        // const nextNavigationStateToVisit = navigation.getState()['routes'].at(-1)
+        // if (nextNavigationStateToVisit['name'] === 'Track'){
+        //   changeCurrentPage("Track")
+        // } else{
+        //   changeCurrentPage("Not Track")
+        // }
+        changeCurrentPage("Not Track")
+      })
+      return () => {unsubscribe()}
+    }, [navigation])
+  )
+
+  // useEffect(() => {
+  //   console.log("useEffect run")
+  //   if(isUserListeningToRoom){
+  //     changeCurrentPage("Chatroom")
+  //   }
+  //   else {
+  //     changeCurrentPage("Not Track")
+  //   }
+  //   console.log(currentPage)
+  // }, [isUserListeningToRoom]);
+
+  // call when the screen is first opened
+  useEffect(async () => {
+    // console.log('RoomID: ' + roomID);
+    await getInitialProfileData();
+    await getRoomDetails();
+    return () => {
+      changeCurrentPage("Not Track")
+    }
+  }, [])
+
+  // Use useEffect to scroll to the bottom when chatMessages change
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [chatMessages]);
+
+  useEffect(() => {
+    getMessages();
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [username, chatRefresh])
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{
+        display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         paddingTop: inset.top,
@@ -180,18 +248,64 @@ export const Chatroom = ({route, navigation}) => {
 
 
         <View style={styles.topContainer}>
+
+          {/*RoomName*/}
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.roomName}>{roomName}</Text>
+            {/*<Text style={styles.roomName}>{roomName}</Text>*/}
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('RoomDetails', {
+                  roomName: roomName,
+                  roomUserIDList: roomUserIDList,
+                  roomDJIDList: roomDJIDList
+                });
+              }}
+            >
+              <BoldText style={styles.roomName}>{roomName}</BoldText>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.viewQueueBtn} onPress={handleButtonPress}>
+
+          <TouchableOpacity
+            style={styles.viewQueueBtn}
+            onPress={() => {
+              navigation.navigate('RadioRoomQueue');
+            }}
+          >
             <Text style={styles.buttonText}>View Queue</Text>
           </TouchableOpacity>
         </View>
 
-        {/*disabled for now.*/}
-        {/*<View style={styles.musicPlayer}>*/}
-        {/*  <Text>Music Player</Text>*/}
-        {/*</View>*/}
+        {/*Initial element will be something like: Click to tune in!*/}
+        <View style={styles.musicPlayerContainer}>
+          {isUserListeningToRoom ?
+            <ChatroomMusicPlayer
+              roomID={roomID}
+              roomIsCurrentTrackPlaying={roomIsCurrentTrackPlaying}
+              roomCurrentTrackID={roomCurrentTrackID}
+              isUserDJ={isUserDJ}
+            />
+            :
+            <TouchableOpacity
+              style={{
+                width: 120,
+                height: 40,
+                // width: '150',
+                // height: '100',
+                borderRadius: 17,
+                backgroundColor: '#41BBC4',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={() => {
+                setIsUserListeningToRoom(true)
+              }}
+            >
+              <MediumText>Click to tune in!</MediumText>
+
+            </TouchableOpacity>
+          }
+        </View>
+
 
         <View style={styles.roomCodeView}>
           <Text style={styles.roomCodeTitle}>Room Code</Text>
@@ -227,6 +341,32 @@ export const Chatroom = ({route, navigation}) => {
           value={message}
           onSubmitEditing={sendMessage}
         />
+        <TouchableOpacity
+          style={{...styles.viewQueueBtn, marginHorizontal:"50%"}}
+          onPress={() => {
+            room_updateRoom({
+              roomID:roomID,
+              isPublic:true,
+              dj: [
+                "user_id_1",
+                "user_id_2"
+              ],
+              users:{
+                user_id_1: {
+                  "username": "askofsf"
+                },
+                user_id_2: {
+                  "username": "ghjk"
+                },
+                user_id_3: {
+                  "username": "qwe"
+                }
+              }
+            })
+          }}
+        >
+          <Text style={styles.buttonText}>RoomDetailsTestReset</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -234,6 +374,7 @@ export const Chatroom = ({route, navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
+    // display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Purple_website.svg/1200px-Purple_website.svg.png")',
@@ -263,17 +404,18 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 16,
   },
-  musicPlayer: {
-    width: 380,
-    height: 114,
-    backgroundColor: '#303847', // Make sure to use a valid color code
-    borderRadius: 10,
-    marginLeft: 22,
-    marginRight: 22,
-    marginBottom: 20,
+  musicPlayerContainer: {
+    // width: Dimensions.get('window').width - 20,
+    marginVertical: 20,
+    height: 100,
+    // marginHorizontal: '50%',
+    backgroundColor: 'purple',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
   },
   roomCodeView: {
-    width: 380,
+    // width: 380,
     height: 64,
     backgroundColor: '#13151E', // Change the color as needed
     borderRadius: 10,
@@ -310,8 +452,7 @@ const styles = StyleSheet.create({
   },
 
   chatbox: {
-    width: 380,
-    height: 250,
+    flex: 1,
     backgroundColor: '#343434', // Change the color as needed
     borderRadius: 10,
     marginLeft: 22,
@@ -326,7 +467,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginLeft: 22,
     marginRight: 22,
-    marginBottom: '30%',
+    // marginBottom: '30%',
     paddingLeft: 10, // Add some left padding for the text input
   },
   background: {

@@ -21,11 +21,13 @@ import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 import { Queue } from '../Screens/Queue'
 import { Chatroom } from '../Screens/RadioRooms/Components/Chatroom'
 import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
+import { RadioRoomQueue } from '../Screens/RadioRooms/Components/RadioRoomQueue'
 import { RoomQueue } from '../Screens/RadioRooms/Components/RoomQueue'
 
 // Track
 import { Track } from '../Commons/Track/track'
 import { useMusicStore } from '../Store/useMusicStore'
+import {RoomDetails} from "../Screens/RadioRooms/Components/RoomDetails";
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
@@ -76,7 +78,8 @@ function HomeTabs() {
     >
       <Tab.Screen name='Home' component={HomeStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='Search' component={SearchStackNavigator} options={{unmountOnBlur: true}}/>
-      <Tab.Screen name='RadioRooms' component={RadioRoomStackNavigator} />
+      {/*RadioRoom cannot be unmounted because of the music player. If got errors then check check this*/}
+      <Tab.Screen name='RadioRooms' component={RadioRoomStackNavigator}/>
       <Tab.Screen name='Profile' component={ProfileStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='TestAPI' component={TestAPI} />
     </Tab.Navigator>
@@ -131,6 +134,8 @@ function RadioRoomStackNavigator(){
     <RadioRoomStack.Navigator screenOptions={{ headerShown: false }}>
       <RadioRoomStack.Screen name='RadioRoom' component={RadioRooms} />
       <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
+      <RadioRoomStack.Screen name='RoomDetails' component={RoomDetails} />
+      <RadioRoomStack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
       <RadioRoomStack.Screen name='Track' component={Track} />
       <RadioRoomStack.Screen name='Playlist' component={Playlist} />
       <RadioRoomStack.Screen name='RoomQueue' component={RoomQueue} />
@@ -160,6 +165,7 @@ export const Navigation = () => {
             <Stack.Screen name='Chatroom' component={Chatroom} />
             <Stack.Screen name='CreateRoom' component={CreateRoom} />
             <Stack.Screen name='Track' component={Track} />
+            <Stack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
