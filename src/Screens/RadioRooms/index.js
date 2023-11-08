@@ -14,13 +14,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BoldText } from "../../Commons/UI/styledText";
 import { COLORS, SIZES } from "../../Constants";
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useMusicStore } from '../../Store/useMusicStore'
 
-export const RadioRooms = () => {
+export const RadioRooms = (currentPage) => {
   const insets = useSafeAreaInsets()
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [shuffledRooms, setShuffledRooms] = useState([]);
   const navigation = useNavigation();
+
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
   useEffect(() => {
     console.log("Fetching rooms...");
     room_getAllRooms()
@@ -49,6 +53,7 @@ export const RadioRooms = () => {
     navigation.navigate('Chatroom', {
       roomID: roomId,
     })
+    changeCurrentPage('Chatroom')
   }
   function shuffleArray(array) {
     let shuffledArray = [...array];

@@ -20,8 +20,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {room_getRoom} from '../../../../Utilities/Firebase/room_functions';
 import { COLORS, SIZES } from '../../../../Constants';
 import { BoldText } from '../../../../Commons/UI/styledText';
+import { useMusicStore } from '../../../../Store/useMusicStore';
 
-export const Chatroom = ({route, navigation}) => {
+export const Chatroom = ({route, navigation, currentPage}) => {
   const { roomID } = route.params;
   const inset = useSafeAreaInsets();
   const [message, setMessage] = useState(''); // State to store the message text
@@ -33,6 +34,7 @@ export const Chatroom = ({route, navigation}) => {
   const [chatRefresh] = useMessageListener(roomID);
   const [roomName, setRoomName] = useState('');
   const [roomImage, setImage] = useState('');
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
 
   const getInitialProfileData = async () => {
     // fetch data on load
@@ -167,7 +169,10 @@ export const Chatroom = ({route, navigation}) => {
       >
 
       {/* back button */}
-      <TouchableOpacity onPress={() => navigation.goBack()} style={{flexDirection: 'row', alignItems:'center',}}>
+      <TouchableOpacity onPress={() => {
+        navigation.goBack()
+        changeCurrentPage('Radioroom')
+        }} style={{flexDirection: 'row', alignItems:'center',}}>
         <Ionicons name='chevron-back' size={30} color={COLORS.light} />
         <BoldText style= {{color: COLORS.light, fontSize: SIZES.medium}}>Leave Room</BoldText>
       </TouchableOpacity>
@@ -191,27 +196,31 @@ export const Chatroom = ({route, navigation}) => {
           <BoldText style={{ color: COLORS.darkblue, fontSize: SIZES.medium,}}>View Queue</BoldText>
         </TouchableOpacity>
       </View>
-
-      <ScrollView style={{flex:1, width:'100%',}}>
+      
       {/*disabled for now.*/}
-      <View style={{ height: 100,
-        backgroundColor: COLORS.darkblue, // Make sure to use a valid color code
+      <View style={{ height: 100, width:'100%',
         borderRadius: 10,
         marginBottom: 15, alignItems:'center', justifyContent:'center'}}>
        <Text style={{color:'white'}}>Music Player placeholder</Text>
       </View>
 
+      <ScrollView style={{flex:1, width:'100%',}}>
       {/* Room Code */}
       <View style={{
         height: 70,
         backgroundColor: COLORS.dark, // Change the color as needed
         borderRadius: 10,
         marginBottom: 15,
-        padding:15,}}>
-        <Text style={{color: 'white', fontSize: SIZES.small,}}>Room Code</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent:'space-between'}}>
-          <BoldText style={{ fontSize: SIZES.large,color: COLORS.light,}}>{roomID}</BoldText>
-          <Text style={{fontSize: SIZES.small, color: COLORS.yellow, marginRight:10}}>237 LISTENING</Text>
+        padding:15,
+        flexDirection: 'row',
+        justifyContent:'space-between',
+        alignItems:'center'}}>
+        <View style={{ flexDirection: 'column', }}>
+          <Text style={{color: 'white', fontSize: SIZES.small,}}>Room Code</Text>
+          <BoldText style={{ fontSize: SIZES.large,color: COLORS.light,}}>{roomID}</BoldText>   
+        </View>
+        <View style={{flexDirection:'row', alignItems:'center'}}>
+        <Text style={{fontSize: SIZES.small, color: COLORS.yellow, marginRight:10}}>237 LISTENING</Text>
         </View>
       </View>
 
