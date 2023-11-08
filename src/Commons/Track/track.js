@@ -83,7 +83,7 @@ export const Track = ({ navigation }) => {
               textShadowRadius: 3,
               maxHeight: 30,}}>{songInfo.songAlbum}</Text>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => {
                 changeCurrentPage(navigation.navigate('SearchClick'))
               }}
@@ -92,12 +92,12 @@ export const Track = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          <Image 
+          <Image
           style={{
             width: '90%',
             aspectRatio: 1,
             borderRadius: 10,
-            marginTop: 20,}} 
+            marginTop: 20,}}
             src={songInfo.coverUrl} />
 
           {/* TITLE, DESC, QUEUE BUTTON */}
@@ -122,7 +122,7 @@ export const Track = ({ navigation }) => {
                 /* Body 3 */
                 fontSize: 15,}}>{songInfo.songArtist}</Text>
             </View>
-            <TouchableOpacity onPress={() => console.log('queue')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Queue')}>
               <Icon
                 style={{
                   color: '#FFF',
@@ -133,7 +133,7 @@ export const Track = ({ navigation }) => {
               />
             </TouchableOpacity>
           </View>
-          
+
           {/* SLIDER, PLAY BUTTON */}
           <Play />
 

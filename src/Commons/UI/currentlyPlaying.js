@@ -4,9 +4,13 @@ import { LightText, MediumText } from './styledText'
 import { COLORS } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
-import { useEffect, useState } from 'react'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
+import { Audio } from 'expo-av'
+import { useAuthStore } from '../../Store/useAuthStore'
 
 const SongProgessBar = ({ currentTime, duration }) => {
     return (
@@ -31,15 +35,24 @@ const SongProgessBar = ({ currentTime, duration }) => {
 
 export function CurrentlyPlaying({ currentPage }) {
     const screenWidth = Dimensions.get('window').width
+    const accessToken = useAuthStore((state) => state.accessToken)
+
+    // music store
     const songInfo = useMusicStore((state) => state.songInfo)
     const isPlaying = useMusicStore((state) => state.isPlaying)
     const soundObject = useMusicStore((state) => state.soundObject)
+    const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+    const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const position = useMusicStore((state) => state.position)
     const changePosition = useMusicStore((state) => state.changePosition)
     const duration = useMusicStore((state) => state.duration)
     const changeDuration = useMusicStore((state) => state.changeDuration)
+
+    // queue store
+    const queue = useQueueStore((state) => state.queue)
+
     const navigation = useNavigation()
     const insets = useSafeAreaInsets()
 
@@ -59,17 +72,56 @@ export function CurrentlyPlaying({ currentPage }) {
         }
     }
 
+    const handleNextSong = (trackId) => {
+        const createSoundObject = async (uri) => {
+            // clear previous song
+            if (soundObject) {
+                changeIsPlaying(false)
+                soundObject.unloadAsync()
+            }
+            const { sound } = await Audio.Sound.createAsync({ uri: uri })
+            changeSoundObject(sound)
+            changeIsPlaying(true)
+        }
+
+        const getTrackData = async () => {
+            try {
+                const trackData = await GetTrack({
+                    accessToken: accessToken,
+                    trackId: trackId,
+                })
+                changeSongInfo(
+                    trackData.album.images[0].url,
+                    trackData.name,
+                    trackData.artists[0].name,
+                    trackData.album.name
+                )
+                createSoundObject(trackData.preview_url)
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
+        getTrackData()
+    }
+
     const updatePosition = async (intervalId) => {
         if (soundObject) {
             const status = await soundObject.getStatusAsync()
             changePosition(status.positionMillis)
             changeDuration(status.durationMillis)
 
+            // if currently playing song is completed
             if (status.positionMillis > status.durationMillis - 40) {
-                clearInterval(intervalId)
-                changeIsPlaying(false)
-                await soundObject.setPositionAsync(0)
-                changePosition(0)
+                if (queue.length !== 0) {
+                    clearInterval(intervalId)
+                    handleNextSong(queue.shift().id)
+                } else {
+                    clearInterval(intervalId)
+                    changeIsPlaying(false)
+                    await soundObject.setPositionAsync(0)
+                    changePosition(0)
+                }
             }
         }
     }
@@ -133,11 +185,18 @@ export function CurrentlyPlaying({ currentPage }) {
                     <View
                         aria-label='text box'
                         style={{
-                            flexGrow: 1,
                             display: 'flex',
+                            width: '90%',
                         }}
                     >
-                        <MediumText style={{ color: 'white', fontSize: 14 }}>
+                        <MediumText
+                            numberOfLines={1}
+                            ellipsizeMode='tail'
+                            style={{
+                                color: 'white',
+                                fontSize: 14,
+                            }}
+                        >
                             {songInfo.songTitle}
                         </MediumText>
                         <LightText
@@ -147,6 +206,7 @@ export function CurrentlyPlaying({ currentPage }) {
                         </LightText>
                     </View>
                     <TouchableOpacity
+                        style={{ paddingHorizontal: 5 }}
                         onPress={() => {
                             changeIsPlaying(!isPlaying)
                         }}
