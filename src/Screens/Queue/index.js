@@ -72,7 +72,7 @@ export const Queue = ({navigation}) => {
     
     return (
         <GestureHandlerRootView style={[styles.container, {
-            // paddingTop: insets.top,
+            paddingTop: insets.top,
             }]}>
             <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16 }}>
                 <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => navigation.goBack()}>
