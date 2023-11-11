@@ -5,7 +5,12 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import Slider from '@react-native-community/slider'
+import { useAuthStore } from '../../Store/useAuthStore'
 import { useMusicStore } from '../../Store/useMusicStore'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { COLORS } from '../../Constants'
+import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
+import { Audio } from 'expo-av'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -14,13 +19,28 @@ const Icon = createIconSetFromIcoMoon(
 )
 
 export const Play = () => {
+    const [localPosition, setLocalPosition] = useState(0)
+
+    // music store
     const isPlaying = useMusicStore((state) => state.isPlaying)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const position = useMusicStore((state) => state.position)
     const duration = useMusicStore((state) => state.duration)
     const changePosition = useMusicStore((state) => state.changePosition)
+    const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const soundObject = useMusicStore((state) => state.soundObject)
-    const [localPosition, setLocalPosition] = useState(0)
+    const isRepeat = useMusicStore((state) => state.isRepeat)
+    const changeIsRepeat = useMusicStore((state) => state.changeIsRepeat)
+    const songInfo = useMusicStore((state) => state.songInfo)
+    const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+    const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
+    const changeDuration = useMusicStore((state) => state.changeDuration)
+
+    // queue store
+    const queue = useQueueStore((state) => state.queue)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
+
+    const accessToken = useAuthStore((state) => state.accessToken)
 
     useEffect(() => {
         setLocalPosition(position)
@@ -51,6 +71,58 @@ export const Play = () => {
         await soundObject.setPositionAsync(value)
     }
 
+    const handlePrev = async () => {
+        changeIsPlaying(false)
+        await soundObject.setPositionAsync(0)
+        changePosition(0)
+        changeIsPlaying(true)
+    }
+
+    const handleNextSong = (trackId) => {
+        const createSoundObject = async (uri) => {
+            // clear previous song
+            if (soundObject) {
+                changeIsPlaying(false)
+                soundObject.unloadAsync()
+            }
+            const { sound } = await Audio.Sound.createAsync({ uri: uri })
+            changeSoundObject(sound)
+            changeIsPlaying(true)
+        }
+
+        const getTrackData = async () => {
+            try {
+                const trackData = await GetTrack({
+                    accessToken: accessToken,
+                    trackId: trackId,
+                })
+                changeSongInfo(
+                    trackData.album.images[0].url,
+                    trackData.name,
+                    trackData.artists[0].name,
+                    trackData.album.name
+                )
+                createSoundObject(trackData.preview_url)
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        changeIsPlaying(false)
+        getTrackData()
+    }
+
+    const handleNext = async () => {
+        if (queue.length !== 0) {
+            const currSong = queue[0]
+            changeQueue(queue.slice(1))
+            handleNextSong(currSong.id)
+        } else {
+            changeIsPlaying(false)
+            await soundObject.setPositionAsync(0)
+            changePosition(0)
+        }
+    }
+
     return (
         <View style={styles.container}>
             {/* SLIDER */}
@@ -78,7 +150,7 @@ export const Play = () => {
                     <Icon style={styles.icon} name='shuffle' size={25} />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handlePrev}>
                     <Icon style={styles.icon} name='back' size={30} />
                 </TouchableOpacity>
 
@@ -90,7 +162,7 @@ export const Play = () => {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleNext}>
                     <Icon
                         style={[styles.icon, styles.rot]}
                         name='back'
@@ -98,9 +170,11 @@ export const Play = () => {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => changeIsRepeat(!isRepeat)}>
                     <Icon
-                        style={[styles.icon, styles.rot]}
+                        style={{
+                            color: isRepeat ? COLORS.primary : COLORS.white,
+                        }}
                         name='repeat'
                         size={25}
                     />
