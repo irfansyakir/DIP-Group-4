@@ -1,6 +1,6 @@
 import { View, Image, TouchableOpacity, Pressable } from 'react-native'
 import { Dimensions } from 'react-native'
-import { LightText, MediumText, BoldText} from './styledText'
+import { LightText, MediumText, BoldText } from './styledText'
 import { COLORS, SIZES } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
@@ -13,7 +13,7 @@ const SongProgessBar = ({ currentTime, duration, currentPage }) => {
     return (
         <View
             style={{
-                height: currentPage === 'Chatroom' ? 7:4,
+                height: currentPage === 'Chatroom' ? 7 : 4,
                 backgroundColor: '#100D22',
                 borderRadius: 3,
             }}
@@ -101,9 +101,9 @@ export function CurrentlyPlaying({ currentPage }) {
                 width: screenWidth - 20,
                 left: 10,
                 right: 10,
-                height: currentPage === 'Chatroom' ? 100 :70,
-                bottom: currentPage === 'Chatroom'? 0:insets.bottom + 60,
-                top: currentPage === 'Chatroom' ? insets.top + 100: null,
+                height: currentPage === 'Chatroom' ? 100 : 70,
+                bottom: currentPage === 'Chatroom' ? 0 : insets.bottom + 60,
+                top: currentPage === 'Chatroom' ? insets.top + 100 : null,
                 transition: 'all 0.3s ease-out',
                 backgroundColor: COLORS.darkblue,
                 borderRadius: 10,
@@ -118,9 +118,14 @@ export function CurrentlyPlaying({ currentPage }) {
                 changeCurrentPage('Track')
             }}
         >
-            <Image style={{ 
-                width: currentPage === 'Chatroom' ? 70 :50, 
-                height: currentPage === 'Chatroom' ? 70 :50,  borderRadius: 5}} src={songInfo.coverUrl} />
+            <Image
+                style={{
+                    width: currentPage === 'Chatroom' ? 70 : 50,
+                    height: currentPage === 'Chatroom' ? 70 : 50,
+                    borderRadius: 5,
+                }}
+                src={songInfo.coverUrl}
+            />
             <View
                 aria-label='text and bar'
                 style={{
@@ -134,8 +139,11 @@ export function CurrentlyPlaying({ currentPage }) {
             >
                 <View
                     aria-label='text and play button box'
-                    style={{ display: 'flex', flexDirection: 'row', 
-                    marginVertical:currentPage === 'Chatroom' ? 10:5}}
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        marginVertical: currentPage === 'Chatroom' ? 10 : 5,
+                    }}
                 >
                     <View
                         aria-label='text box'
@@ -144,15 +152,26 @@ export function CurrentlyPlaying({ currentPage }) {
                             display: 'flex',
                         }}
                     >
-                        <BoldText style={{ 
-                            color: 'white', 
-                            fontSize: currentPage === 'Chatroom' ? SIZES.medium:SIZES.sm }}>
+                        <BoldText
+                            style={{
+                                color: 'white',
+                                fontSize:
+                                    currentPage === 'Chatroom'
+                                        ? SIZES.medium
+                                        : SIZES.sm,
+                            }}
+                        >
                             {songInfo.songTitle}
                         </BoldText>
                         <LightText
-                            style={{ 
-                                color: COLORS.light, 
-                                fontSize: currentPage === 'Chatroom' ? SIZES.sm:SIZES.small}}>
+                            style={{
+                                color: COLORS.light,
+                                fontSize:
+                                    currentPage === 'Chatroom'
+                                        ? SIZES.sm
+                                        : SIZES.small,
+                            }}
+                        >
                             {songInfo.songArtist}
                         </LightText>
                     </View>
@@ -161,19 +180,19 @@ export function CurrentlyPlaying({ currentPage }) {
                         onPress={() => {
                             changeIsPlaying(!isPlaying)
                         }}
-                        style={{marginRight:5}}
+                        style={{ marginRight: 5 }}
                     >
                         {/* update state for pause and play */}
                         {!isPlaying ? (
                             <Ionicons
                                 name='play'
-                                size={currentPage === 'Chatroom' ? 35 :24}
+                                size={currentPage === 'Chatroom' ? 35 : 24}
                                 color={COLORS.white}
                             />
                         ) : (
                             <Ionicons
                                 name='pause'
-                                size={currentPage === 'Chatroom' ? 35 :24}
+                                size={currentPage === 'Chatroom' ? 35 : 24}
                                 color={COLORS.white}
                             />
                         )}
@@ -189,4 +208,3 @@ export function CurrentlyPlaying({ currentPage }) {
         // </Animated.View>
     )
 }
-
