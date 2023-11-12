@@ -255,9 +255,7 @@ export const Chatroom = ({route, navigation}) => {
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('RoomDetails', {
-                  roomName: roomName,
-                  roomUserIDList: roomUserIDList,
-                  roomDJIDList: roomDJIDList
+                  roomID: roomID
                 });
               }}
             >

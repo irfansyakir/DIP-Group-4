@@ -16,14 +16,37 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS, SIZES } from "../../../../Constants";
 import { BoldText } from "../../../../Commons/UI/styledText";
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useProfileStore } from '../../../../Store/useProfileStore'
+import { useAuthStore } from '../../../../Store/useAuthStore'
+import { GetCurrentUserProfile } from '../../../../Utilities/SpotifyApi/Utils'
 
 
 export const CreateRoom = ()=> {
     const insets = useSafeAreaInsets()
+    const accessToken = useAuthStore((state) => state.accessToken)
     const [roomName, setRoomName] = useState('');
     const [roomDescription, setRoomDescription] = useState('');
     const [themeImageUrl, setThemeImageUrl] = useState('');
     const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+    const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
+    const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
+    const changeFollowers = useProfileStore((state) => state.changeFollowers)
+    const storeDisplayName = useProfileStore((state) => state.displayName)
+    const getInitialProfileData = async () => {
+        // fetch data on load
+        try {
+          const profileData = await GetCurrentUserProfile({
+            accessToken: accessToken,
+          })
+          changeDisplayName(profileData.display_name)
+          changeFollowers(profileData.followers.total)
+          changeProfileUrl(profileData.images[1].url)
+          console.log(storeDisplayName)
+        } catch (error) {
+          console.error(error)
+        }
+      }
+    //const storeProfileUrl = useProfileStore((state) => state.profileUrl)
     
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch1 = () => {
@@ -65,11 +88,11 @@ export const CreateRoom = ()=> {
     const handleChoiceClick = (choice) => {
         setSelectedChoice(choice);
         if (choice == 1) {
-            setThemeImageUrl('clouds.png');
+            setThemeImageUrl('clouds');
         } else if (choice == 2) {
-            setThemeImageUrl('palmTrees.png');
+            setThemeImageUrl('palmTrees');
         } else if (choice == 3) {
-            setThemeImageUrl('raindrops.png');
+            setThemeImageUrl('raindrops');
         } else {
             setThemeImageUrl(uploadedImageUrl);
         }
@@ -92,7 +115,7 @@ export const CreateRoom = ()=> {
         console.log(roomName)
         if (roomName != '') {
             console.log('creating room: ' + roomName);
-            console.log(roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
+            console.log(roomDescription, themeImageUrl, isPublic, isOthersAddSongs, storeDisplayName);
             const roomID = push(child(dbRef, '/rooms')).key;
             room_updateRoom({
                 roomID: roomID,
@@ -101,6 +124,8 @@ export const CreateRoom = ()=> {
                 themeImageUrl: themeImageUrl,
                 isPublic: isPublic,
                 isOthersAddSongs: isOthersAddSongs,
+                dj: [storeDisplayName],
+                users: [storeDisplayName, 'greg', 'ruihan'],
             });
             navigation.navigate('Chatroom', {
                 roomID: roomID,
@@ -111,11 +136,15 @@ export const CreateRoom = ()=> {
     }
 
     useEffect(() => {
-        console.log('hello')
+        console.log('helloooo')
         isPublic = 'no';
         isOthersAddSongs = 'no';
+        if (storeDisplayName == '') {
+            getInitialProfileData()
+        }
         setUploadedImageUrl(questionMark);
-        console.log(isPublic, isOthersAddSongs)
+        setSelectedChoice(1);
+        console.log(isPublic, isOthersAddSongs, storeDisplayName)
     }, [])
 
     let callNameFunction = (e) => {
