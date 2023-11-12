@@ -4,17 +4,22 @@ import React, { useEffect, useState } from 'react';
 import {child, get, update, push} from "firebase/database";
 import {dbRef} from "../../../../../firebaseConfig";
 import { Text, View, TextInput, Button, Switch, 
-    StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
+    StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView,} from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient';
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
 import clouds from  '../../../../../assets/clouds.png'
 import raindrops from '../../../../../assets/raindrops.png'
 import palmTrees from '../../../../../assets/palmtrees.png'
+import questionMark from '../../../../../assets/questionmark.png'
+import { Ionicons } from "@expo/vector-icons";
+import { COLORS, SIZES } from "../../../../Constants";
+import { BoldText } from "../../../../Commons/UI/styledText";
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 
 export const CreateRoom = ()=> {
-    
+    const insets = useSafeAreaInsets()
     const [roomName, setRoomName] = useState('');
     const [roomDescription, setRoomDescription] = useState('');
     const [themeImageUrl, setThemeImageUrl] = useState('');
@@ -35,7 +40,7 @@ export const CreateRoom = ()=> {
     const setIsPublic = () => {
         if (isPublic == 'yes') {
             isPublic = 'no';
-            console.log('isPublic is a no')
+            console.log('isPublic is a no blah')
             //() => setIndex(0);
         } else {
             isPublic = 'yes';
@@ -109,6 +114,7 @@ export const CreateRoom = ()=> {
         console.log('hello')
         isPublic = 'no';
         isOthersAddSongs = 'no';
+        setUploadedImageUrl(questionMark);
         console.log(isPublic, isOthersAddSongs)
     }, [])
 
@@ -147,44 +153,47 @@ export const CreateRoom = ()=> {
     };
 */
     return (
-        <View style={styles.container}>
-         <LinearGradient
-            colors={['grey', '#42559E', 'black']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            locations={[0, 0.3, 0.6]}
-            style={styles.background}/>
-            
+        <View style={{
+            flex: 1,
+            justifyContent: 'start',
+            backgroundColor: COLORS.dark,
+            paddingTop: insets.top + 20,
+            padding: 20,
+        }}>
+        <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{flex:1,}}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
+        >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{flexDirection: 'row', alignItems:'center',}}>
+        <Ionicons name='chevron-back' size={30} color={COLORS.grey} />
+        </TouchableOpacity>
             <ScrollView>
-            <View style={styles.body}>
-                <Text style={styles.title}>Create Room</Text>
-            </View>
-            <View style={styles.body}>
-                <Text style={styles.subtitle}>Select a theme</Text>
+            <BoldText style={{ color: COLORS.light, fontSize: 25, marginVertical: 10,}}>
+                Create Room
+            </BoldText>
+                <BoldText style={styles.subtitle}>Select a theme</BoldText>
                 <ScrollView
-                horizontal={true}
+                horizontal={true} style={{paddingBottom: 20}}
                 >
                 <TouchableOpacity
                         onPress={() => handleChoiceClick(1)}
-                        style={{
-                        borderWidth: 3,
-                        borderRadius: 10,
-                        borderColor: selectedChoice === 1 ? 'white' : 'transparent',
-                        }}
+                        style={[
+                            styles.imageFormat,
+                            {borderColor: selectedChoice === 1 ? COLORS.primary : 'transparent'},
+                        ]}
                     > 
-                <Image style={styles.themeImagestart}
+                <Image style={styles.themeImage}
                  source={clouds}
                  />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                         onPress={() => handleChoiceClick(2)}
-                        style={{
-                        marginLeft:25,
-                        borderWidth: 3,
-                        borderRadius: 10,
-                        borderColor: selectedChoice === 2 ? 'white' : 'transparent',
-                        }}
+                        style={[
+                            styles.imageFormat,
+                            {borderColor: selectedChoice === 2 ? COLORS.primary : 'transparent'},
+                            ]}
                     > 
                 <Image style={styles.themeImage}
                  source={palmTrees} 
@@ -193,12 +202,10 @@ export const CreateRoom = ()=> {
 
                 <TouchableOpacity
                         onPress={() => handleChoiceClick(3)}
-                        style={{
-                        marginLeft:25,
-                        borderWidth: 3,
-                        borderRadius: 10,
-                        borderColor: selectedChoice === 3 ? 'white' : 'transparent',
-                        }}
+                        style={[
+                            styles.imageFormat,
+                            {borderColor: selectedChoice === 3 ? COLORS.primary : 'transparent'},
+                            ]}
                     > 
                 <Image style={styles.themeImage}
                  source={raindrops} 
@@ -206,12 +213,10 @@ export const CreateRoom = ()=> {
                  </TouchableOpacity>
                  <TouchableOpacity
                         onPress={() => handleChoiceClick(4)}
-                        style={{
-                        marginLeft:25,
-                        borderWidth: 3,
-                        borderRadius: 10,
-                        borderColor: selectedChoice === 4 ? 'white' : 'transparent',
-                        }}
+                        style={[
+                            styles.imageFormat,
+                            {borderColor: selectedChoice === 4 ? COLORS.primary : 'transparent'},
+                            ]}
                     > 
                 <Image style={styles.themeImage}
                  source={themeImageUrl} 
@@ -225,30 +230,31 @@ export const CreateRoom = ()=> {
                             <Text style={styles.buttonPlustext}>Add a theme</Text>
                         </TouchableOpacity>
                  </ScrollView>
-                <Text style={styles.name}>Room Name</Text>
+                <BoldText style={styles.subtitle}>Room Name</BoldText>
                 <TextInput
                     style={styles.input}
                     onChangeText={callNameFunction}
                     value={roomName}
-                    placeholder="Enter a room name..."
+                    placeholder="Type a room name..."
+                    placeholderTextColor={COLORS.grey}
                 />
-                <Text style={styles.name}>Room Description</Text>
+                <BoldText style={styles.subtitle}>Room Description</BoldText>
                 <TextInput
                     style={styles.input}
                     onChangeText={callDescFunction}
                     value={roomDescription}
-                    placeholder="Enter a room description..."
+                    placeholder="Type a room description..."
+                    placeholderTextColor={COLORS.grey}
                 />
-                <Text style={styles.name}>Settings</Text>
+                <BoldText style={styles.subtitle}>Settings</BoldText>
                 <View
-                    style={{
-                    flexDirection: 'row',
-                    }}>
+                    style={styles.settingview}>
                 <Text style={styles.setting}>Allow listeners to queue songs</Text>
-                    <View style={{marginLeft: 130}}>
-                        <Switch style={{marginleft: 20}}
-                        trackColor={{false: '#767577', true: '#34bdeb'}}
-                        thumbColor={isEnabled ? '#83b7eb' : '#f4f3f4'}
+                    <View>
+                        <Switch
+                        style={{ transform: [{scaleX: 1.2}, {scaleY: 1.2}]}}
+                        trackColor={{false: '#767577', true: '#767577'}}
+                        thumbColor={isEnabled ? COLORS.primary : COLORS.light}
                         ios_backgroundColor="#3e3e3e"
                         onValueChange={toggleSwitch1}
                         value={isEnabled}
@@ -256,14 +262,13 @@ export const CreateRoom = ()=> {
                     </View>
                 </View>
                 <View
-                    style={{
-                    flexDirection: 'row',
-                    }}>
+                    style={styles.settingview}>
                 <Text style={styles.setting}>Invites only</Text>
-                    <View style={{marginLeft: 260}}>
+                    <View>
                         <Switch
-                        trackColor={{false: '#767577', true: '#34bdeb'}}
-                        thumbColor={isEnabled2 ? '#83b7eb' : '#f4f3f4'}
+                        style={{ transform: [{scaleX: 1.2}, {scaleY: 1.2}]}}
+                        trackColor={{false: '#767577', true: '#767577'}}
+                        thumbColor={isEnabled2 ? COLORS.primary : COLORS.light}
                         ios_backgroundColor="#3e3e3e"
                         onValueChange={toggleSwitch2}
                         value={isEnabled2}
@@ -272,11 +277,10 @@ export const CreateRoom = ()=> {
                 </View>
                 
                     <TouchableOpacity style={styles.buttonListen} onPress={handleStartListening}>
-                        <Text style={styles.buttonText}>Start Listening</Text>
+                    <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium,}}>Start Listening</BoldText>
                     </TouchableOpacity>
-
-            </View>
             </ScrollView>
+        </KeyboardAvoidingView>
         </View>
        
         
@@ -304,10 +308,10 @@ export const styles = StyleSheet.create({
         fontSize: 32,
     },
     subtitle: {
-        fontWeight: 'bold',
-        color: 'white',
-        fontSize: 18,
-        paddingBottom: 10,
+        color: COLORS.light, 
+        fontSize: SIZES.medium, 
+        marginTop: 10,
+        marginBottom: 10,
     },
     name: {
         fontWeight: 'bold',
@@ -319,31 +323,28 @@ export const styles = StyleSheet.create({
         paddingLeft: 15,
         paddingTop: 20,
     },
-    themeImagestart: {
-        width: 80,
-        height: 85,
-        justifyContent: 'left',
-        borderRadius: 10,
-    },
     themeImage: {
-        width: 80,
-        height: 85,
-        justifyContent: 'left',
-        borderRadius: 10,
+        width: 120,
+        height: 120,
+        borderRadius: 15,
     },
     input: {
+        color: COLORS.light,
+        fontSize: SIZES.sm,
         height: 40,
-        marginRight: 12,
-        marginTop: 10,
-        borderWidth: 1,
         padding: 10,
-        backgroundColor: 'grey',
+        backgroundColor: COLORS.darkgrey,
         borderRadius: 5,
+        marginBottom:15,
     },
     setting: {
-        fontSize: 15,
-        color: 'white',
-        marginTop: 11,
+        fontSize: SIZES.medium,
+        color: COLORS.light,
+    },
+    imageFormat: {
+        marginRight: 5,
+        borderWidth: 5,
+        borderRadius: 20,
     },
     button: {
         marginTop: 20,
@@ -354,22 +355,30 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignSelf: 'center',
     },
+    settingview:{
+        flexDirection:'row', 
+        justifyContent:'space-between', 
+        alignItems:'center', 
+        marginVertical:10,
+        marginRight: 5,
+    },
     imagebutton: {
         marginTop: 10,
         borderRadius: 50,
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 80,
         justifyContent: 'center',
         alignSelf: 'center',
         marginLeft:25,
     },
     buttonListen: {
         marginTop: 30,
-        backgroundColor: '#83b7eb',
+        backgroundColor: COLORS.primary,
         borderRadius: 50,
-        width: 300,
+        width: '75%',
         height: 45,
         justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
     },
     buttonBack: {
@@ -387,13 +396,17 @@ export const styles = StyleSheet.create({
         textAlign: 'center',
     },
     buttonPlus: {
-        color: '#FFFFFF',
-        fontSize: 30,
+        color: COLORS.light, 
+        fontSize: SIZES.xxLarge, 
+        marginTop: 1,
+        marginBottom: 1,
         textAlign: 'center',
     },
     buttonPlustext: {
-        color: '#FFFFFF',
-        fontSize: 15,
+        color: COLORS.light, 
+        fontSize: SIZES.medium, 
+        marginTop: 10,
+        marginBottom: 10,
         textAlign: 'center',
     },
     emptyText: {

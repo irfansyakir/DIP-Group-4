@@ -7,6 +7,7 @@ const COLORS = {
   dark: '#13151E',
   black: '#111111',
   grey: '#9A9A9A',
+  darkgrey: '#343434',
   trackLyrics: '#665959',
   trackBG: 'linear-gradient(180deg, #836E55 0%, #4C4134 48.44%, #15120F 100%)',
 }
