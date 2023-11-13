@@ -77,6 +77,13 @@ export const TestAPI = () => {
 
       <Button
         onPress={() => {
+          navigation.navigate('AddSong')
+        }}
+      >
+        Go to Add Song
+      </Button>
+      <Button
+        onPress={() => {
           navigation.navigate('RoomQueue')
         }}
       >

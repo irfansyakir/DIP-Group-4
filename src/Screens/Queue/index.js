@@ -10,11 +10,16 @@ import "react-native-gesture-handler";
 import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-gesture-handler';
 import { useQueueStore } from '../../Store/useQueueStore'
 import { useMusicStore } from '../../Store/useMusicStore'
+import { useAuthStore } from '../../Store/useAuthStore'
 import { red, white } from 'color-name';
 import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
 import { Play } from '../../Commons/Track/play'
 import { COLORS } from '../../Constants'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+    userQueue_getQueue,
+    userQueue_updateQueue,
+  } from '../../Utilities/Firebase/user_queue_functions'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -27,6 +32,7 @@ export const Queue = ({navigation}) => {
     const storeQueue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
+    const userId = useAuthStore((state) => state.userId)
 
     const insets = useSafeAreaInsets()
 
@@ -36,17 +42,20 @@ export const Queue = ({navigation}) => {
         <View style={{flex: 1}}>
             <DraggableFlatList
             data={storeQueue}
-            onDragEnd={({data}) => {changeQueue(data)}}
+            onDragEnd={({data}) => {
+                changeQueue(data)
+                userQueue_updateQueue({ userID: userId, userQueueList: data})
+            }}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             renderItem={({ item, drag, isActive }) => (
                 <View style={[styles.songInQ,
                     {backgroundColor: isActive ? COLORS.secondary : item.backgroundColor}
-                ]}
+                ]} 
                 >
-                    <View> 
-                        <Text style={styles.songName}>{item.title}</Text>
-                        <Text style={styles.artistName}>{item.artist}</Text>
+                    <View style={{flex: 1}}> 
+                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.songName}>{item.title}</Text>
+                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.artistName}>{item.artist}</Text>
                     </View>
                     <TouchableOpacity 
                         style={{
@@ -71,9 +80,7 @@ export const Queue = ({navigation}) => {
     };
     
     return (
-        <GestureHandlerRootView style={[styles.container, {
-            paddingTop: insets.top,
-            }]}>
+        <GestureHandlerRootView style={[styles.container, {paddingTop: insets.top,}]}>
             <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16 }}>
                 <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => navigation.goBack()}>
                     <Icon style={styles.icon} name='down'/>
@@ -101,7 +108,7 @@ export const Queue = ({navigation}) => {
             <Text style={styles.subHeaderTxt}>Next In Queue</Text>
             {generateSongs()}
 
-            <View style={{height: 170, alignItems: 'center'}}><Play/></View>
+            <View style={{height: 165, alignItems: 'center'}}><Play/></View>
 
         </GestureHandlerRootView>
         

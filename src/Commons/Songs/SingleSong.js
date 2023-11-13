@@ -1,10 +1,22 @@
-import { Text, TouchableOpacity, View, Image } from 'react-native'
+import { Text, TouchableOpacity, View, Image, Touchable } from 'react-native'
 import { COLORS, SIZES } from '../../Constants'
 import { Audio } from 'expo-av'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { debounce } from '../../Utilities/Functions/debounce'
+import { createIconSetFromIcoMoon } from '@expo/vector-icons'
+import { useQueueStore } from '../../Store/useQueueStore'
+import {
+  userQueue_getQueue,
+  userQueue_updateQueue,
+} from '../../Utilities/Firebase/user_queue_functions'
+
+const Icon = createIconSetFromIcoMoon(
+  require('../../../assets/icomoon/selection.json'),
+  'IcoMoon',
+  'icomoon.ttf'
+)
 
 export default function SingleSong({ item }) {
   const soundObject = useMusicStore((state) => state.soundObject)
@@ -12,6 +24,10 @@ export default function SingleSong({ item }) {
   const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
   const accessToken = useAuthStore((state) => state.accessToken)
+
+  const storeQueue = useQueueStore((state) => state.queue)
+  const changeQueue = useQueueStore((state) => state.changeQueue)
+  const userId = useAuthStore((state) => state.userId)
 
   const handleTrackClick = (trackId) => {
     const createSoundObject = async (uri) => {
@@ -36,7 +52,8 @@ export default function SingleSong({ item }) {
           trackData.album.images[0].url,
           trackData.name,
           trackData.artists[0].name,
-          trackData.album.name
+          trackData.album.name,
+          trackData.id
         )
         createSoundObject(trackData.preview_url)
       } catch (err) {
@@ -47,19 +64,35 @@ export default function SingleSong({ item }) {
     getTrackData()
   }
 
+  const addSongtoQ = () => { 
+    const addedSong = {
+      id: item.id,
+      title: item.title,
+      artist: item.artist,
+      img: item.coverUrl
+    }
+    const newQueue = [addedSong, ...storeQueue]
+
+    changeQueue(newQueue)
+    userQueue_updateQueue({
+      userID: userId,
+      userQueueList: newQueue,
+    })
+  }
+
+
   const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
   return (
-    <TouchableOpacity
-      key={item.id}
-      onPress={() => debouncedTrackClick(item.id)}
-    >
-      <View
+    <View key={item.id} style={{flex: 1, flexDirection: 'row', justifyContent:'space-between',}}>
+      <TouchableOpacity
         style={{
+          flex: 1,
           flexDirection: 'row',
           paddingVertical: 7,
           alignItems: 'center',
         }}
+        onPress={() => debouncedTrackClick(item.id)}
       >
         {/* SONG IMAGE */}
         <Image
@@ -73,7 +106,13 @@ export default function SingleSong({ item }) {
           </Text>
           <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <TouchableOpacity 
+        style={{justifyContent: 'center'}} 
+        onPress={() => addSongtoQ()}
+      >
+          <Icon style={{fontSize: 30, color: COLORS.white,}} name='addqueue'/>
+      </TouchableOpacity>
+    </View>
   )
 }

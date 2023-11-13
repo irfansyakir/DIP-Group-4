@@ -9,6 +9,7 @@ export const useMusicStore = create((set) => ({
         songTitle: '',
         songArtist: '',
         songAlbum: '',
+        songId: '',
     },
     currentPage: '',
     position: 0,
@@ -18,13 +19,14 @@ export const useMusicStore = create((set) => ({
     addToPlaylist: (track) => set(() => ({ playlist: [...playlist, track] })),
     clearPlaylist: () => set(() => ({ playlist: [] })),
     changeIsPlaying: (isPlaying) => set(() => ({ isPlaying: isPlaying })),
-    changeSongInfo: (url, title, artist, albumName) =>
+    changeSongInfo: (url, title, artist, albumName, id) =>
         set(() => ({
             songInfo: {
                 coverUrl: url,
                 songTitle: title,
                 songArtist: artist,
                 songAlbum: albumName,
+                songId: id,
             },
         })),
     changePosition: (pos) => set(() => ({ position: pos })),

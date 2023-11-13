@@ -83,13 +83,14 @@ export const Track = ({ navigation }) => {
               textShadowRadius: 3,
               maxHeight: 30,}}>{songInfo.songAlbum}</Text>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => {
-                changeCurrentPage(navigation.navigate('SearchClick'))
+                navigation.navigate('RoomQueue')
               }}
             >
-              <Icon style={{color: '#FFF'}} name='more' size={25} />
-            </TouchableOpacity>
+              <Icon style={{color: '#FFF', backgroundColor:'red'}} name='addqueue' size={25} />
+            </TouchableOpacity> */}
+            <View style={{height: 25, width: 25,}}></View>
           </View>
 
           <Image

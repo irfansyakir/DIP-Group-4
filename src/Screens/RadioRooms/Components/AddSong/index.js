@@ -6,53 +6,53 @@ import {
   FlatList,
   Image,
 } from 'react-native'
-import { COLORS, SIZES } from '../../Constants'
-import { BoldText, MediumText } from '../../Commons/UI/styledText'
+import { COLORS, SIZES } from '../../../../Constants'
+import { BoldText, MediumText } from '../../../../Commons/UI/styledText'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
 import { useState } from 'react'
 import { Audio } from 'expo-av'
-import { useAuthStore } from '../../Store/useAuthStore'
-import { SearchTrack } from '../../Utilities/SpotifyApi/Utils'
-import { useMusicStore } from '../../Store/useMusicStore'
-import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
-import { debounce } from '../../Utilities/Functions/debounce'
+import { useAuthStore } from '../../../../Store/useAuthStore'
+import { SearchTrack } from '../../../../Utilities/SpotifyApi/Utils'
+import { useMusicStore } from '../../../../Store/useMusicStore'
+import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
+import { debounce } from '../../../../Utilities/Functions/debounce'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-export const Search = () => {
-  const insets = useSafeAreaInsets()
-  const navigation = useNavigation() // Initialize navigation
+// export const AddSong = () => {
+//   const insets = useSafeAreaInsets()
+//   const navigation = useNavigation() // Initialize navigation
 
-  return (
-    <View style={{ backgroundColor: COLORS.dark, flex: 1 }}>
-      <View style={{ padding: 20, paddingTop: insets.top,}}>
-        <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
-          Search
-        </BoldText>
-        <TouchableOpacity
-          style={{
-            backgroundColor: COLORS.light,
-            padding: 10,
-            paddingLeft: 20,
-            marginTop: 15,
-            borderRadius: 7,
-            flexDirection: 'row',
-            alignItems: 'center',}}
-          activeOpacity={1}
-          onPress={() => {
-            navigation.navigate('SearchClick')
-          }}
-        >
-          <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
-          <MediumText style={{ marginLeft: 10 }}>Artists or Song</MediumText>
-        </TouchableOpacity>
-      </View>
-    </View>
-  )
-}
+//   return (
+//     <View style={{ backgroundColor: COLORS.dark, flex: 1 }}>
+//       <View style={{ padding: 20, paddingTop: insets.top,}}>
+//         <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
+//           Search
+//         </BoldText>
+//         <TouchableOpacity
+//           style={{
+//             backgroundColor: COLORS.light,
+//             padding: 10,
+//             paddingLeft: 20,
+//             marginTop: 15,
+//             borderRadius: 7,
+//             flexDirection: 'row',
+//             alignItems: 'center',}}
+//           activeOpacity={1}
+//           onPress={() => {
+//             navigation.navigate('SearchClick')
+//           }}
+//         >
+//           <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
+//           <MediumText style={{ marginLeft: 10 }}>Artists or Song</MediumText>
+//         </TouchableOpacity>
+//       </View>
+//     </View>
+//   )
+// }
 
 // search fr fr
-export const SearchClick = () => {
+export const AddSong = () => {
   const insets = useSafeAreaInsets()
   // Initialize navigation
   const navigation = useNavigation()
@@ -60,6 +60,10 @@ export const SearchClick = () => {
   const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
   const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+
+  // take the store queue and save in firebase
+  // const storeQueue = useQueueStore((state) => state.queue)
+  // userQueue_updateRoomQueue({ roomID: roomID, userRoomQueueList: storeQueue})
 
   const backButton = () => {
     navigation.goBack()
