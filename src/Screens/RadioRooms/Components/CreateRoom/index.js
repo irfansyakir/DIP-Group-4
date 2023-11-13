@@ -32,6 +32,7 @@ export const CreateRoom = ()=> {
     const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
     const changeFollowers = useProfileStore((state) => state.changeFollowers)
     const storeDisplayName = useProfileStore((state) => state.displayName)
+    const storeProfileUrl = useProfileStore((state) => state.profileUrl)
     const getInitialProfileData = async () => {
         // fetch data on load
         try {
@@ -41,7 +42,7 @@ export const CreateRoom = ()=> {
           changeDisplayName(profileData.display_name)
           changeFollowers(profileData.followers.total)
           changeProfileUrl(profileData.images[1].url)
-          console.log(storeDisplayName)
+          console.log(storeDisplayName, storeProfileUrl)
         } catch (error) {
           console.error(error)
         }
@@ -124,8 +125,28 @@ export const CreateRoom = ()=> {
                 themeImageUrl: themeImageUrl,
                 isPublic: isPublic,
                 isOthersAddSongs: isOthersAddSongs,
-                dj: [storeDisplayName],
-                users: [storeDisplayName, 'greg', 'ruihan'],
+                //dj: [storeDisplayName],
+                //users: [storeDisplayName, 'greg', 'ruihan'],
+                dj:{
+                    "username": {
+                    0: storeDisplayName,
+                    },
+                    "profileUrl": {
+                    0: storeProfileUrl,
+                    },
+                },
+                users:{
+                    "username": {
+                    0: storeDisplayName,
+                    1: "greg",
+                    2: "ruihan",
+                    },
+                    "profileUrl": {
+                    0: storeProfileUrl,
+                    1: storeProfileUrl,
+                    2: storeProfileUrl,
+                    },
+                }
             });
             navigation.navigate('Chatroom', {
                 roomID: roomID,

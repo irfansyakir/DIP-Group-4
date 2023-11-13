@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { Image, Text, View, TextInput, Switch,
+import { Image, Text, View, FlatList, Switch,
     StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView,} from 'react-native';
 // import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -25,7 +25,9 @@ export const RoomDetails = ({route, navigation}) => {
     const [roomDescription, setRoomDescription] = useState('')
     const [roomThemeImgURL, setRoomThemeImgURL] = useState('')
     const [roomUserIDList, setRoomUserIDList] = useState([])
+    const [roomProfileUrlList, setRoomProfileUrlList] = useState([])
     const [roomDJIDList, setRoomDJIDList] = useState([])
+    const [roomDJProfileUrlList, setRoomDJProfileUrlList] = useState([])
     const insets = useSafeAreaInsets()
 
     useEffect(() => {
@@ -35,7 +37,9 @@ export const RoomDetails = ({route, navigation}) => {
         console.log('roomdescription: ', roomDescription)
         console.log('roomthemeURL: ', roomThemeImgURL)
         console.log('roomUserIDs: ', roomUserIDList)
+        console.log('roomProfileUrls: ', roomProfileUrlList)
         console.log('roomDJs: ', roomDJIDList)
+        console.log('roomDJProfileUrls: ', roomDJProfileUrlList)
     }, []);
 
     const handleButtonClick = () => {
@@ -64,9 +68,12 @@ export const RoomDetails = ({route, navigation}) => {
         setRoomThemeImgURL(themeImageUrl);
       }
       //every room MUST have a minimum of 1 user (that is the creator)
-      setRoomUserIDList(roomDetails["users"] ? roomDetails["users"] : [])
+      //setRoomUserIDList(roomDetails["users"] ? roomDetails["users"] : [])
+      setRoomUserIDList(roomDetails["users"]["username"] ? roomDetails["users"]["username"] : [])
+      setRoomProfileUrlList(roomDetails["users"]["profileUrl"] ? roomDetails["users"]["profileUrl"] : [])
       // console.log(roomUserIDList)
-      setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
+      setRoomDJIDList(roomDetails["dj"]["username"] ? roomDetails["dj"]["username"] : [])
+      setRoomDJProfileUrlList(roomDetails["dj"]["profileUrl"] ? roomDetails["dj"]["profileUrl"] : [])
     }
 
     return (
@@ -98,19 +105,41 @@ export const RoomDetails = ({route, navigation}) => {
           {roomDescription}
         </Text>
 
+        <View>
+        <Text style={{ color: COLORS.light, fontSize: 15, paddingVertical: 6, marginLeft: 10}}>DJs:</Text></View>
         <View style={styles.header}>
-        <Text style={{ color: COLORS.dark, fontSize: 15, marginLeft: 10}}>
-        DJs: {roomDJIDList.map((element, index) => (
-                `\n${index + 1}. ${element}`
-              ))}
-        </Text>
+        <FlatList
+          data={roomDJIDList}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <View style={styles.row} key={index}>
+              <Image
+                source={{ uri: roomDJProfileUrlList[index] }}
+                style={styles.profileImage}
+              />
+              <Text style={styles.text}>{`${item}`}</Text>
+            </View>
+          )}
+        />
+
         </View>
+        <View>
+        <Text style={{ color: COLORS.light, fontSize: 15, paddingVertical: 6, marginLeft: 10}}>Users:</Text></View>
         <View style={styles.header1}>
-        <Text style={{ color: COLORS.dark, fontSize: 15, paddingVertical: 6, marginLeft: 10}}>
-        Users: {roomUserIDList.map((element, index) => (
-                `\n${index + 1}. ${element}`
-              ))}
-        </Text>
+        <FlatList
+          data={roomUserIDList}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <View style={styles.row} key={index}>
+              <Image
+                source={{ uri: roomProfileUrlList[index] }}
+                style={styles.profileImage}
+              />
+              <Text style={styles.text}>{`${item}`}</Text>
+            </View>
+          )}
+        />
+
         </View>
 
         <TouchableOpacity
@@ -158,5 +187,20 @@ export const styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'left',
     flexDirection: 'row',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  text: {
+    color: COLORS.dark,
+    fontSize: 15,
+    marginLeft: 10,
+  },
+  profileImage: {
+    width: 50, // Adjust the width as needed
+    height: 50, // Adjust the height as needed
+    marginRight: 10, // Add margin to separate image and text
   },
 });
