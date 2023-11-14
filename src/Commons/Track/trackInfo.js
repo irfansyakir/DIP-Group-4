@@ -5,7 +5,7 @@ import { useFonts } from 'expo-font';
 import { createIconSetFromIcoMoon } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { BackgroundImage } from '@rneui/base'
-import { queue_addToQueue, queue_updateQueue } from '../../Utilities/Firebase/queue_functions';
+import { room_queue_updateQueue } from '../../Utilities/Firebase/room_queue_functions';
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -41,7 +41,7 @@ export const TrackInfo = () => {
   const handleClick = () => {
     if(trackId){
       // const roomID='123qweasd'
-      queue_updateQueue({queueList: ["05XoZNL3OMdegGO0SnrHWD", "05XoZNL3OMdegGO0SnrHWDsdf", "05XoZNL3OMdegGO0SnrHWDsdjhfb"]})
+      room_queue_updateQueue({queueList: ["05XoZNL3OMdegGO0SnrHWD", "05XoZNL3OMdegGO0SnrHWDsdf", "05XoZNL3OMdegGO0SnrHWDsdjhfb"]})
       navigation.navigate('Track', {setpop: true})
     }
   }

@@ -6,40 +6,23 @@ import {
   GetUserPlaylists,
 } from '../../Utilities/SpotifyApi/Utils'
 import { useAuthStore } from '../../Store/useAuthStore'
+import { useQueueStore } from '../../Store/useQueueStore'
 import { useNavigation } from '@react-navigation/native'
 import {
-  user_addToRoom,
-  user_getRooms,
-  user_removeFromRooms,
-  user_removeUser,
-} from '../../Utilities/Firebase/user_functions'
-import {
-  room_getRoom,
-  room_removeRoom,
-  room_updateRoom,
-} from '../../Utilities/Firebase/room_functions'
-import {
-  message_getMessage,
-  message_setMessage,
-} from '../../Utilities/Firebase/messages_functions'
-import {
-  current_track_getCurrentTrack,
   current_track_updateCurrentTrack,
 } from '../../Utilities/Firebase/current_track_functions'
 import { useEffect, useState } from 'react'
-import {
-  queue_getQueue,
-  queue_updateQueue,
-} from '../../Utilities/Firebase/queue_functions'
 import { useSpotifyRefresh } from '../../Utilities/SpotifyApi/useSpotifyAuthenticate'
 import {
   useIsCurrentTrackPlayingListener,
   useTimeOfLastPlayedListener
 } from "../../Utilities/Firebase/useFirebaseListener";
+import {room_addUser, room_removeUser, room_updateRoom} from "../../Utilities/Firebase/room_functions";
 
 export const TestAPI = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const signOut = useAuthStore((state) => state.signOut)
+  const delStoreQueue = useQueueStore((state) => state.delStoreQueue)
 
   const navigation = useNavigation() // Initialize navigation
 
@@ -94,10 +77,17 @@ export const TestAPI = () => {
 
       <Button
         onPress={() => {
-          navigation.navigate('Queue')
+          navigation.navigate('AddSong')
         }}
       >
-        Go to Queue
+        Go to Add Song
+      </Button>
+      <Button
+        onPress={() => {
+          navigation.navigate('RoomQueue')
+        }}
+      >
+        Go to Room Queue
       </Button>
       <Button
         onPress={() => {
@@ -106,7 +96,7 @@ export const TestAPI = () => {
       >
         Go to Playlist
       </Button>
-      <Button title={'Log Out'} onPress={signOut} />
+      <Button title={'Log Out'} onPress={() => {signOut(); delStoreQueue()}} />
       <Button
         onPress={() => {
           navigation.navigate('Chatroom')
@@ -132,6 +122,23 @@ export const TestAPI = () => {
         }}
       >
         setupCurrentTrack
+      </Button>
+
+      <Button
+        onPress={() => {
+          room_updateRoom({
+            roomID: "-NiAAvDkBNs6vHeQSOd7",
+            usersObject: {
+              "asiduhsfsdgu": {
+                username: "sdgfujbhihhd"
+              },
+              "as4590456094kldfgh90": {
+                username: "hijogni"
+              }
+            }})
+        }}
+      >
+        updateUsersInRoom
       </Button>
 
       <Button

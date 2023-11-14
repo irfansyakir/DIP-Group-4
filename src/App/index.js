@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useEffect } from 'react'
+import {Fragment, useEffect} from 'react'
 import { Text } from 'react-native'
 import { Navigation } from '../Navigation'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
