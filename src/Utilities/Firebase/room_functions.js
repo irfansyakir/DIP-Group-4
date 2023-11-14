@@ -11,31 +11,31 @@ export async function room_updateRoom({roomID, roomName, roomDescription, themeI
   if(!roomID){
     roomID = push(child(dbRef, `/rooms`)).key;
   }
-  if(roomName){
+  if(roomName !== undefined){
     updates[`/rooms/${roomID}/room_name`] = roomName
   }
-  if(roomDescription){
+  if(roomDescription !== undefined){
     updates[`/rooms/${roomID}/room_description`] = roomDescription
   }
-  if(themeImageUrl){
+  if(themeImageUrl !== undefined){
     updates[`/rooms/${roomID}/themeImageUrl`] = themeImageUrl
   }
-  if(last_message){
+  if(last_message !== undefined){
     updates[`/rooms/${roomID}/last_message`] = last_message
   }
-  if(last_message_timestamp){
+  if(last_message_timestamp !== undefined){
     updates[`/rooms/${roomID}/last_message_timestamp`] = last_message
   }
-  if(dj){
+  if(dj !== undefined){
     updates[`/rooms/${roomID}/dj`] = dj
   }
-  if(isPublic){
+  if(isPublic !== undefined){
     updates[`/rooms/${roomID}/isPublic`] = isPublic
   }
-  if(users){
+  if(users !== undefined){
     updates[`/rooms/${roomID}/users`] = users
   }
-  if(isOthersAddSongs){
+  if(isOthersAddSongs !== undefined){
     updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
   }
 

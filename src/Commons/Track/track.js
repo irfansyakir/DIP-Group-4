@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import { Text, View, Image, TouchableOpacity, ScrollView } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useFonts } from 'expo-font'
@@ -18,11 +18,13 @@ const Icon = createIconSetFromIcoMoon(
 export const Track = ({ navigation }) => {
     const insets = useSafeAreaInsets()
     const songInfo = useMusicStore((state) => state.songInfo)
+    const [previousPage, setPreviousPage] = useState('')
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
 
     useEffect(() => {
         const routes = navigation.getState()?.routes
         const prevRoute = routes[routes.length - 2]
+        setPreviousPage(prevRoute.name)
         return () => changeCurrentPage(prevRoute.name)
     }, [])
 
@@ -178,7 +180,7 @@ export const Track = ({ navigation }) => {
                         </View>
 
                         {/* SLIDER, PLAY BUTTON */}
-                        <Play />
+                        <Play previousPage={previousPage}/>
 
                         {/* LYRICS */}
                         <View

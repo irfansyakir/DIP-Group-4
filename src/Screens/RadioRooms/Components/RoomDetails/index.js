@@ -20,7 +20,7 @@ import { room_getRoom } from '../../../../Utilities/Firebase/room_functions';
 export const RoomDetails = ({route, navigation}) => {
     //can just make this page look like the telegram room details
     const { roomID } = route.params;
-    //const { roomName, roomUserIDList, roomDJIDList } = route.params;
+    // const { roomName, roomUserIDList, roomDJIDList } = route.params;
     const [roomName, setRoomName] = useState('')
     const [roomDescription, setRoomDescription] = useState('')
     const [roomThemeImgURL, setRoomThemeImgURL] = useState('')
@@ -54,7 +54,7 @@ export const RoomDetails = ({route, navigation}) => {
 
     const getRoomDetails = async () => {
       const roomDetails = await room_getRoom({roomID: roomID});
-      // console.log('Room Name: '+ roomDetails["room_name"]);
+      console.log(roomDetails)
       setRoomName(roomDetails["room_name"]);
       setRoomDescription(roomDetails["room_description"]);
       themeImageUrl = roomDetails["themeImageUrl"]

@@ -1,43 +1,13 @@
-import {ref, onValue} from "firebase/database";
-import {db, dbRef} from "../../../firebaseConfig"
+import {onValue, ref} from "firebase/database";
+import {db} from "../../../firebaseConfig"
 import {useEffect, useState} from "react";
-
-export function useTimeOfLastPlayedListener(roomID){
-  const [timeOfLastPlayed, setTimeOfLastPlayed] = useState(0)
-
-  const timeOfLastPlayedRef = ref(db, `/current_track/${roomID}/time_of_last_played`)
-
-  useEffect(() => {
-    onValue(timeOfLastPlayedRef, (snapshot) => {
-      const data = snapshot.val();
-      setTimeOfLastPlayed(data)
-    });
-  }, []);
-
-  return [timeOfLastPlayed]
-}
-export function useIsCurrentTrackPlayingListener(roomID){
-  const [isCurrentTrackPlaying, setIsCurrentTrackPlaying] = useState(false)
-
-  const isCurrentTrackPlayingRef = ref(db, `/current_track/${roomID}/is_current_track_playing`)
-
-  useEffect(() => {
-    onValue(isCurrentTrackPlayingRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setIsCurrentTrackPlaying(data)
-    });
-  }, []);
-
-  return [isCurrentTrackPlaying]
-}
 
 export function useRoomTrackIDListener(roomID){
   const [trackID, setTrackID] = useState()
   const trackIDRef = ref(db, `/current_track/${roomID}/track_id`)
 
   useEffect(() => {
-    onValue(trackIDRef, (snapshot) => {
+    return onValue(trackIDRef, (snapshot) => {
       const data = snapshot.val();
       // console.log(data)
       setTrackID(data)
@@ -47,27 +17,12 @@ export function useRoomTrackIDListener(roomID){
   return [trackID]
 }
 
-export function useRoomCurrentQueue(roomID){
-  const [currentQueue, setCurrentQueue] = useState()
-  const currentQueueRef = ref(db, `/queue/${roomID}`)
-
-  useEffect(() => {
-    onValue(currentQueueRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setCurrentQueue(data)
-    });
-  }, []);
-
-  return [currentQueue]
-}
-
 export function useUserCurrentQueue(userID){
   const [userQueue, setUserQueue] = useState()
   const userQueueRef = ref(db, `/user_queue/${userID}`)
 
   useEffect(() => {
-    onValue(userQueueRef, (snapshot) => {
+    return onValue(userQueueRef, (snapshot) => {
       const data = snapshot.val();
       // console.log(data)
       setUserQueue(data)
@@ -82,7 +37,7 @@ export function useMessageListener(roomID){
   const messagesRef = ref(db, `/messages/${roomID}`)
 
   useEffect(() => {
-    onValue(messagesRef, (snapshot) => {
+    return onValue(messagesRef, (snapshot) => {
       const data = snapshot.val();
       // console.log(data)
       setMessages(data)
@@ -97,7 +52,7 @@ export function useRoomListener(roomID){
   const roomRef = ref(db, `/rooms/${roomID}`)
 
   useEffect(() => {
-    onValue(roomRef, (snapshot) => {
+    return onValue(roomRef, (snapshot) => {
       const data = snapshot.val();
       // console.log(data)
       setRoom(data)
@@ -112,7 +67,7 @@ export function useUserListener(userID){
   const userRef = ref(db, `/users/${userID}`)
 
   useEffect(() => {
-    onValue(userRef, (snapshot) => {
+    return onValue(userRef, (snapshot) => {
       const data = snapshot.val();
       // console.log(data)
       setUser(data)
@@ -121,3 +76,49 @@ export function useUserListener(userID){
 
   return [user]
 }
+
+export function useTimeOfLastPlayedListener(roomID){
+  const [timeOfLastPlayed, setTimeOfLastPlayed] = useState(0)
+
+  const timeOfLastPlayedRef = ref(db, `/current_track/${roomID}/time_of_last_played`)
+
+  useEffect(() => {
+    return onValue(timeOfLastPlayedRef, (snapshot) => {
+      const data = snapshot.val();
+      setTimeOfLastPlayed(data)
+    });
+  }, []);
+
+  return [timeOfLastPlayed]
+}
+export function useIsCurrentTrackPlayingListener(roomID){
+  const [isCurrentTrackPlaying, setIsCurrentTrackPlaying] = useState(false)
+
+  const isCurrentTrackPlayingRef = ref(db, `/current_track/${roomID}/is_current_track_playing`)
+
+  useEffect(() => {
+    return onValue(isCurrentTrackPlayingRef, (snapshot) => {
+      const data = snapshot.val();
+      // console.log(data)
+      setIsCurrentTrackPlaying(data)
+    });
+  }, []);
+
+  return [isCurrentTrackPlaying]
+}
+
+export function useRoomCurrentQueue(roomID){
+  const [currentQueue, setCurrentQueue] = useState()
+  const currentQueueRef = ref(db, `/queue/${roomID}`)
+
+  useEffect(() => {
+    return onValue(currentQueueRef, (snapshot) => {
+      const data = snapshot.val();
+      // console.log(data)
+      setCurrentQueue(data)
+    });
+  }, []);
+
+  return [currentQueue]
+}
+

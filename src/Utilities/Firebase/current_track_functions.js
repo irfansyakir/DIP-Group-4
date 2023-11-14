@@ -7,18 +7,14 @@ export async function current_track_updateCurrentTrack({roomID, trackId, timeOfL
   }
   const updates = {};
 
-  if(trackId){
+  if(trackId !== undefined) {
     updates[`/current_track/${roomID}/track_id`] = trackId
   }
-  if(timeOfLastPlayed){
+  if(timeOfLastPlayed !== undefined){
     updates[`/current_track/${roomID}/time_of_last_played`] = timeOfLastPlayed
-  } else{
-    updates[`/current_track/${roomID}/time_of_last_played`] = 0
   }
-  if(isCurrentTrackPlaying){
+  if(isCurrentTrackPlaying !== undefined){
     updates[`/current_track/${roomID}/is_current_track_playing`] = isCurrentTrackPlaying
-  } else {
-    updates[`/current_track/${roomID}/is_current_track_playing`] = false
   }
 
   try {

@@ -1,7 +1,7 @@
 // Music player bar used in track.js
 
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import {StyleSheet, Text, View, TouchableOpacity, Alert} from 'react-native'
 import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import Slider from '@react-native-community/slider'
@@ -18,7 +18,7 @@ const Icon = createIconSetFromIcoMoon(
     'icomoon.ttf'
 )
 
-export const Play = () => {
+export const Play = ({previousPage}) => {
     const [localPosition, setLocalPosition] = useState(0)
 
     // music store
@@ -36,11 +36,18 @@ export const Play = () => {
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeDuration = useMusicStore((state) => state.changeDuration)
 
+    const radioRoom_isDJ = useMusicStore((state) => state.radioRoom_isDJ)
+
     // queue store
     const queue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
 
     const accessToken = useAuthStore((state) => state.accessToken)
+
+    useEffect(() => {
+        console.log(previousPage)
+
+    }, []);
 
     useEffect(() => {
         setLocalPosition(position)
@@ -63,22 +70,63 @@ export const Play = () => {
     }
 
     const togglePlay = () => {
-        changeIsPlaying(!isPlaying)
+        if(previousPage !== 'Chatroom'){
+            changeIsPlaying(!isPlaying)
+        }else{
+            if(radioRoom_isDJ){
+                changeIsPlaying(!isPlaying)
+            } else {
+                Alert.alert('Dj permissions', 'Not a DJ',
+                  [
+                    {text: 'OK :(', onPress: () => console.log('OK Pressed')},
+                    ]
+                )
+            }
+        }
     }
 
     const handleSlider = async (value) => {
-        changePosition(value)
-        await soundObject.setPositionAsync(value)
+        if(previousPage !== 'Chatroom'){
+            changePosition(value)
+            await soundObject.setPositionAsync(value)
+        }else{
+            if(radioRoom_isDJ){
+                changePosition(value)
+                await soundObject.setPositionAsync(value)
+            } else {
+                Alert.alert('Dj permissions', 'Not a DJ',
+                  [
+                      {text: 'OK :(', onPress: () => console.log('OK Pressed')},
+                  ]
+                )
+            }
+        }
     }
 
     const handlePrev = async () => {
-        changeIsPlaying(false)
-        await soundObject.setPositionAsync(0)
-        changePosition(0)
-        changeIsPlaying(true)
+        if(previousPage !== 'Chatroom'){
+            changeIsPlaying(false)
+            await soundObject.setPositionAsync(0)
+            changePosition(0)
+            changeIsPlaying(true)
+        }else{
+            if(radioRoom_isDJ){
+                changeIsPlaying(false)
+                await soundObject.setPositionAsync(0)
+                changePosition(0)
+                changeIsPlaying(true)
+            } else {
+                Alert.alert('Dj permissions', 'Not a DJ',
+                  [
+                      {text: 'OK :(', onPress: () => console.log('OK Pressed')},
+                  ]
+                )
+            }
+        }
     }
 
     const handleNextSong = (trackId) => {
+
         const createSoundObject = async (uri) => {
             // clear previous song
             if (soundObject) {
@@ -112,14 +160,34 @@ export const Play = () => {
     }
 
     const handleNext = async () => {
-        if (queue.length !== 0) {
-            const currSong = queue[0]
-            changeQueue(queue.slice(1))
-            handleNextSong(currSong.id)
-        } else {
-            changeIsPlaying(false)
-            await soundObject.setPositionAsync(0)
-            changePosition(0)
+        if(previousPage !== 'Chatroom'){
+            if (queue.length !== 0) {
+                const currSong = queue[0]
+                changeQueue(queue.slice(1))
+                handleNextSong(currSong.id)
+            } else {
+                changeIsPlaying(false)
+                await soundObject.setPositionAsync(0)
+                changePosition(0)
+            }
+        }else{
+            if(radioRoom_isDJ){
+                if (queue.length !== 0) {
+                    const currSong = queue[0]
+                    changeQueue(queue.slice(1))
+                    handleNextSong(currSong.id)
+                } else {
+                    changeIsPlaying(false)
+                    await soundObject.setPositionAsync(0)
+                    changePosition(0)
+                }
+            } else {
+                Alert.alert('Dj permissions', 'Not a DJ',
+                  [
+                      {text: 'OK :(', onPress: () => console.log('OK Pressed')},
+                  ]
+                )
+            }
         }
     }
 

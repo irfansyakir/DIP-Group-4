@@ -24,18 +24,20 @@
   
   "rooms": {
     "room_id_1": {
-      "id": "room_id",
       "room_name": "inconspicuous group (real)",
+      "room_description": 'asdasfsdfg',
       "last_message": "ghopper: Relay malfunction found. Cause: moth.",
       "last_message_timestamp": 1459361875666,
       "isPublic": true,
+      "themeImageUrl": 'https....',
       "dj": [
         "user_id_1", 
         "user_id_2"
       ],
       "users": {
         "user_id_1": {
-          "username": "askofsf"
+          "username": "askofsf",
+          "owner": true
         },
         "user_id_2": {
           "username": "ghjk"

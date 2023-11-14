@@ -11,12 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'
 import { BackgroundImage } from '@rneui/base';
+import * as Clipboard from 'expo-clipboard';
 
 import chatroomBackground from '../../../../../assets/RadioRoomBackground.jpg'
 
 import {useAuthStore} from '../../../../Store/useAuthStore'
 import MessageBubble from './Components/MessageBubble';
-import {GetCurrentUserProfile} from '../../../../Utilities/SpotifyApi/Utils'
+import {GetCurrentUserProfile, GetTrack} from '../../../../Utilities/SpotifyApi/Utils'
 import {message_getMessage, message_setMessage} from '../../../../Utilities/Firebase/messages_functions'
 import {
   useIsCurrentTrackPlayingListener,
@@ -27,18 +28,19 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {room_getRoom, room_updateRoom} from '../../../../Utilities/Firebase/room_functions';
 import {BoldText, MediumText} from "../../../../Commons/UI/styledText";
 import {useMusicStore} from "../../../../Store/useMusicStore";
-import {ChatroomMusicPlayer} from "./Components/ChatroomMusicPlayer";
 
 import { useQueueStore } from '../../../../Store/useQueueStore'
 import { userQueue_getQueue } from '../../../../Utilities/Firebase/user_queue_functions'
 
 import { COLORS, SIZES } from '../../../../Constants';
 import {useFocusEffect} from "@react-navigation/native";
+import {current_track_updateCurrentTrack} from "../../../../Utilities/Firebase/current_track_functions";
+import {useProfileStore} from "../../../../Store/useProfileStore";
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
   const accessToken = useAuthStore((state) => state.accessToken)
 
-  // -------------------------------------------------------------------------------------------------Chat Initialization
+  // -------------------------------------------------------------------------------------------------Chat Initializations
 
   const inset = useSafeAreaInsets();
   const [message, setMessage] = useState(''); // State to store the message text
@@ -46,31 +48,42 @@ export const Chatroom = ({route, navigation}) => {
   const [roomName, setRoomName] = useState('Loading...');
   const [roomImage, setImage] = useState('');
 
+  const [numOfListeners, setNumOfListeners] = useState(0)
+
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
 
   const [chatRefresh] = useMessageListener(roomID);
 
-  //TODO: Change to use the one from useProfileStore (not implemented for now)
-  const [username, setUsername] = useState('Loading...');
-  const [userID, setUserID] = useState('Loading...');
+  const displayName = useProfileStore((state) => state.displayName)
+  const [username, setUsername] = useState(displayName);
 
-  // -------------------------------------------------------------------------------------------------Song Player Initialization
+  // -------------------------------------------------------------------------------------------------Song Player Initializations
 
   //TODO: Resolve conflict between radioroom queue & user queue so that when radioroom song done playing can go to next radioroom song from any page
 
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
   const currentPage = useMusicStore((state) => state.currentPage)
+  const isPlaying = useMusicStore((state) => state.isPlaying)
+  const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+
+  const isDJ = useMusicStore((state) => state.radioRoom_isDJ)
+  const changeIsDJ = useMusicStore((state) => state.changeRadioRoom_isDJ)
+  const isBroadcasting = useMusicStore(state => state.radioRoom_isBroadcasting)
+  const changeIsBroadcasting = useMusicStore(state => state.changeRadioRoom_isBroadcasting)
+  const songId = useMusicStore((state) => state.songInfo.songId)
+
+  const position = useMusicStore((state) => state.position)
 
   const [roomUserIDList, setRoomUserIDList] = useState([])
   const [roomDJIDList, setRoomDJIDList] = useState([])
-  const [isUserListeningToRoom, setIsUserListeningToRoom] = useState(false)
-  const [isUserDJ, setIsUserDj] = useState(false)
 
-  const [roomCurrentTrackID] = useRoomTrackIDListener(roomID)
+  const [roomIsUserListening, setRoomIsUserListening] = useState(false)
+
   const [roomIsCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomID)
-  // const [timeOfLastPlayed, setTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
+  const [roomTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
+  const [roomCurrentTrackID] = useRoomTrackIDListener(roomID)
 
-  // ------------------------------------------------------------------------------------------------- Room Queue Initialization
+  // ------------------------------------------------------------------------------------------------- Room Queue Initializations
 
   const storeQueue = useQueueStore((state) => state.queue)
   const changeQueue = useQueueStore((state) => state.changeQueue)
@@ -81,21 +94,8 @@ export const Chatroom = ({route, navigation}) => {
     changeQueue(personalQueue)
   }
   
-  // -------------------------------------------------------------------------------------------------General Room Functions
+  // -------------------------------------------------------------------------------------------------Room Functions
 
-  //TODO: Delete getInitialProfileData after useProfileStore is implemented
-  const getInitialProfileData = async () => {
-    // fetch data on load
-    try {
-      const profileData = await GetCurrentUserProfile({
-        accessToken: accessToken,
-      })
-      setUsername(profileData.display_name)
-      setUserID(profileData["id"])
-    } catch (error) {
-      //console.error(error)
-    }
-  }
 
   //TODO: Make sure that at least 1 user exist in roomDetails, otherwise got error "Possible unhandled promise rejection, cannot convert undefined value to object"
   const getRoomDetails = async () => {
@@ -103,12 +103,15 @@ export const Chatroom = ({route, navigation}) => {
     // console.log('Room Name: '+ roomDetails["room_name"]);
     setRoomName(roomDetails["room_name"]);
     setImage(roomDetails["image_url"]);
-    //every room MUST have a minimum of 1 user (that is the creator)
-    // if(roomUserIDList){
-    //   setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
-    // }
+    // setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
+    if(roomDetails['dj'].includes(userId)){
+      changeIsDJ(true)
+    } else{
+      changeIsDJ(false)
+    }
+    setNumOfListeners(Object.keys(roomDetails.users).length)
     // console.log(roomUserIDList)
-    setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
+    // setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
     // roomDetails["dj"].includes()
   }
 
@@ -194,12 +197,6 @@ export const Chatroom = ({route, navigation}) => {
 
   // -------------------------------------------------------------------------------------------------Legacy code pre merge w/ xinzhen's dont know if gonna use or not
 
-
-  //hide the usual musicPlayer if in chatroom. Instead, use the ChatroomMusicPlayer
-  //This is if clicking on the player will bring up the Track page, in which the djs can fast forward or something else
-  //If so, then TODO: implement fix on how to do the Music Player, Chatroom Music Player, and the Track Page.
-  //For now, disabled the ChatroomMusicPlayer pressable
-
   //Merging stuff with xinzhens code. Have no idea will this be used or not
   // useFocusEffect(
   //   useCallback(() => {
@@ -237,13 +234,13 @@ export const Chatroom = ({route, navigation}) => {
   // call when the screen is first opened
   useEffect( () => {
     // console.log('RoomID: ' + roomID);
-    getInitialProfileData().then();
     getRoomDetails().then();
     return () => {
       changeCurrentPage("Not Track")
+      changeIsBroadcasting(false)
+      changeIsPlaying(false)
     }
   }, [])
-
 
   // Use useEffect to scroll to the bottom when chatMessages change
   useEffect(() => {
@@ -252,13 +249,33 @@ export const Chatroom = ({route, navigation}) => {
     }
   }, [chatMessages]);
 
-
   useEffect(() => {
     getMessages();
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [username, chatRefresh])
+
+  //Careful with the useEffects below
+
+  useEffect(() => {
+    if(isBroadcasting){
+      current_track_updateCurrentTrack({roomID: roomID, timeOfLastPlayed: position, trackId: songId}).then()
+    }
+  }, [position]);
+  //separate this just in case of feedback
+  useEffect(() => {
+    current_track_updateCurrentTrack({roomID: roomID, isCurrentTrackPlaying: isBroadcasting}).then()
+  }, [isBroadcasting]);
+
+  useEffect(() => {
+    if(roomIsCurrentTrackPlaying){
+      changeIsPlaying(true)
+    } else {
+      changeIsPlaying(false)
+      changeIsBroadcasting(false)
+    }
+  }, [roomIsCurrentTrackPlaying]);
 
 
   return (
@@ -293,9 +310,10 @@ export const Chatroom = ({route, navigation}) => {
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('RoomDetails', {
-              roomName: roomName,
-              roomUserIDList: roomUserIDList,
-              roomDJIDList: roomDJIDList
+              // roomName: roomName,
+              // roomUserIDList: roomUserIDList,
+              // roomDJIDList: roomDJIDList
+              roomID: roomID
             });
           }}
         >
@@ -335,12 +353,20 @@ export const Chatroom = ({route, navigation}) => {
         flexDirection: 'row',
         justifyContent:'space-between',
         alignItems:'center'}}>
-        <View style={{ flexDirection: 'column', }}>
-          <Text style={{color: 'white', fontSize: SIZES.small,}}>Room Code</Text>
-          <BoldText style={{ fontSize: SIZES.large,color: COLORS.light,}}>{roomID}</BoldText>
-        </View>
+
+        <TouchableOpacity
+          onPress={async () => {
+            await Clipboard.setStringAsync(roomID)
+          }}
+        >
+          <View style={{ flexDirection: 'column', }}>
+            <Text style={{color: 'white', fontSize: SIZES.small,}}>Room Code</Text>
+            <BoldText style={{ fontSize: SIZES.medium,color: COLORS.light,}}>{roomID}</BoldText>
+          </View>
+        </TouchableOpacity>
+
         <View style={{flexDirection:'row', alignItems:'center'}}>
-        <Text style={{fontSize: SIZES.small, color: COLORS.yellow, marginRight:10}}>237 LISTENING</Text>
+        <Text style={{fontSize: SIZES.small, color: COLORS.yellow, marginRight:10}}>{numOfListeners} LISTENING</Text>
         </View>
       </View>
 

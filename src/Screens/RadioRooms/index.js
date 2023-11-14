@@ -6,7 +6,7 @@ import {
   TextInput,
   FlatList,
   Image,
-  ScrollView,
+  ScrollView, Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuthStore } from '../../Store/useAuthStore'
@@ -22,6 +22,8 @@ import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_func
 
 export const RadioRooms = (currentPage) => {
   const insets = useSafeAreaInsets()
+  const windowWidth = Dimensions.get('window').width;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const navigation = useNavigation(); // Initialize navigation\
@@ -43,7 +45,7 @@ export const RadioRooms = (currentPage) => {
         for (const [key, value] of Object.entries(roomData)) {
           roomsArray.push({...value, id: key})
         }
-        //need to do this due to database structure having the id as key because flatlist. This caused me 2 hours of pain
+        //need to do this due to database structure having the id as key because flatlist.
         // Shuffle rooms only when the component mounts or when rooms are fetched
         if (shuffledRooms.length === 0) {
           // console.log(roomsArray)
@@ -84,86 +86,105 @@ export const RadioRooms = (currentPage) => {
     changeQueue(roomQueue)
   }
 
-  const renderItem = ({ item }, obj) => (
-    <View style={{
-      flexDirection: "row",
-      alignItems: "center",
-    }}>
-      <TouchableOpacity
-        onPress={() => handleRoomSelect(item.id)}
-        style={{
-          padding: 20,
-          paddingLeft: selectedRoom === item.id ? 20 : 0,
-          marginTop: selectedRoom === item.id ? 20 : 0,
-          borderRadius: 10,
-          flexDirection: "column",
-          alignItems: "center",
-          // backgroundColor: 'red',
-          backgroundColor: selectedRoom === item.id ? COLORS.darkblue : COLORS.dark,
-          height: selectedRoom === item.id ? 190 : 100,
+  const renderItem = ({ item }) => {
+    let owner = 'Loading...';
+    for (const [key, value] of Object.entries(item.users)) {
+      if(value.owner === true){
+        owner = value.username
+      }
+    }
+    return(
+      <View style={{
+        flexDirection: "row",
+        alignItems: "center",
+      }}>
+        <TouchableOpacity
+          onPress={() => {
+            handleRoomSelect(item.id)
           }}
-      >
-      <View style={{flexDirection:'row', marginBottom:15,}}>
-      <Image
-          source={{ uri: item.image_url }} // Use the image URL from Firebase
           style={{
-            width: selectedRoom === item.id ? 100 : 80,
-            height: selectedRoom === item.id ? 100 : 80,
-            marginRight: 15,
-            borderRadius: 10,}}
-        />
-        {/* Room Title, Created by, Description */}
-        <View style={{marginRight:15, justifyContent:'center', maxWidth:'80%'}}>
-        <BoldText style={{
-          color: COLORS.light,
-          fontSize: 16, }}>
-          {item.room_name}
-        </BoldText>
-        <Text numberOfLines={1}
-          ellipsizeMode='tail'
-          style={{
-            color: COLORS.grey,
-            fontSize: 12,}}>
-          CREATED BY ddkfmadkfmakf{item.created_by}
-        </Text>
-        {selectedRoom === item.id ?<Text numberOfLines={2}
-        ellipsizeMode='tail'
-        style={{
-          color: COLORS.light,
-          fontSize: SIZES.small
-        }}>room description here blbeabadajsndkasndskl</Text>:null}
-        <Text style={{color: COLORS.yellow}}>
-          100 LISTENING
-        </Text>
-       </View>
-       </View>
+            padding: 20,
+            paddingLeft: selectedRoom === item.id ? 20 : 0,
+            marginTop: selectedRoom === item.id ? 20 : 0,
+            borderRadius: 10,
+            flexDirection: "column",
+            alignItems: "center",
+            // backgroundColor: 'red',
+            backgroundColor: selectedRoom === item.id ? COLORS.darkblue : COLORS.dark,
+            height: selectedRoom === item.id ? 190 : 100,
+            width: '100%'
+          }}
+        >
+          <View style={{flexDirection: 'row', marginBottom: 15,}}>
+            <Image
+              source={{uri: item.image_url}} // Use the image URL from Firebase
+              style={{
+                width: selectedRoom === item.id ? 100 : 80,
+                height: selectedRoom === item.id ? 100 : 80,
+                marginRight: 15,
+                borderRadius: 10,
+              }}
+            />
+            {/* Room Title, Created by, Description */}
+            <View style={{marginRight: 15, justifyContent: 'center', maxWidth: '80%'}}>
+              <BoldText style={{
+                color: COLORS.light,
+                fontSize: 16,
+              }}>
+                {item.room_name}
+              </BoldText>
+              <Text numberOfLines={1}
+                    ellipsizeMode='tail'
+                    style={{
+                      color: COLORS.grey,
+                      fontSize: 12,
+                    }}>
+                CREATED BY {owner}
+              </Text>
+              {selectedRoom === item.id ?
+                <Text
+                  numberOfLines={2}
+                  ellipsizeMode='tail'
+                  style={{
+                    color: COLORS.light,
+                    fontSize: SIZES.small
+                  }}>
+                  {item.room_description}
+                </Text> : null
+              }
+              <Text style={{color: COLORS.yellow}}>
+                {Object.keys(item.users).length} LISTENING
+              </Text>
+            </View>
+          </View>
 
-       {/* JOIN BUTTON */}
-        {selectedRoom === item.id ?
-        <TouchableOpacity style={{
-          backgroundColor: COLORS.primary,
-          borderRadius: 20,
-          justifyContent: "center",
-          alignItems: "center",
-          width: '50%',
-          height: 34,
-        }} onPress={() => {
-          goToChatroom(item.id)
-          swapToRoomQueue(item.id)
-          }}>
-          <Text style={{
-            fontSize: 14,
-            color: "black",
-            fontWeight: "bold",
-          }} >Join Room</Text>
-        </TouchableOpacity>: null}
+          {/* JOIN BUTTON */}
+          {selectedRoom === item.id ?
+            <TouchableOpacity style={{
+              backgroundColor: COLORS.primary,
+              borderRadius: 20,
+              justifyContent: "center",
+              alignItems: "center",
+              width: '50%',
+              height: 34,
+            }} onPress={() => {
+              goToChatroom(item.id)
+              swapToRoomQueue(item.id)
+            }}>
+              <Text style={{
+                fontSize: 14,
+                color: "black",
+                fontWeight: "bold",
+              }}>Join Room</Text>
+            </TouchableOpacity> : null}
 
-      </TouchableOpacity>
-    </View>
-  );
+        </TouchableOpacity>
+      </View>
+    )
+  };
 
   return (
-    <View style={{flex:1, paddingTop: insets.top, backgroundColor: COLORS.dark}}>
+    <View style={{flex:1, paddingTop: insets.top, backgroundColor: COLORS.dark, width: windowWidth}}>
     <ScrollView style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}>
       <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
       <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>

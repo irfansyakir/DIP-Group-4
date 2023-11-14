@@ -16,6 +16,8 @@ import { BoldText } from "../../../../Commons/UI/styledText";
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useQueueStore } from '../../../../Store/useQueueStore'
+import {useAuthStore} from "../../../../Store/useAuthStore";
+import {useProfileStore} from "../../../../Store/useProfileStore";
 
 export const CreateRoom = ()=> {
     const insets = useSafeAreaInsets()
@@ -31,6 +33,9 @@ export const CreateRoom = ()=> {
     const [isEnabled2, setIsEnabled2] = useState(false);
 
     const delStoreQueue = useQueueStore((state) => state.delStoreQueue)
+
+    const userID = useAuthStore((state) => state.userId)
+    const username = useProfileStore((state) => state.displayName)
 
     //have no idea what this is meant to do but its in the original code soo ill just recreate it
     //use: toggleSwitch(setIsEnabled2) or toggleSwitch(setIsEnabled)
@@ -82,7 +87,17 @@ export const CreateRoom = ()=> {
               themeImageUrl: themeImageUrl,
               isPublic: isPublic,
               isOthersAddSongs: isOthersAddSongs,
-          }).then(roomID => {navigation.navigate('RoomQueue', {roomID: roomID, roomName: roomName})});
+              dj: [userID],
+              users: {
+                [userID]: {
+                  'username': username,
+                  'owner': true
+                }
+              }
+          })
+            .then(roomID => {
+              navigation.navigate('RoomQueue', {roomID: roomID, roomName: roomName})
+            });
     
         } else {
             console.log('no room name!');

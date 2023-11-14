@@ -15,6 +15,11 @@ export const useMusicStore = create((set) => ({
     position: 0,
     duration: 0,
     isRepeat: false,
+
+    radioRoom_isDJ: false,
+    radioRoom_isBroadcasting: false,
+    radioRoom_roomID: '',
+
     changeCurrentPage: (page) => set(() => ({ currentPage: page })),
     changeSoundObject: (sound) => set(() => ({ soundObject: sound })),
     addToPlaylist: (track) => set(() => ({ playlist: [...playlist, track] })),
@@ -33,4 +38,7 @@ export const useMusicStore = create((set) => ({
     changePosition: (pos) => set(() => ({ position: pos })),
     changeDuration: (duration) => set(() => ({ duration: duration })),
     changeIsRepeat: (isRepeat) => set(() => ({ isRepeat: isRepeat })),
+
+    changeRadioRoom_isDJ: (isDJ) => set(() => ({ radioRoom_isDJ: isDJ })),
+    changeRadioRoom_isBroadcasting: (isDJ) => set(() => ({ radioRoom_isBroadcasting: isDJ })),
 }))

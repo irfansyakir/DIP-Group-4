@@ -2,7 +2,7 @@ import {child, get, ref, update, push, query, orderByChild} from "firebase/datab
 import {db, dbRef} from "../../../firebaseConfig"
 
 export async function message_setMessage({roomID, username, message, timestamp}) {
-  if (roomID === null || username === null || message === null || timestamp === null) {
+  if (roomID === undefined || username === undefined || message === undefined || timestamp === undefined) {
     throw new Error("One or more required parameters are missing or empty in message_setMessage.");
   }
 
