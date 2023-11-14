@@ -15,6 +15,8 @@ import { COLORS, SIZES } from "../../../../Constants";
 import { BoldText } from "../../../../Commons/UI/styledText";
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useQueueStore } from '../../../../Store/useQueueStore'
+
 export const CreateRoom = ()=> {
     const insets = useSafeAreaInsets()
     const [selectedIndex, setIndex] = React.useState(0);
@@ -27,6 +29,8 @@ export const CreateRoom = ()=> {
 
     const [isEnabled, setIsEnabled] = useState(false);
     const [isEnabled2, setIsEnabled2] = useState(false);
+
+    const delStoreQueue = useQueueStore((state) => state.delStoreQueue)
 
     //have no idea what this is meant to do but its in the original code soo ill just recreate it
     //use: toggleSwitch(setIsEnabled2) or toggleSwitch(setIsEnabled)
@@ -46,7 +50,7 @@ export const CreateRoom = ()=> {
         } else {
             setThemeImageUrl(uploadedImageUrl);
         }
-        console.log(themeImageUrl);
+        // console.log(themeImageUrl);
       };
 
 
@@ -68,20 +72,18 @@ export const CreateRoom = ()=> {
     const handleStartListening = async () => {
         // console.log(roomName)
         if (roomName) {
-            console.log('creating room: ' + roomName);
-            console.log('room details: ', roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
-            room_updateRoom({
-                roomName: roomName,
-                roomDescription: roomDescription,
-                themeImageUrl: themeImageUrl,
-                isPublic: isPublic,
-                isOthersAddSongs: isOthersAddSongs,
-            })
-              .then(roomID => {
-                navigation.navigate('Chatroom', {
-                  roomID: roomID,
-                })
-              });
+          console.log('creating room: ' + roomName);
+          console.log('room details: ', roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
+
+          delStoreQueue()
+          room_updateRoom({
+              roomName: roomName,
+              roomDescription: roomDescription,
+              themeImageUrl: themeImageUrl,
+              isPublic: isPublic,
+              isOthersAddSongs: isOthersAddSongs,
+          }).then(roomID => {navigation.navigate('RoomQueue', {roomID: roomID, roomName: roomName})});
+    
         } else {
             console.log('no room name!');
         }
@@ -92,9 +94,9 @@ export const CreateRoom = ()=> {
     }, [])
 
     //debugging purposes
-    useEffect(() => {
-      console.log("Data: ", roomName, roomDescription, themeImageUrl, isPublic, isOthersAddSongs)
-    }, [roomName, roomDescription, themeImageUrl, isPublic, isOthersAddSongs])
+    // useEffect(() => {
+    //   console.log("Data: ", roomName, roomDescription, themeImageUrl, isPublic, isOthersAddSongs)
+    // }, [roomName, roomDescription, themeImageUrl, isPublic, isOthersAddSongs])
 
 
     const navigation = useNavigation(); // Initialize navigation
@@ -231,7 +233,7 @@ export const CreateRoom = ()=> {
             </TouchableOpacity>
           </View>
 
-          {/* Start Listening Button */}
+          {/* Create Playlist Button */}
           <TouchableOpacity
             style={{
               marginTop: 30,
@@ -245,7 +247,7 @@ export const CreateRoom = ()=> {
             }}
             onPress={handleStartListening}
           >
-            <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium,}}>Start Listening</BoldText>
+            <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium,}}>Create Playlist</BoldText>
           </TouchableOpacity>
         </ScrollView>
     </KeyboardAvoidingView>

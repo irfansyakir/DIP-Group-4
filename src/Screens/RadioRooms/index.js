@@ -18,6 +18,7 @@ import { BoldText } from "../../Commons/UI/styledText";
 import { COLORS, SIZES } from "../../Constants";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
+import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_functions'
 
 export const RadioRooms = (currentPage) => {
   const insets = useSafeAreaInsets()
@@ -25,8 +26,7 @@ export const RadioRooms = (currentPage) => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const navigation = useNavigation(); // Initialize navigation\
 
-  const userId = useAuthStore((state) => state.userId)
-  const storeQueue = useQueueStore((state) => state.queue)
+  const changeQueue = useQueueStore((state) => state.changeQueue)
   const [shuffledRooms, setShuffledRooms] = useState([]);
 
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
@@ -67,11 +67,6 @@ export const RadioRooms = (currentPage) => {
       roomID: roomId,
     })
     changeCurrentPage('Chatroom')
-    // Save personal queue in queueStore to firebase whenever creating/ joining a room
-    userQueue_updateQueue({
-      userID: userId,
-      userQueueList: storeQueue,
-    })
 
     // console.log("Clicked!")
   }
@@ -82,6 +77,11 @@ export const RadioRooms = (currentPage) => {
       [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
     }
     return shuffledArray;
+  }
+
+  const swapToRoomQueue = async (roomId) => {
+    const roomQueue =  await userQueue_getRoomQueue({ roomID: roomId })
+    changeQueue(roomQueue)
   }
 
   const renderItem = ({ item }, obj) => (
@@ -147,7 +147,10 @@ export const RadioRooms = (currentPage) => {
           alignItems: "center",
           width: '50%',
           height: 34,
-        }} onPress={() => goToChatroom(item.id)}>
+        }} onPress={() => {
+          goToChatroom(item.id)
+          swapToRoomQueue(item.id)
+          }}>
           <Text style={{
             fontSize: 14,
             color: "black",
