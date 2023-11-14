@@ -21,6 +21,27 @@ export async function userQueue_updateQueue({userID, userQueueList = null}){
     throw e
   }
 }
+
+export async function userQueue_updateRoomQueue({roomID, userRoomQueueList = null}){
+  const updates = {};
+
+  if (!roomID) {
+    const newRoomID = push(child(dbRef, `/room_queue`)).key;
+    updates[`/room_queue/${newRoomID}`] = userRoomQueueList
+  }
+  else{
+    updates[`/room_queue/${roomID}`] = userRoomQueueList
+  }
+
+  try {
+    await update(dbRef, updates)
+    await console.log("roomQueue updated successfully")
+  }catch (e) {
+    console.log(e)
+    throw e
+  }
+}
+
 export async function userQueue_getQueue({userID}){
   if (userID === null) {
     throw new Error("userID is missing in userQueue_getQueue.");
@@ -33,6 +54,20 @@ export async function userQueue_getQueue({userID}){
     throw e
   }
 }
+
+export async function userQueue_getRoomQueue({roomID}){
+  if (roomID === null) {
+    throw new Error("userID is missing in userQueue_getQueue.");
+  }
+  try {
+    const snapshot = await get(child(dbRef, `/room_queue/${roomID}`));
+    return await snapshot.val()
+  }catch (e) {
+    console.log(e)
+    throw e
+  }
+}
+
 export async function userQueue_removeQueue({userID}){
   if (userID === null) {
     throw new Error("userID is missing in userQueue_removeQueue.");

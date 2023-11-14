@@ -23,6 +23,7 @@ import { Chatroom } from '../Screens/RadioRooms/Components/Chatroom'
 import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
 import { RadioRoomQueue } from '../Screens/RadioRooms/Components/RadioRoomQueue'
 import { RoomQueue } from '../Screens/RadioRooms/Components/RoomQueue'
+import { AddSong } from '../Screens/RadioRooms/Components/AddSong'
 
 // Track
 import { Track } from '../Commons/Track/track'
@@ -139,6 +140,7 @@ function RadioRoomStackNavigator(){
       <RadioRoomStack.Screen name='Track' component={Track} />
       <RadioRoomStack.Screen name='Playlist' component={Playlist} />
       <RadioRoomStack.Screen name='RoomQueue' component={RoomQueue} />
+      <RadioRoomStack.Screen name='AddSong' component={AddSong} />
     </RadioRoomStack.Navigator>
   )
 }
@@ -166,6 +168,8 @@ export const Navigation = () => {
             <Stack.Screen name='CreateRoom' component={CreateRoom} />
             <Stack.Screen name='Track' component={Track} />
             <Stack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
+            <Stack.Screen name='RoomQueue' component={RoomQueue} />
+            <Stack.Screen name='AddSong' component={AddSong} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />

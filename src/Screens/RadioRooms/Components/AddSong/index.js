@@ -6,53 +6,24 @@ import {
   FlatList,
   Image,
 } from 'react-native'
-import { COLORS, SIZES } from '../../Constants'
-import { BoldText, MediumText } from '../../Commons/UI/styledText'
+import { COLORS, SIZES } from '../../../../Constants'
+import { BoldText, MediumText } from '../../../../Commons/UI/styledText'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
 import { useState } from 'react'
 import { Audio } from 'expo-av'
-import { useAuthStore } from '../../Store/useAuthStore'
-import { SearchTrack } from '../../Utilities/SpotifyApi/Utils'
-import { useMusicStore } from '../../Store/useMusicStore'
-import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
-import { debounce } from '../../Utilities/Functions/debounce'
+import { useAuthStore } from '../../../../Store/useAuthStore'
+import { SearchTrack } from '../../../../Utilities/SpotifyApi/Utils'
+import { useMusicStore } from '../../../../Store/useMusicStore'
+import { useQueueStore } from '../../../../Store/useQueueStore'
+import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
+import { debounce } from '../../../../Utilities/Functions/debounce'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { userQueue_updateRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
 
-export const Search = () => {
-  const insets = useSafeAreaInsets()
-  const navigation = useNavigation() // Initialize navigation
+export const AddSong = ({route}) => {
+  const { roomID } = route.params || {};
 
-  return (
-    <View style={{ backgroundColor: COLORS.dark, flex: 1 }}>
-      <View style={{ padding: 20, paddingTop: insets.top,}}>
-        <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
-          Search
-        </BoldText>
-        <TouchableOpacity
-          style={{
-            backgroundColor: COLORS.light,
-            padding: 10,
-            paddingLeft: 20,
-            marginTop: 15,
-            borderRadius: 7,
-            flexDirection: 'row',
-            alignItems: 'center',}}
-          activeOpacity={1}
-          onPress={() => {
-            navigation.navigate('SearchClick')
-          }}
-        >
-          <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
-          <MediumText style={{ marginLeft: 10 }}>Artists or Song</MediumText>
-        </TouchableOpacity>
-      </View>
-    </View>
-  )
-}
-
-// search fr fr
-export const SearchClick = () => {
   const insets = useSafeAreaInsets()
   // Initialize navigation
   const navigation = useNavigation()
@@ -60,6 +31,9 @@ export const SearchClick = () => {
   const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
   const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
   const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+
+  const storeQueue = useQueueStore((state) => state.queue)
+  const changeQueue = useQueueStore((state) => state.changeQueue)
 
   const backButton = () => {
     navigation.goBack()
@@ -134,30 +108,58 @@ export const SearchClick = () => {
     }
   }
 
+  const addSongtoRoomQ = (item) => { 
+    const addedSong = {
+      id: item.id,
+      title: item.title,
+      artist: item.artist,
+      img: item.coverUrl
+    }
+
+    let newQueue = []
+    if (storeQueue) newQueue = [...storeQueue, addedSong]
+    else newQueue = [addedSong]
+    changeQueue(newQueue)
+
+    userQueue_updateRoomQueue({ 
+      roomID: roomID, 
+      userRoomQueueList: newQueue
+    })
+  }
+
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => debouncedTrackClick(item.id)}>
       <View
         style={{
           flexDirection: 'row',
-          paddingVertical: 7,
+          justifyContent: 'space-between', 
           alignItems: 'center',
-        }}
-      >
-        {/* SONG IMAGE */}
-        <Image style={{
-          width: 50,
-          height: 50,
-          borderRadius: 10,
-          marginRight: 15,}} src={item.coverUrl} />
-        <View>
-          {/* TITLE AND ARTIST */}
-          <Text numberOfLines={1} ellipsizeMode='tail' style={{color:'#FFF', width: 280, fontSize: SIZES.medium,}}>
-            {item.title}
-          </Text>
-          <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
-        </View>
+          paddingVertical: 7,
+        }}>
+        <TouchableOpacity 
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+          onPress={() => debouncedTrackClick(item.id)}>
+          {/* SONG IMAGE */}
+          <Image style={{
+            width: 50,
+            height: 50,
+            borderRadius: 10,
+            marginRight: 15,}} src={item.coverUrl} />
+          <View>
+            {/* TITLE AND ARTIST */}
+            <Text numberOfLines={1} ellipsizeMode='tail' style={{color:'#FFF', fontSize: SIZES.medium,}}>
+              {item.title}
+            </Text>
+            <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => addSongtoRoomQ(item)}>
+          <Ionicons name={'add-circle-outline'} style={{}} size={35} color={COLORS.light} />
+        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
   )
 
   return (
@@ -166,15 +168,20 @@ export const SearchClick = () => {
         paddingTop: insets.top, 
         padding: 20,
         flexDirection: 'row',
-        justifyContent: 'space-between',}}>
+        justifyContent: 'space-between',
+      }}>
+        <TouchableOpacity onPress={backButton} style={{justifyContent: 'center', marginTop: 20}}>
+          <Ionicons name={'arrow-back'} size={25} color={COLORS.grey} />
+        </TouchableOpacity>
         <View style={{
           marginTop: 20,
           flexDirection: 'row',
           backgroundColor: '#333',
           borderRadius: 10,
           alignItems: 'center',
-          paddingHorizontal: 10,}}>
-          <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
+          paddingHorizontal: 10,
+        }}>
+          <Ionicons name={'ios-search'} size={20} color={COLORS.grey} />
           <TextInput
             autoFocus={true}
             style={{
@@ -188,9 +195,7 @@ export const SearchClick = () => {
             onChangeText={onChangeText}
           />
         </View>
-        <TouchableOpacity onPress={backButton}>
-          <Text style={{ color: COLORS.light, marginTop: 30 }}>cancel</Text>
-        </TouchableOpacity>
+        
       </View>
 
       <View style={{ paddingHorizontal: 20 }}>

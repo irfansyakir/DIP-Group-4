@@ -74,7 +74,8 @@ export const ChatroomMusicPlayer = ({roomID, roomIsCurrentTrackPlaying, roomCurr
           trackData.album.images[0].url,
           trackData.name,
           trackData.artists[0].name,
-          trackData.album.name
+          trackData.album.name,
+          trackData.id
         )
         await createSoundObject(trackData.preview_url)
       } catch (err) {

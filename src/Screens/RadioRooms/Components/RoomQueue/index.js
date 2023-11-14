@@ -15,6 +15,8 @@ import { useUserCurrentQueue } from "../../../../Utilities/Firebase/useFirebaseL
 import { Play } from '../../../../Commons/Track/play'
 import { COLORS } from '../../../../Constants'
 import { AuthError } from 'expo-auth-session';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useColorScheme } from 'react-native';
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -22,50 +24,50 @@ const Icon = createIconSetFromIcoMoon(
     'icomoon.ttf'
 )
 
-export const RoomQueue = ({navigation}) => {
-
+export const RoomQueue = ({route, navigation}) => {
+    const { roomID, roomName} = route.params || {};
+ 
     const storeQueue = useQueueStore((state) => state.queue)
-    const changeQueue = useQueueStore((state) => state.changeQueue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
+
+    const insets = useSafeAreaInsets()
 
     const generateSongs = () => {        
         return (
-        <FlatList
-          data={storeQueue}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <View style={styles.songInQ}>
-                <Image 
-                    style={{
-                        width: 45,
-                        height: 45,
-                        borderRadius: 5
-                    }}
-                    source={item.img}
-                />
-                <View style={{ paddingLeft: 10 }}> 
-                    <Text style={styles.songName}>{item.title}</Text>
-                    <Text style={styles.artistName}>{item.artist}</Text>
+        <View style={{flex: 1}}>
+            <FlatList
+            data={storeQueue}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={true}
+            renderItem={({ item }) => (
+                <View style={styles.songInQ}>
+                    <Image 
+                        style={{
+                            width: 45,
+                            height: 45,
+                            borderRadius: 5
+                        }}
+                        source={item.img}
+                    />
+                    <View style={{ paddingLeft: 10 }}> 
+                        <Text style={styles.songName}>{item.title}</Text>
+                        <Text style={styles.artistName}>{item.artist}</Text>
+                    </View>
                 </View>
-            </View>
-        )}/>
+            )}/>
+        </View>
         );
     };
     
     return (
-        <GestureHandlerRootView style={styles.container}>
-            <TouchableOpacity style={{
-                position: 'absolute',
-                top: 25,
-                left: 26,
-                width: 20,
-                height: 20,
-                backgroundColor: 'red'
-            }} onPress={() => navigation.goBack()}>
-                {/* <Icon style={styles.icon} name='down'/> */}
-            </TouchableOpacity>
-            <Text style={styles.headerTxt}> ROOM NAME </Text>
+        <GestureHandlerRootView style={[styles.container,  {paddingTop: insets.top,}]}>
+            <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16}}>
+                <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => navigation.goBack()}>
+                    <Icon style={styles.icon} name='down'/>
+                </TouchableOpacity>
+                <Text style={styles.headerTxt}> {roomName} </Text>
+                <View style={{height:20, width:20}}></View>
+            </View>
             
             <Text style={[styles.subHeaderTxt, { marginBottom: 5 }]}>Now Playing</Text>
             <View style={styles.playingNow}>
@@ -83,8 +85,30 @@ export const RoomQueue = ({navigation}) => {
                 </View>
             </View>
             
-            <Text style={styles.subHeaderTxt}>Next from: ROOM NAME</Text>
+            <Text style={styles.subHeaderTxt}>Next from: {roomName}</Text>
             {generateSongs()}
+
+            <View style={{
+                flexDirection: 'row', 
+                width: '100vw',
+                justifyContent: 'space-between',
+                marginTop: 10,
+            }}>
+                <TouchableOpacity 
+                    style={styles.secButtons} 
+                    onPress={() => {navigation.navigate('AddSong',  {roomID: roomID})}}
+                >
+                    <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Add Songs</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.secButtons, {backgroundColor: COLORS.primary}]} 
+                    onPress={() => {navigation.navigate('Chatroom', {roomID: roomID})}}
+                >
+                    <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Start Listening</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={{height: 150, alignItems: 'center', transform:[{scale: 0.98}]}}><Play/></View>
 
         </GestureHandlerRootView>
         
@@ -95,16 +119,13 @@ const styles = StyleSheet.create({
     container:{
         flex: 1,
         justifyContent: 'flex-start',
-        paddingTop: 10,
-        paddingBottom: 10,
-        backgroundColor: '#13151e',
+        backgroundColor: COLORS.dark,
     },  
     headerTxt: {
         fontSize: 20,
         fontWeight: 'bold',
         color: COLORS.white,
         alignSelf: 'center',
-        margin: 10,
     },
     icon:{
         fontSize: 20,
@@ -114,7 +135,6 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: 'bold',
         color: COLORS.white,
-        // marginBottom: 10,
         paddingLeft: 16,
         paddingRight: 16,
     },
@@ -159,6 +179,15 @@ const styles = StyleSheet.create({
     draggable: {
         width: 20,
         height: 15,
+    },
+    secButtons:{
+        width: 155, 
+        backgroundColor: COLORS.light, 
+        borderRadius: 100, 
+        height: 42, 
+        justifyContent: 'center', 
+        marginLeft: 10,
+        marginRight: 10,
     }
 })
 

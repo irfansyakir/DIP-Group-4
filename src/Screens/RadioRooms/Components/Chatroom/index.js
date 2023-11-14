@@ -29,6 +29,9 @@ import {BoldText, MediumText} from "../../../../Commons/UI/styledText";
 import {useMusicStore} from "../../../../Store/useMusicStore";
 import {ChatroomMusicPlayer} from "./Components/ChatroomMusicPlayer";
 
+import { useQueueStore } from '../../../../Store/useQueueStore'
+import { userQueue_getQueue } from '../../../../Utilities/Firebase/user_queue_functions'
+
 import { COLORS, SIZES } from '../../../../Constants';
 
 export const Chatroom = ({route, navigation, currentPage}) => {
@@ -66,6 +69,17 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   const [roomIsCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomID)
   // const [timeOfLastPlayed, setTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
 
+  // ------------------------------------------------------------------------------------------------- Room Queue Initialization
+
+  const storeQueue = useQueueStore((state) => state.queue)
+  const changeQueue = useQueueStore((state) => state.changeQueue)
+  const userId = useAuthStore((state) => state.userId)
+
+  const swapToQueue = async () => {
+    const personalQueue =  await userQueue_getQueue({ userID: userId,})
+    changeQueue(personalQueue)
+  }
+  
   // -------------------------------------------------------------------------------------------------General Room Functions
 
   //TODO: Delete getInitialProfileData after useProfileStore is implemented
@@ -251,9 +265,11 @@ export const Chatroom = ({route, navigation, currentPage}) => {
 
       {/* back button */}
       <TouchableOpacity onPress={() => {
-        navigation.goBack()
+        navigation.popToTop()
         changeCurrentPage('Radioroom')
-        }} style={{flexDirection: 'row', alignItems:'center',}}>
+        swapToQueue()
+        }} 
+        style={{flexDirection: 'row', alignItems:'center',}}>
         <Ionicons name='chevron-back' size={30} color={COLORS.light} />
         <BoldText style= {{color: COLORS.light, fontSize: SIZES.medium}}>Leave Room</BoldText>
       </TouchableOpacity>
@@ -288,6 +304,7 @@ export const Chatroom = ({route, navigation, currentPage}) => {
             justifyContent: 'center',
             alignItems: 'center',
           }}
+          onPress={() => {navigation.navigate('RoomQueue', {roomID: roomID})}}
         >
           <BoldText style={{ color: COLORS.darkblue, fontSize: SIZES.medium,}}>View Queue</BoldText>
         </TouchableOpacity>

@@ -77,7 +77,8 @@ export const Home = () => {
                     trackData.album.images[0].url,
                     trackData.name,
                     trackData.artists[0].name,
-                    trackData.album.name
+                    trackData.album.name,
+                    trackData.id
                 )
                 createSoundObject(trackData.preview_url)
             } catch (err) {
