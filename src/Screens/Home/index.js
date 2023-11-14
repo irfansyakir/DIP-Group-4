@@ -27,6 +27,7 @@ import {
   userQueue_getQueue,
   userQueue_updateQueue,
 } from '../../Utilities/Firebase/user_queue_functions'
+import {useProfileStore} from "../../Store/useProfileStore";
 
 //Danish's Home Page
 //Needs testing first
@@ -53,6 +54,10 @@ export const Home = () => {
 
     const [userId, setUserId] = useState()
     const changeUserId = useAuthStore((state) => state.changeUserId)
+
+    const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
+    const changeProfileURL = useProfileStore((state) => state.changeProfileUrl)
+
     const changeQueue = useQueueStore((state) => state.changeQueue)
 
     const handleTrackClick = (trackId) => {
@@ -133,19 +138,25 @@ export const Home = () => {
         }
     }
 
-    const getUserID = async () => {
+    const getUserProfile = async () => {
       try {
           const userProfileData = await GetCurrentUserProfile({
               accessToken: accessToken,
           })
 
+          console.log(userProfileData)
+
           const currUserId = userProfileData.id
           changeUserId(currUserId)
           setUserId(currUserId)
+
+          changeDisplayName(userProfileData.display_name)
+          changeProfileURL(userProfileData.images[1].url)
+
       } catch (error) {
           console.error(error)   
       }
-    } 
+    }
 
       // Getting queue from API and saving in queueStore
     const getQueue = async () => {
@@ -194,7 +205,7 @@ export const Home = () => {
     useEffect(() => {
         getRecentlyPlayed()
         getPlaylistData()
-        getUserID()        
+        getUserProfile()
     }, [])
 
     useEffect(() => {

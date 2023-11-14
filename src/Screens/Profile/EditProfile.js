@@ -73,25 +73,9 @@ export const EditProfile = () => {
     // retrieve state data from stores
     const accessToken = useAuthStore((state) => state.accessToken)
 
-    const getInitialProfileData = async () => {
-        // fetch data on load
-        try {
-            const profileData = await GetCurrentUserProfile({
-                accessToken: accessToken,
-            })
-            if (storeDisplayName == profileData.display_name) {
-                setDisplayName(profileData.display_name)
-            } else {
-                setDisplayName(storeDisplayName)
-            }
-            if (storeProfileUrl == profileData.profileUrl) {
-                setProfileUrl(profileData.images[1].url)
-            } else {
-                setProfileUrl(storeProfileUrl)
-            }
-        } catch (error) {
-            console.error(error)
-        }
+    const getInitialProfileData = () => {
+        setDisplayName(storeDisplayName)
+        setProfileUrl(storeProfileUrl)
     }
 
     useEffect(() => {
