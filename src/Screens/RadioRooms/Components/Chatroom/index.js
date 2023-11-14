@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -33,8 +33,8 @@ import { useQueueStore } from '../../../../Store/useQueueStore'
 import { userQueue_getQueue } from '../../../../Utilities/Firebase/user_queue_functions'
 
 import { COLORS, SIZES } from '../../../../Constants';
-
-export const Chatroom = ({route, navigation, currentPage}) => {
+import {useFocusEffect} from "@react-navigation/native";
+export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
   const accessToken = useAuthStore((state) => state.accessToken)
 
@@ -59,6 +59,7 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   //TODO: Resolve conflict between radioroom queue & user queue so that when radioroom song done playing can go to next radioroom song from any page
 
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+  const currentPage = useMusicStore((state) => state.currentPage)
 
   const [roomUserIDList, setRoomUserIDList] = useState([])
   const [roomDJIDList, setRoomDJIDList] = useState([])
@@ -103,7 +104,9 @@ export const Chatroom = ({route, navigation, currentPage}) => {
     setRoomName(roomDetails["room_name"]);
     setImage(roomDetails["image_url"]);
     //every room MUST have a minimum of 1 user (that is the creator)
-    setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
+    // if(roomUserIDList){
+    //   setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
+    // }
     // console.log(roomUserIDList)
     setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
     // roomDetails["dj"].includes()
@@ -189,6 +192,8 @@ export const Chatroom = ({route, navigation, currentPage}) => {
 
   // -------------------------------------------------------------------------------------------------Use Effects
 
+  // -------------------------------------------------------------------------------------------------Legacy code pre merge w/ xinzhen's dont know if gonna use or not
+
 
   //hide the usual musicPlayer if in chatroom. Instead, use the ChatroomMusicPlayer
   //This is if clicking on the player will bring up the Track page, in which the djs can fast forward or something else
@@ -199,8 +204,7 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   // useFocusEffect(
   //   useCallback(() => {
   //     const subscribe = navigation.addListener('focus', () => {
-  //         // console.log("UseCallback Run")
-  //         // console.log(currentPage)
+  //         console.log("UseCallback Run")
   //         changeCurrentPage("Chatroom")
   //     })
   //     const unsubscribe = navigation.addListener('blur', () => {
@@ -210,7 +214,8 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   //       // } else{
   //       //   changeCurrentPage("Not Track")
   //       // }
-  //       changeCurrentPage("Not Track")
+  //       // console.log("asdujifhsdiuf")
+  //       // changeCurrentPage("Not Track")
   //     })
   //     return () => {unsubscribe()}
   //   }, [navigation])
@@ -224,17 +229,19 @@ export const Chatroom = ({route, navigation, currentPage}) => {
   //   else {
   //     changeCurrentPage("Not Track")
   //   }
-  //   console.log(currentPage)
   // }, [isUserListeningToRoom]);
+
+  // -------------------------------------------------------------------------------------------------Legacy code end
+
 
   // call when the screen is first opened
   useEffect( () => {
     // console.log('RoomID: ' + roomID);
     getInitialProfileData().then();
     getRoomDetails().then();
-    // return () => {
-    //   changeCurrentPage("Not Track")
-    // }
+    return () => {
+      changeCurrentPage("Not Track")
+    }
   }, [])
 
 

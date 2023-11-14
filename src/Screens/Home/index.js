@@ -156,6 +156,8 @@ export const Home = () => {
               accessToken: accessToken,
           })
 
+          console.log(queueData)
+
           if(queueData.currently_playing){
               const artistNames = queueData.currently_playing.artists.map(artist => artist.name).join(', ');
               const currPlaying = {
@@ -176,6 +178,7 @@ export const Home = () => {
                     })
               })
           }
+
           changeQueue(currQueue)
 
           userQueue_updateQueue({
@@ -197,6 +200,7 @@ export const Home = () => {
     useEffect(() => {
       if (userId) {
         userQueue_getQueue({userID: userId}).then(checkQueue => {
+          console.log(checkQueue)
           checkQueue ? changeQueue(checkQueue) : getQueue()
         });
       }

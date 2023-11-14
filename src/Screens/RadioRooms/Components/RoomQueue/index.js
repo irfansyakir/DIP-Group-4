@@ -26,13 +26,28 @@ const Icon = createIconSetFromIcoMoon(
 
 export const RoomQueue = ({route, navigation}) => {
     const { roomID, roomName} = route.params || {};
- 
+
     const storeQueue = useQueueStore((state) => state.queue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
 
+    const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
     const insets = useSafeAreaInsets()
 
-    const generateSongs = () => {        
+    useEffect(() => {
+        changeCurrentPage("Track")
+        return () => {
+          const nextNavigationStateToVisit = navigation.getState()['routes'].at(-1)
+          console.log(nextNavigationStateToVisit)
+          if (nextNavigationStateToVisit['name'] === 'Chatroom'){
+              changeCurrentPage("Chatroom")
+          } else{
+            changeCurrentPage("Not Track")
+          }
+        }
+    }, []);
+
+    const generateSongs = () => {
         return (
         <View style={{flex: 1}}>
             <FlatList
@@ -41,7 +56,7 @@ export const RoomQueue = ({route, navigation}) => {
             showsVerticalScrollIndicator={true}
             renderItem={({ item }) => (
                 <View style={styles.songInQ}>
-                    <Image 
+                    <Image
                         style={{
                             width: 45,
                             height: 45,
@@ -49,7 +64,7 @@ export const RoomQueue = ({route, navigation}) => {
                         }}
                         source={item.img}
                     />
-                    <View style={{ paddingLeft: 10 }}> 
+                    <View style={{ paddingLeft: 10 }}>
                         <Text style={styles.songName}>{item.title}</Text>
                         <Text style={styles.artistName}>{item.artist}</Text>
                     </View>
@@ -58,7 +73,7 @@ export const RoomQueue = ({route, navigation}) => {
         </View>
         );
     };
-    
+
     return (
         <GestureHandlerRootView style={[styles.container,  {paddingTop: insets.top,}]}>
             <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16}}>
@@ -68,13 +83,13 @@ export const RoomQueue = ({route, navigation}) => {
                 <Text style={styles.headerTxt}> {roomName} </Text>
                 <View style={{height:20, width:20}}></View>
             </View>
-            
+
             <Text style={[styles.subHeaderTxt, { marginBottom: 5 }]}>Now Playing</Text>
             <View style={styles.playingNow}>
                 <Image
                     style={styles.playlistImage}
                     source={storeCurrTrack.coverUrl}
-                /> 
+                />
                 <View style={styles.songDets}>
                     <Text style={styles.currSong}>
                         {storeCurrTrack.songTitle}
@@ -84,24 +99,24 @@ export const RoomQueue = ({route, navigation}) => {
                     </Text>
                 </View>
             </View>
-            
+
             <Text style={styles.subHeaderTxt}>Next from: {roomName}</Text>
             {generateSongs()}
 
             <View style={{
-                flexDirection: 'row', 
+                flexDirection: 'row',
                 width: '100vw',
                 justifyContent: 'space-between',
                 marginTop: 10,
             }}>
-                <TouchableOpacity 
-                    style={styles.secButtons} 
+                <TouchableOpacity
+                    style={styles.secButtons}
                     onPress={() => {navigation.navigate('AddSong',  {roomID: roomID})}}
                 >
                     <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Add Songs</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                    style={[styles.secButtons, {backgroundColor: COLORS.primary}]} 
+                <TouchableOpacity
+                    style={[styles.secButtons, {backgroundColor: COLORS.primary}]}
                     onPress={() => {navigation.navigate('Chatroom', {roomID: roomID})}}
                 >
                     <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Start Listening</Text>
@@ -111,7 +126,7 @@ export const RoomQueue = ({route, navigation}) => {
             <View style={{height: 150, alignItems: 'center', transform:[{scale: 0.98}]}}><Play/></View>
 
         </GestureHandlerRootView>
-        
+
     );
 }
 
@@ -120,7 +135,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         backgroundColor: COLORS.dark,
-    },  
+    },
     headerTxt: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -181,11 +196,11 @@ const styles = StyleSheet.create({
         height: 15,
     },
     secButtons:{
-        width: 155, 
-        backgroundColor: COLORS.light, 
-        borderRadius: 100, 
-        height: 42, 
-        justifyContent: 'center', 
+        width: 155,
+        backgroundColor: COLORS.light,
+        borderRadius: 100,
+        height: 42,
+        justifyContent: 'center',
         marginLeft: 10,
         marginRight: 10,
     }
