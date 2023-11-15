@@ -1,7 +1,7 @@
 // Music player bar used in track.js
 
 import React, { useEffect, useState } from 'react'
-import {StyleSheet, Text, View, TouchableOpacity, Alert} from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
 import { useFonts } from 'expo-font'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import Slider from '@react-native-community/slider'
@@ -11,6 +11,7 @@ import { useQueueStore } from '../../Store/useQueueStore'
 import { COLORS } from '../../Constants'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
+import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -18,8 +19,9 @@ const Icon = createIconSetFromIcoMoon(
     'icomoon.ttf'
 )
 
-export const Play = ({previousPage}) => {
+export const Play = ({ previousPage }) => {
     const [localPosition, setLocalPosition] = useState(0)
+    const userId = useAuthStore((state) => state.userId)
 
     // music store
     const isPlaying = useMusicStore((state) => state.isPlaying)
@@ -46,8 +48,7 @@ export const Play = ({previousPage}) => {
 
     useEffect(() => {
         console.log(previousPage)
-
-    }, []);
+    }, [])
 
     useEffect(() => {
         setLocalPosition(position)
@@ -64,69 +65,60 @@ export const Play = ({previousPage}) => {
         const totalSeconds = value / 1000
         const minutes = Math.floor(totalSeconds / 60)
         const seconds = Math.round(totalSeconds % 60)
-        return `${minutes.toString().padStart(2, '0')}:${seconds
-            .toString()
-            .padStart(2, '0')}`
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
     }
 
     const togglePlay = () => {
-        if(previousPage !== 'Chatroom'){
+        if (previousPage !== 'Chatroom') {
             changeIsPlaying(!isPlaying)
-        }else{
-            if(radioRoom_isDJ){
+        } else {
+            if (radioRoom_isDJ) {
                 changeIsPlaying(!isPlaying)
             } else {
-                Alert.alert('Dj permissions', 'Not a DJ',
-                  [
-                    {text: 'OK :(', onPress: () => console.log('OK Pressed')},
-                    ]
-                )
+                Alert.alert('Dj permissions', 'Not a DJ', [
+                    { text: 'OK :(', onPress: () => console.log('OK Pressed') },
+                ])
             }
         }
     }
 
     const handleSlider = async (value) => {
-        if(previousPage !== 'Chatroom'){
+        if (previousPage !== 'Chatroom') {
             changePosition(value)
             await soundObject.setPositionAsync(value)
-        }else{
-            if(radioRoom_isDJ){
+        } else {
+            if (radioRoom_isDJ) {
                 changePosition(value)
                 await soundObject.setPositionAsync(value)
             } else {
-                Alert.alert('Dj permissions', 'Not a DJ',
-                  [
-                      {text: 'OK :(', onPress: () => console.log('OK Pressed')},
-                  ]
-                )
+                Alert.alert('Dj permissions', 'Not a DJ', [
+                    { text: 'OK :(', onPress: () => console.log('OK Pressed') },
+                ])
             }
         }
     }
 
     const handlePrev = async () => {
-        if(previousPage !== 'Chatroom'){
+        if (previousPage !== 'Chatroom') {
             changeIsPlaying(false)
             await soundObject.setPositionAsync(0)
             changePosition(0)
             changeIsPlaying(true)
-        }else{
-            if(radioRoom_isDJ){
+        } else {
+            if (radioRoom_isDJ) {
                 changeIsPlaying(false)
                 await soundObject.setPositionAsync(0)
                 changePosition(0)
                 changeIsPlaying(true)
             } else {
-                Alert.alert('Dj permissions', 'Not a DJ',
-                  [
-                      {text: 'OK :(', onPress: () => console.log('OK Pressed')},
-                  ]
-                )
+                Alert.alert('Dj permissions', 'Not a DJ', [
+                    { text: 'OK :(', onPress: () => console.log('OK Pressed') },
+                ])
             }
         }
     }
 
     const handleNextSong = (trackId) => {
-
         const createSoundObject = async (uri) => {
             // clear previous song
             if (soundObject) {
@@ -160,21 +152,29 @@ export const Play = ({previousPage}) => {
     }
 
     const handleNext = async () => {
-        if(previousPage !== 'Chatroom'){
+        if (previousPage !== 'Chatroom') {
             if (queue.length !== 0) {
                 const currSong = queue[0]
                 changeQueue(queue.slice(1))
+                userQueue_updateQueue({
+                    userID: userId,
+                    userQueueList: queue.slice(1),
+                })
                 handleNextSong(currSong.id)
             } else {
                 changeIsPlaying(false)
                 await soundObject.setPositionAsync(0)
                 changePosition(0)
             }
-        }else{
-            if(radioRoom_isDJ){
+        } else {
+            if (radioRoom_isDJ) {
                 if (queue.length !== 0) {
                     const currSong = queue[0]
                     changeQueue(queue.slice(1))
+                    userQueue_updateQueue({
+                        userID: userId,
+                        userQueueList: queue.slice(1),
+                    })
                     handleNextSong(currSong.id)
                 } else {
                     changeIsPlaying(false)
@@ -182,11 +182,9 @@ export const Play = ({previousPage}) => {
                     changePosition(0)
                 }
             } else {
-                Alert.alert('Dj permissions', 'Not a DJ',
-                  [
-                      {text: 'OK :(', onPress: () => console.log('OK Pressed')},
-                  ]
-                )
+                Alert.alert('Dj permissions', 'Not a DJ', [
+                    { text: 'OK :(', onPress: () => console.log('OK Pressed') },
+                ])
             }
         }
     }
@@ -231,11 +229,7 @@ export const Play = ({previousPage}) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={handleNext}>
-                    <Icon
-                        style={[styles.icon, styles.rot]}
-                        name='back'
-                        size={30}
-                    />
+                    <Icon style={[styles.icon, styles.rot]} name='back' size={30} />
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => changeIsRepeat(!isRepeat)}>

@@ -40,13 +40,11 @@ export const RoomQueue = ({ route, navigation }) => {
 
     const storeQueue = {}
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
-
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
-
     const insets = useSafeAreaInsets()
 
     useEffect(() => {
-        changeCurrentPage('Room Queue')
+        changeCurrentPage('RoomQueue')
         const routes = navigation.getState()?.routes
         const prevRoute = routes[routes.length - 2]
         return () => changeCurrentPage(prevRoute.name)
@@ -190,7 +188,7 @@ export const RoomQueue = ({ route, navigation }) => {
                         </Text>
                     </TouchableOpacity>
                 </View>
-                {/* <View style={styles.butContainer}>
+                <View style={styles.butContainer}>
                     <TouchableOpacity
                         style={[styles.secButtons, { backgroundColor: COLORS.primary }]}
                         onPress={() => {
@@ -206,7 +204,7 @@ export const RoomQueue = ({ route, navigation }) => {
                             Start Listening
                         </Text>
                     </TouchableOpacity>
-                </View> */}
+                </View>
             </View>
         </GestureHandlerRootView>
     )

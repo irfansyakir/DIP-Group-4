@@ -20,7 +20,10 @@ export const useMusicStore = create((set) => ({
     radioRoom_isBroadcasting: false,
     radioRoom_roomID: '',
 
-    changeCurrentPage: (page) => set(() => ({ currentPage: page })),
+    changeCurrentPage: (page) => {
+        console.log('changePage', page)
+        set(() => ({ currentPage: page }))
+    },
     changeSoundObject: (sound) => set(() => ({ soundObject: sound })),
     addToPlaylist: (track) => set(() => ({ playlist: [...playlist, track] })),
     clearPlaylist: () => set(() => ({ playlist: [] })),
@@ -41,4 +44,21 @@ export const useMusicStore = create((set) => ({
 
     changeRadioRoom_isDJ: (isDJ) => set(() => ({ radioRoom_isDJ: isDJ })),
     changeRadioRoom_isBroadcasting: (isDJ) => set(() => ({ radioRoom_isBroadcasting: isDJ })),
+
+    resetPlayer: () => {
+        set(() => ({
+            soundObject: null,
+            isPlaying: false,
+            songInfo: {
+                coverUrl: '',
+                songTitle: '',
+                songArtist: '',
+                songAlbum: '',
+                songId: '',
+            },
+            position: 0,
+            duration: 0,
+            isRepeat: false,
+        }))
+    },
 }))
