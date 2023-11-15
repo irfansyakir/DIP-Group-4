@@ -31,6 +31,7 @@ import {useMusicStore} from "../../../../Store/useMusicStore";
 
 import { useQueueStore } from '../../../../Store/useQueueStore'
 import { userQueue_getQueue } from '../../../../Utilities/Firebase/user_queue_functions'
+import { room_addUser } from '../../../../Utilities/Firebase/room_functions';
 
 import { COLORS, SIZES } from '../../../../Constants';
 import {useFocusEffect} from "@react-navigation/native";
@@ -47,7 +48,6 @@ export const Chatroom = ({route, navigation}) => {
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
   const [roomName, setRoomName] = useState('Loading...');
   const [roomImage, setImage] = useState('');
-
   const [numOfListeners, setNumOfListeners] = useState(0)
 
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
@@ -103,16 +103,29 @@ export const Chatroom = ({route, navigation}) => {
     // console.log('Room Name: '+ roomDetails["room_name"]);
     setRoomName(roomDetails["room_name"]);
     setImage(roomDetails["image_url"]);
-    // setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
+    setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
     if(roomDetails['dj'].includes(userId)){
       changeIsDJ(true)
     } else{
       changeIsDJ(false)
     }
     setNumOfListeners(Object.keys(roomDetails.users).length)
-    // console.log(roomUserIDList)
+    console.log("users: " + Object.keys(roomDetails.users))
     // setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
     // roomDetails["dj"].includes()
+
+
+    // adds the current user to room's list of users if the user is not already in the room
+    if (!Object.keys(roomDetails.users).includes(userId)){
+        room_addUser({
+          roomID: roomID,
+          userID: userId,
+          username: username,
+        })
+        
+        const updatedRoomDetails = await room_getRoom({roomID: roomID});
+        setNumOfListeners(Object.keys(updatedRoomDetails.users).length)
+    }
   }
 
   const getMessages = async () => {

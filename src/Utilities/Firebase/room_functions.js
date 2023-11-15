@@ -79,12 +79,13 @@ export async function room_removeRoom({roomID}){
 }
 
 export async function room_addUser({roomID, userID, username}){
-  if (roomID === null || userID === null || username === null) {
+  if (roomID === null || userID === null || username === null){
     throw new Error("One or more required parameters are missing or empty in room_addUser.");
   }
   const updates = {};
   updates[`/rooms/${roomID}/users/${userID}`] = {
-    username: username
+    username: username,
+    owner: false
   }
 
   try {
