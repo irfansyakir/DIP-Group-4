@@ -37,6 +37,9 @@ export const RadioRooms = (currentPage) => {
     console.log("Fetching rooms...");
     room_getAllRooms()
       .then((roomData) => {
+        if(!roomData){
+          return
+        }
         // console.log("Rooms fetched:", roomData);
 
         // Convert the object to an array
