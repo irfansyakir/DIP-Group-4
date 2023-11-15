@@ -138,13 +138,9 @@ export const CreateRoom = ()=> {
                 users:{
                     "username": {
                     0: storeDisplayName,
-                    1: "greg",
-                    2: "ruihan",
                     },
                     "profileUrl": {
                     0: storeProfileUrl,
-                    1: storeProfileUrl,
-                    2: storeProfileUrl,
                     },
                 }
             });
@@ -158,7 +154,7 @@ export const CreateRoom = ()=> {
 
     useEffect(() => {
         console.log('helloooo')
-        isPublic = 'no';
+        isPublic = 'yes';
         isOthersAddSongs = 'no';
         if (storeDisplayName == '') {
             getInitialProfileData()
