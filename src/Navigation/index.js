@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { NavigationContainer } from '@react-navigation/native'
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -11,23 +11,30 @@ import { Profile } from '../Screens/Profile'
 import { EditProfile } from '../Screens/Profile/EditProfile'
 import { Login } from '../Screens/Login'
 
+
 import { Fragment } from 'react'
 import { useAuthStore } from '../Store/useAuthStore'
-import { Playlist } from '../Screens/Playlist'
+import { Playlist } from '../Commons/Playlist'
 import { TestAPI } from '../Screens/TestAPI'
 import { COLORS, SIZES } from '../Constants'
 import { CurrentlyPlaying } from '../Commons/UI/currentlyPlaying'
 import { Queue } from '../Screens/Queue'
-import { Chatroom } from '../Screens/Chatroom'
-import { CreateRoom } from "../Screens/RadioRooms/Components/CreateRoom";
+import { Chatroom } from '../Screens/RadioRooms/Components/Chatroom'
+import { CreateRoom } from '../Screens/RadioRooms/Components/CreateRoom'
+import { RadioRoomQueue } from '../Screens/RadioRooms/Components/RadioRoomQueue'
+import { RoomQueue } from '../Screens/RadioRooms/Components/RoomQueue'
+import { AddSong } from '../Screens/RadioRooms/Components/AddSong'
 
 // Track
 import { Track } from '../Commons/Track/track'
-import { TrackInfo } from '../Commons/Track/trackInfo'
+import { useMusicStore } from '../Store/useMusicStore'
+import {RoomDetails} from "../Screens/RadioRooms/Components/RoomDetails";
 
 const Stack = createNativeStackNavigator()
 const ProfileStack = createNativeStackNavigator()
 const SearchStack = createNativeStackNavigator()
+const RadioRoomStack = createNativeStackNavigator()
+const HomeStack = createNativeStackNavigator()
 
 const Tab = createBottomTabNavigator()
 
@@ -70,10 +77,11 @@ function HomeTabs() {
         },
       })}
     >
-      <Tab.Screen name='Home' component={Home} />
-      <Tab.Screen name='Search' component={SearchStackNavigator} />
-      <Tab.Screen name='RadioRooms' component={RadioRooms} />
-      <Tab.Screen name='Profile' component={ProfileStackNavigator} />
+      <Tab.Screen name='Home' component={HomeStackNavigator} options={{unmountOnBlur: true}}/>
+      <Tab.Screen name='Search' component={SearchStackNavigator} options={{unmountOnBlur: true}}/>
+      {/*Really dont know if radioRoom can be unmounted or not. For now unmount*/}
+      <Tab.Screen name='RadioRooms' component={RadioRoomStackNavigator} options={{unmountOnBlur: true}}/>
+      <Tab.Screen name='Profile' component={ProfileStackNavigator} options={{unmountOnBlur: true}}/>
       <Tab.Screen name='TestAPI' component={TestAPI} />
     </Tab.Navigator>
   )
@@ -88,37 +96,58 @@ function AuthStack() {
   )
 }
 
+function HomeStackNavigator() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name='HomeTab' component={Home} />
+      <HomeStack.Screen name='Track' component={Track} />
+      <HomeStack.Screen name='Playlist' component={Playlist} />
+      {/*<ProfileStack.Screen name='CreateRoom' component={CreateRoom} />*/}
+    </HomeStack.Navigator>
+  )
+}
+
 function ProfileStackNavigator() {
   return (
     <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
       <ProfileStack.Screen name='ProfileTab' component={Profile} />
       <ProfileStack.Screen name='EditProfile' component={EditProfile} />
       <ProfileStack.Screen name='Track' component={Track} />
-      
-      <ProfileStack.Group screenOptions={{ presentation: 'modal' }}>
-        <ProfileStack.Screen name="TrackInfo" component={TrackInfo} />
-      </ProfileStack.Group>
+      <ProfileStack.Screen name='Playlist' component={Playlist} />
+      {/*<ProfileStack.Screen name='CreateRoom' component={CreateRoom} />*/}
     </ProfileStack.Navigator>
   )
 }
-function SearchStackNavigator(){
-  return(
+
+function SearchStackNavigator() {
+  return (
     <SearchStack.Navigator screenOptions={{ headerShown: false }}>
       <SearchStack.Screen name='SearchTab' component={Search} />
-      <SearchStack.Screen name="SearchClick" component={SearchClick} />
+      <SearchStack.Screen name='SearchClick' component={SearchClick} />
       <SearchStack.Screen name='Track' component={Track} />
-      <SearchStack.Group screenOptions={{ presentation: 'modal' }}>
-        <SearchStack.Screen name="TrackInfo" component={TrackInfo} />
-      </SearchStack.Group>
+      <SearchStack.Screen name='Playlist' component={Playlist} />
     </SearchStack.Navigator>
   )
 }
 
+function RadioRoomStackNavigator(){
+  return (
+    <RadioRoomStack.Navigator screenOptions={{ headerShown: false }}>
+      <RadioRoomStack.Screen name='RadioRoom' component={RadioRooms} />
+      <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
+      <RadioRoomStack.Screen name='RoomDetails' component={RoomDetails} />
+      <RadioRoomStack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
+      <RadioRoomStack.Screen name='Track' component={Track} />
+      <RadioRoomStack.Screen name='Playlist' component={Playlist} />
+      <RadioRoomStack.Screen name='RoomQueue' component={RoomQueue} />
+      <RadioRoomStack.Screen name='AddSong' component={AddSong} />
+    </RadioRoomStack.Navigator>
+  )
+}
 
 export const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
-  const wholeState = useAuthStore((state) => state)
-  console.log(wholeState)
+  const currentPage = useMusicStore((state) => state.currentPage)
 
   return (
     <React.Fragment>
@@ -131,31 +160,28 @@ export const Navigation = () => {
       >
         {isLoggedIn ? (
           <Fragment>
-              <Stack.Screen name='RootHome' component={HomeTabs} />
-              <Stack.Screen name='EditProfile' component={EditProfile} />
-              <Stack.Screen name="Queue" component={Queue} />
-              <Stack.Screen name="Playlist" component={Playlist} />
-              <Stack.Screen name="Chatroom" component={Chatroom} />
+            <Stack.Screen name='RootHome' component={HomeTabs} />
+            <Stack.Screen name='EditProfile' component={EditProfile} />
+            <Stack.Screen name='Queue' component={Queue} />
+            <Stack.Screen name='Playlist' component={Playlist} />
+            <Stack.Screen name='Chatroom' component={Chatroom} />
+            <Stack.Screen name='CreateRoom' component={CreateRoom} />
+            <Stack.Screen name='Track' component={Track} />
+            <Stack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
+            <Stack.Screen name='RoomQueue' component={RoomQueue} />
+            <Stack.Screen name='AddSong' component={AddSong} />
           </Fragment>
         ) : (
           <Stack.Screen name='Auth' component={AuthStack} />
         )}
       </Stack.Navigator>
-      {false && (
+      {isLoggedIn && (
         <CurrentlyPlaying
-          coverUrl={
-            'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228'
-          }
-          title='Never Not'
-          artist={'Lauv'}
           currentTime={30}
           duration={100}
+          currentPage={currentPage}
         />
       )}
-      
-      
-       
-
     </React.Fragment>
   )
 }

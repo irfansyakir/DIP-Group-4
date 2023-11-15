@@ -6,6 +6,7 @@ export const useAuthStore = create(
   persist(
     (set) => ({
       isLoggedIn: false,
+      userId: '',
       code: '',
       codeVerifier: '',
       accessToken: '',
@@ -20,6 +21,7 @@ export const useAuthStore = create(
         set(() => ({
           isLoggedIn: false,
           code: '',
+          userId: '',
           codeVerifier: '',
           accessToken: '',
           refreshToken: '',

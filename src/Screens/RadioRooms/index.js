@@ -1,182 +1,248 @@
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  Image,
+  ScrollView, Dimensions,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useAuthStore } from '../../Store/useAuthStore'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
+import { room_getAllRooms } from "../../Utilities/Firebase/room_functions";
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { BoldText } from "../../Commons/UI/styledText";
+import { COLORS, SIZES } from "../../Constants";
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { useMusicStore } from '../../Store/useMusicStore'
+import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_functions'
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList } from 'react-native';
-import Svg, { Text as SvgText } from 'react-native-svg';
-import {useNavigation} from "@react-navigation/native";
+export const RadioRooms = (currentPage) => {
+  const insets = useSafeAreaInsets()
+  const windowWidth = Dimensions.get('window').width;
 
-
-export const RadioRooms = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation(); // Initialize navigation\
 
-  const handleButtonClick = () => {
-    // Navigate to "YourNewPage" screen when the container is clicked
-    navigation.navigate('CreateRoom');
-  };
+  const changeQueue = useQueueStore((state) => state.changeQueue)
+  const [shuffledRooms, setShuffledRooms] = useState([]);
 
-  // Sample data for recommended radio rooms
-  const recommendedRooms = [
-    { id: '1', name: 'Radio Room 1' },
-    { id: '2', name: 'Radio Room 2' },
-    { id: '3', name: 'Radio Room 3' },
-  ];
+  const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
+  useEffect(() => {
+    console.log("Fetching rooms...");
+    room_getAllRooms()
+      .then((roomData) => {
+        // console.log("Rooms fetched:", roomData);
+
+        // Convert the object to an array
+
+        let roomsArray = []
+        for (const [key, value] of Object.entries(roomData)) {
+          roomsArray.push({...value, id: key})
+        }
+        //need to do this due to database structure having the id as key because flatlist.
+        // Shuffle rooms only when the component mounts or when rooms are fetched
+        if (shuffledRooms.length === 0) {
+          // console.log(roomsArray)
+          setShuffledRooms(shuffleArray(roomsArray));
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching rooms:", error);
+      });
+  }, []);
 
   const handleRoomSelect = (roomId) => {
-    setSelectedRoom(roomId === selectedRoom ? null : roomId);
+    setSelectedRoom(roomId);
   };
+  const handleButtonClick = () => {
+    // Navigate to "CreateRoom" screen when the button is clicked
+    navigation.navigate("CreateRoom");
+  };
+  const goToChatroom = (roomId) => {
+    navigation.navigate('Chatroom', {
+      roomID: roomId,
+    })
+    changeCurrentPage('Chatroom')
 
-  const goToChatroom = () => { 
-    navigation.navigate('Chatroom')
     // console.log("Clicked!")
   }
+  function shuffleArray(array) {
+    let shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+    return shuffledArray;
+  }
+
+  const swapToRoomQueue = async (roomId) => {
+    const roomQueue =  await userQueue_getRoomQueue({ roomID: roomId })
+    changeQueue(roomQueue)
+  }
+
+  const renderItem = ({ item }) => {
+    let owner = 'Loading...';
+    for (const [key, value] of Object.entries(item.users)) {
+      if(value.owner === true){
+        owner = value.username
+      }
+    }
+    return(
+      <View style={{
+        flexDirection: "row",
+        alignItems: "center",
+      }}>
+        <TouchableOpacity
+          onPress={() => {
+            handleRoomSelect(item.id)
+          }}
+          style={{
+            padding: 20,
+            paddingLeft: selectedRoom === item.id ? 20 : 0,
+            marginTop: selectedRoom === item.id ? 20 : 0,
+            borderRadius: 10,
+            flexDirection: "column",
+            alignItems: "center",
+            // backgroundColor: 'red',
+            backgroundColor: selectedRoom === item.id ? COLORS.darkblue : COLORS.dark,
+            height: selectedRoom === item.id ? 190 : 100,
+            width: '100%'
+          }}
+        >
+          <View style={{flexDirection: 'row', marginBottom: 15,}}>
+            <Image
+              source={{uri: item.image_url}} // Use the image URL from Firebase
+              style={{
+                width: selectedRoom === item.id ? 100 : 80,
+                height: selectedRoom === item.id ? 100 : 80,
+                marginRight: 15,
+                borderRadius: 10,
+              }}
+            />
+            {/* Room Title, Created by, Description */}
+            <View style={{marginRight: 15, justifyContent: 'center', maxWidth: '80%'}}>
+              <BoldText style={{
+                color: COLORS.light,
+                fontSize: 16,
+              }}>
+                {item.room_name}
+              </BoldText>
+              <Text numberOfLines={1}
+                    ellipsizeMode='tail'
+                    style={{
+                      color: COLORS.grey,
+                      fontSize: 12,
+                    }}>
+                CREATED BY {owner}
+              </Text>
+              {selectedRoom === item.id ?
+                <Text
+                  numberOfLines={2}
+                  ellipsizeMode='tail'
+                  style={{
+                    color: COLORS.light,
+                    fontSize: SIZES.small
+                  }}>
+                  {item.room_description}
+                </Text> : null
+              }
+              <Text style={{color: COLORS.yellow}}>
+                {Object.keys(item.users).length} LISTENING
+              </Text>
+            </View>
+          </View>
+
+          {/* JOIN BUTTON */}
+          {selectedRoom === item.id ?
+            <TouchableOpacity style={{
+              backgroundColor: COLORS.primary,
+              borderRadius: 20,
+              justifyContent: "center",
+              alignItems: "center",
+              width: '50%',
+              height: 34,
+            }} onPress={() => {
+              goToChatroom(item.id)
+              swapToRoomQueue(item.id)
+            }}>
+              <Text style={{
+                fontSize: 14,
+                color: "black",
+                fontWeight: "bold",
+              }}>Join Room</Text>
+            </TouchableOpacity> : null}
+
+        </TouchableOpacity>
+      </View>
+    )
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.textContainer}>
-        <Svg width="100%" height="100%">
-          <SvgText x="10" y="20" fontSize="25" fill="white" fontWeight="bold">
-            RadioRooms
-          </SvgText>
-        </Svg>
+    <View style={{flex:1, paddingTop: insets.top, backgroundColor: COLORS.dark, width: windowWidth}}>
+    <ScrollView style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}>
+      <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
+      <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
+        RadioRooms
+      </BoldText>
+      {/* CREATE ROOM BUTTON */}
+      <TouchableOpacity style={{
+        justifyContent: "center",
+        alignItems: "center",
+        height: 45,
+        width: 60,
+        borderRadius: 30,
+        marginTop: 7,
+      }} onPress={handleButtonClick}>
+        <Text style={{
+          fontSize: 40,
+          color: "#41BBC4",}}>+</Text>
+      </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={styles.buttonContainer}
-        onPress={handleButtonClick}
-      >
-        <Svg width="100%" height="100%">
-          <SvgText
-            x="50%"
-            y="27"
-            fontSize="17"
-            fill="black"
-            fontWeight="bold"
-            textAnchor="middle"
-          >
-            Create Room +
-          </SvgText>
-        </Svg>
-      </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.searchBar}
-        onPress={() => {} /* Handle search bar click */}
-      >
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by room code..."
-          placeholderTextColor="gray"
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-          autoFocus={false}
-        />
-      </TouchableOpacity>
-      <Text style={styles.recommendText}>Recommend for you</Text>
+      {/* SEARCH BAR */}
+      <View style={{
+          marginTop: 10,
+          flexDirection: 'row',
+          backgroundColor: '#333',
+          borderRadius: 10,
+          alignItems: 'center',
+          paddingHorizontal: 10,}}>
+          <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
+          <TextInput
+            autoFocus={false}
+            style={{
+              color: COLORS.light,
+              width: 250,
+              fontSize: SIZES.medium,
+              padding: 10,}}
+            placeholder='Search by room code'
+            placeholderTextColor={COLORS.grey}
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
+          />
+        </View>
+
+      <BoldText style={{
+        fontSize: SIZES.large,
+        color: COLORS.light,
+        marginTop: 20,
+        }}>Recommended for you</BoldText>
+
       <FlatList
-        data={recommendedRooms}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.roomContainer}>
-            <TouchableOpacity
-              onPress={() => handleRoomSelect(item.id)}
-              style={[
-                styles.roomBox,
-                {
-                  backgroundColor: selectedRoom === item.id ? 'gray' : 'black',
-                  width: selectedRoom === item.id ? 250 : 200, // Adjust the width as needed
-                },
-              ]}
-            >
-              <Text style={styles.roomRecommendation}>{item.name}</Text>
-              <TouchableOpacity style={styles.joinButton} onPress={goToChatroom}>
-                <Svg width="100%" height="100%">
-                  <SvgText
-                    x="50%"
-                    y="60%"
-                    fontSize="14"
-                    fill={selectedRoom === item.id ? 'black' : 'black'}
-                    fontWeight="bold"
-                    textAnchor="middle"
-                  >
-                    Join Room
-                  </SvgText>
-                </Svg>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </View>
-        )}
+       // data={shuffledRooms.slice(0, 5)} // Display a random selection of 5 rooms
+        data={shuffledRooms} //for now display all rooms cuz easier debugging
+       keyExtractor={(item) => item.id}
+       renderItem={renderItem}
+       style={{marginBottom:150}}
       />
+    </ScrollView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  textContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 42,
-    backgroundColor: '#41BBC4',
-    borderRadius: 103.571,
-    position: 'absolute',
-    top: 30,
-    left: 0,
-    right: 0,
-  },
-  searchBar: {
-    position: 'absolute',
-    top: 80,
-    width: '100%',
-    height: 37,
-    backgroundColor: '#343434',
-    borderRadius: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 10,
-    paddingLeft: 10,
-  },
-  recommendText: {
-    position: 'absolute',
-    fontSize: 17,
-    color: 'white',
-    fontWeight: 'bold',
-    marginLeft: 10,
-    marginTop: 120,
-  },
-  roomContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  roomBox: {
-    backgroundColor: 'black',
-    padding: 20,
-    flex: 1,
-    marginLeft: 20,
-    flexDirection: 'row', // Add this to make room for the Join Room button
-    justifyContent: 'space-between', // Add this to place the Join Room button on the right
-    alignItems: 'center', // Add this to vertically center the Join Room button
-  },
-  roomRecommendation: {
-    flex: 1,
-    fontSize: 16,
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  joinButton: {
-    backgroundColor: '#41BBC4',
-    borderRadius: 103.571,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100, // Adjust the width as needed
-    height: 34,
-  },
-});
+export default RadioRooms;

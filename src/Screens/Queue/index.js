@@ -4,172 +4,138 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import Draggable from 'react-native-draggable';
+import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import DraggableFlatList from "react-native-draggable-flatlist";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-gesture-handler';
-import { GetQueue } from '../../Utilities/SpotifyApi/Utils'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { useMusicStore } from '../../Store/useMusicStore'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { red, white } from 'color-name';
+import { useUserCurrentQueue } from "../../Utilities/Firebase/useFirebaseListener";
+import { Play } from '../../Commons/Track/play'
+import { COLORS } from '../../Constants'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+    userQueue_getQueue,
+    userQueue_updateQueue,
+  } from '../../Utilities/Firebase/user_queue_functions'
 
+const Icon = createIconSetFromIcoMoon(
+    require('../../../assets/icomoon/selection.json'),
+    'IcoMoon',
+    'icomoon.ttf'
+)
 
 export const Queue = ({navigation}) => {
 
-    const [play, setPlay] = useState(false);
-    const accessToken = useAuthStore((state) => state.accessToken)
-    const [currPlaying, setCurrPlaying] = useState([])
-    const [queue, setQueue] = useState([])
+    const storeQueue = useQueueStore((state) => state.queue)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
+    const storeCurrTrack = useMusicStore((state) => state.songInfo)
+    const userId = useAuthStore((state) => state.userId)
 
+    const insets = useSafeAreaInsets()
 
-    const getQueue = async () => {
-
-        try {
-            const queueData = await GetQueue({
-                accessToken: accessToken,
-            })
-
-            const artistNames = queueData.currently_playing.artists.map(artist => artist.name).join(', ');
-            const currPlaying = {
-                id: queueData.currently_playing.id,
-                title: queueData.currently_playing.name,
-                artist: artistNames,
-                img: queueData.currently_playing.album.images[0].url
-            };
-            setCurrPlaying(currPlaying)
-
-            const currQueue = []
-            queueData.queue.map((curr) => {
-                const queueArtistNames = curr.artists.map(artist => artist.name).join(', ');
-
-                currQueue.push({
-                    id: curr.album.id,
-                    title: curr.name,
-                    artist: queueArtistNames,
-                })
-            })
-            setQueue(currQueue)
-
-            console.log('done2')
-        } catch (error) {
-          console.error(error)
-        }
-    }
-
-    const toggleImage = () => {
-      setPlay(!play)
-    };
-
-    useEffect(() => {
-        console.log(queue);
-    }, [queue])    
-
-    // const onItemMove = (fromIndex, toIndex) => {
-    //     const updatedItems = [...items];
-    //     const [movedItem] = updatedItems.splice(fromIndex, 1);
-    //     updatedItems.splice(toIndex, 0, movedItem);
-    //     setItems(updatedItems);
-    // };
-
-    // Generating list of songs
-    const generateSongs = () => {
-
-        return (<DraggableFlatList
-          data={queue}
-          onDragEnd={({data}) => {setQueue(data)}}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          style={{ height: (47/100)*Math.round(Dimensions.get('window').height)}}
-          renderItem={({ item, drag, isActive }) => (
-            <TouchableOpacity 
-                style={styles.songInQ} 
-                onLongPress={drag} 
-                background={isActive ? "gray300" : "white"} 
-                minPressDuration={150} 
-            >
-                <View>
-                    <Text style={styles.songName}>{item.title}</Text>
-                    <Text style={styles.artistName}>{item.artist}</Text>
+    // Generating list of songs from store
+    const generateSongs = () => {        
+        return (
+        <View style={{flex: 1}}>
+            <DraggableFlatList
+            data={storeQueue}
+            onDragEnd={({data}) => {
+                changeQueue(data)
+                userQueue_updateQueue({ userID: userId, userQueueList: data})
+            }}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item, drag, isActive }) => (
+                <View style={[styles.songInQ,
+                    {backgroundColor: isActive ? COLORS.secondary : item.backgroundColor}
+                ]} 
+                >
+                    <View style={{flex: 1}}> 
+                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.songName}>{item.title}</Text>
+                        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.artistName}>{item.artist}</Text>
+                    </View>
+                    <TouchableOpacity 
+                        style={{
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '100%',
+                            width: 52,
+                        }}
+                        onLongPress={drag}
+                        delayLongPress={300}
+                        disabled={isActive}
+                    >
+                        <Image
+                            style={styles.draggable}
+                            source={require("../../../assets/draggable.png")}
+                        />
+                    </TouchableOpacity>
                 </View>
-                <Image
-                    style={styles.draggable}
-                    source={require("../../../assets/draggable.png")}
-                />
-            </TouchableOpacity>
-        )}
-        />);
+            )}/>
+        </View>
+        );
     };
-
-    useEffect(() => {
-        console.log('done')
-        getQueue()
-    }, [])
     
     return (
-        <GestureHandlerRootView style={styles.container}>
-            <Text style={styles.header}>Now Playing</Text>
+        <GestureHandlerRootView style={[styles.container, {paddingTop: insets.top,}]}>
+            <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16 }}>
+                <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => navigation.goBack()}>
+                    <Icon style={styles.icon} name='down'/>
+                </TouchableOpacity>
+                <Text style={styles.headerTxt}> Queue </Text>
+                <View style={{height:20, width:20}}></View>
+            </View>
+            
+            <Text style={[styles.subHeaderTxt, {marginBottom: 8}]}>Now Playing</Text>
             <View style={styles.playingNow}>
                 <Image
                     style={styles.playlistImage}
-                    source={currPlaying.img}
-                />
+                    source={storeCurrTrack.coverUrl}
+                /> 
                 <View style={styles.songDets}>
                     <Text style={styles.currSong}>
-                        {currPlaying.title}
+                        {storeCurrTrack.songTitle}
                     </Text>
                     <Text style={styles.currArtistName}>
-                        {currPlaying.artist}
+                        {storeCurrTrack.songArtist}
                     </Text>
                 </View>
             </View>
-            <Text style={styles.header}>Next In Queue</Text>
-
+            
+            <Text style={styles.subHeaderTxt}>Next In Queue</Text>
             {generateSongs()}
-            {/* Insert music status bar */}
 
-            <View style={styles.musicPlayer}>
-                <TouchableOpacity>
-                    <Image
-                        style={styles.skip}
-                        source={require("../../../assets/skipPrev.png")}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={toggleImage}>
-                    <Image
-                        style={styles.playCircle}
-                        source={require("../../../assets/playCircle.png")}
-                    />
-                    <Image
-                        style={play ? styles.play : styles.pause}
-                        source={play ? require("../../../assets/play.png") : require("../../../assets/pause.png")}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Image
-                        style={styles.skip}
-                        source={require("../../../assets/skipNext.png")}
-                    />
-                </TouchableOpacity>
-            </View>
+            <View style={{height: 165, alignItems: 'center'}}><Play/></View>
+
         </GestureHandlerRootView>
+        
     );
 }
 
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-        justifyContent: 'flex-end',
-        paddingTop: 10,
-        paddingLeft: 25,
-        paddingRight: 25,
-        paddingBottom: 80,
-        backgroundColor: '#13151e',
+        justifyContent: 'flex-start',
+        backgroundColor: COLORS.dark,
     },  
-    header: {
+    headerTxt: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: COLORS.white,
+    },
+    icon:{
+        fontSize: 20,
+        color: COLORS.white,
+    },
+    subHeaderTxt: {
         fontSize: 17,
         fontWeight: 'bold',
-        color: '#FFFFFF',
-        marginBottom: 10,
+        color: COLORS.white,
+        paddingLeft: 16,
+        paddingRight: 16,
     },
     playlistImage: {
         width: 81,
@@ -177,7 +143,9 @@ const styles = StyleSheet.create({
     },
     playingNow: {
         flexDirection: 'row',
-        marginBottom: 28,
+        marginBottom: 20,
+        paddingLeft: 16,
+        paddingRight: 16,
     },
     songDets: {
         justifyContent: 'center',
@@ -186,58 +154,30 @@ const styles = StyleSheet.create({
     currSong: {
         fontSize: 17,
         fontWeight: 'bold',
-        color: '#41BBC4',
+        color: COLORS.primary,
     },
     currArtistName: {
         fontSize: 15,
-        color: '#B3B3B3',
+        color: COLORS.grey,
     },
     songInQ: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 15,
+        height: 60,
+        paddingLeft: 16,
     },
     songName: {
-        fontSize: 16,
-        color: '#FFFFFF',
+        fontSize: 17,
+        color: COLORS.white,
     },
     artistName: {
         fontSize: 13,
-        color: '#B3B3B3',
+        color: COLORS.grey,
     },
     draggable: {
         width: 20,
-        height: 10,
-    },
-    musicPlayer: {
-        height: 60, 
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },  
-    skip: {
-        width: 29,
-        height: 25,
-        margin: 30,
-    },
-    playCircle: {
-        width: 60,
-        height: 60,
-    },
-    play: {
-        width: 21,
-        height: 25,
-        position: 'absolute',
-        top: 18,
-        left: 21,
-    },
-    pause: {
-        width: 20,
-        height: 22,
-        position: 'absolute',
-        top: 19,
-        left: 20,
-    },
+        height: 15,
+    }
 })
 

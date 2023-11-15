@@ -69,16 +69,13 @@ export async function GetPlaylistDetails({
   offset = 0,
 }) {
   try {
-    let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
-    const extraParams = new URLSearchParams({ limit: limit, offset: offset })
-    url = url + '?' + extraParams
+    let url = `https://api.spotify.com/v1/playlists/${playlistId}`
     const playlistResponse = await fetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     })
-    // console.log(playlistResponse)
 
     if (playlistResponse.status === 200) {
       const playlistData = await playlistResponse.json()
@@ -93,6 +90,36 @@ export async function GetPlaylistDetails({
     console.error('Error fetching playlist data:', error)
   }
 }
+
+export async function GetPlaylistSongs({
+  accessToken,
+  playlistId,
+  limit = 20,
+  offset = 0,
+}) {
+  try {
+    let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
+    const playlistResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (playlistResponse.status === 200) {
+      const playlistData = await playlistResponse.json()
+      return playlistData
+    } else {
+      console.error(
+        'Error fetching playlist data:',
+        playlistResponse.statusText
+      )
+    }
+  } catch (error) {
+    console.error('Error fetching playlist data:', error)
+  }
+}
+
 
 export async function GetTrack({ accessToken, trackId }) {
   return await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
@@ -161,10 +188,9 @@ export async function GetQueue({ accessToken }) {
       },
     })
 
-    
-
     if (dataResponse.status === 200) {
       const data = await dataResponse.json()
+      // console.log("data: ", data)
       return data
     } else {
       console.error('Error fetching queue:', dataResponse.statusText)
