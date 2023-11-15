@@ -5,12 +5,14 @@ import {
   TextInput,
   FlatList,
   Image,
+  ToastAndroid
 } from 'react-native'
 import { COLORS, SIZES } from '../../../../Constants'
 import { BoldText, MediumText } from '../../../../Commons/UI/styledText'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
 import { useState } from 'react'
+import { useFonts } from 'expo-font'
 import { Audio } from 'expo-av'
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import { SearchTrack } from '../../../../Utilities/SpotifyApi/Utils'
@@ -127,6 +129,35 @@ export const AddSong = ({route}) => {
     })
   }
 
+  const [fontsLoaded] = useFonts({
+      IcoMoon: require('../../../../../assets/icomoon/icomoon.ttf'),
+  })
+
+  if (!fontsLoaded) {
+      return null
+  }
+  const showToast = () => {
+    ToastAndroid.show('A pikachu appeared nearby !', ToastAndroid.SHORT);
+  };
+
+  const showToastWithGravity = () => {
+    ToastAndroid.showWithGravity(
+      'All Your Base Are Belong To Us',
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER,
+    );
+  };
+
+  const showToastWithGravityAndOffset = () => {
+    ToastAndroid.showWithGravityAndOffset(
+      'A wild toast appeared!',
+      ToastAndroid.LONG,
+      ToastAndroid.BOTTOM,
+      25,
+      50,
+    );
+  };
+
   const renderItem = ({ item }) => (
       <View
         style={{
@@ -156,8 +187,12 @@ export const AddSong = ({route}) => {
             <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => addSongtoRoomQ(item)}>
-          <Ionicons name={'add-circle-outline'} style={{}} size={35} color={COLORS.light} />
+        <TouchableOpacity onPress={() => {
+          addSongtoRoomQ(item) 
+          // showMsg()
+          showToast()
+          }}>
+          <Ionicons name={'add-circle-outline'} size={35} color={COLORS.light} />
         </TouchableOpacity>
       </View>
   )

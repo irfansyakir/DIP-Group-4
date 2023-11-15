@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity, View, Image, Touchable } from 'react-native'
 import { COLORS, SIZES } from '../../Constants'
 import { Audio } from 'expo-av'
+import { useFonts } from 'expo-font'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
@@ -62,6 +63,14 @@ export default function SingleSong({ item }) {
     }
 
     getTrackData()
+  }
+
+  const [fontsLoaded] = useFonts({
+      IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
+  })
+
+  if (!fontsLoaded) {
+      return null
   }
 
   const addSongtoQ = () => { 
