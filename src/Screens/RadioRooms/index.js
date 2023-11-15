@@ -21,7 +21,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_functions'
 
-export const RadioRooms = (currentPage) => {
+export const RadioRooms = () => {
     const insets = useSafeAreaInsets()
     const windowWidth = Dimensions.get('window').width
 
@@ -33,23 +33,21 @@ export const RadioRooms = (currentPage) => {
     const [shuffledRooms, setShuffledRooms] = useState([])
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+    const currentPage = useMusicStore((state) => state.currentPage)
 
     useEffect(() => {
         console.log('Fetching rooms...')
+        console.log('currentPage', currentPage)
         room_getAllRooms()
             .then((roomData) => {
                 if (!roomData) {
                     return
                 }
-                // console.log("Rooms fetched:", roomData);
-
-                // Convert the object to an array
-
                 let roomsArray = []
                 for (const [key, value] of Object.entries(roomData)) {
                     roomsArray.push({ ...value, id: key })
                 }
-                //need to do this due to database structure having the id as key because flatlist.
+                // need to do this due to database structure having the id as key because flatlist.
                 // Shuffle rooms only when the component mounts or when rooms are fetched
                 if (shuffledRooms.length === 0) {
                     // console.log(roomsArray)
@@ -73,8 +71,6 @@ export const RadioRooms = (currentPage) => {
             roomID: roomId,
         })
         changeCurrentPage('Chatroom')
-
-        // console.log("Clicked!")
     }
     function shuffleArray(array) {
         let shuffledArray = [...array]
@@ -195,7 +191,7 @@ export const RadioRooms = (currentPage) => {
                             }}
                             onPress={() => {
                                 goToChatroom(room.id)
-                                swapToRoomQueue(room.id)
+                                // swapToRoomQueue(room.id)
                             }}
                         >
                             <Text

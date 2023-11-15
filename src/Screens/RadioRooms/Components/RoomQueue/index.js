@@ -1,22 +1,32 @@
-import {View, Text, Button, StyleSheet, TouchableOpacity, FlatList, PanResponder, Animated, Dimensions} from 'react-native';
-import { Image } from 'expo-image';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as React from 'react';
-import { useEffect, useState, useRef } from 'react';
+import {
+    View,
+    Text,
+    Button,
+    StyleSheet,
+    TouchableOpacity,
+    FlatList,
+    PanResponder,
+    Animated,
+    Dimensions,
+} from 'react-native'
+import { Image } from 'expo-image'
+import { NavigationContainer } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import * as React from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
-import DraggableFlatList from "react-native-draggable-flatlist";
-import "react-native-gesture-handler";
-import { GestureHandlerRootView, PanGestureHandler, State} from 'react-native-gesture-handler';
+import DraggableFlatList from 'react-native-draggable-flatlist'
+import 'react-native-gesture-handler'
+import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler'
 import { useQueueStore } from '../../../../Store/useQueueStore'
 import { useMusicStore } from '../../../../Store/useMusicStore'
-import { red, white } from 'color-name';
-import { useUserCurrentQueue } from "../../../../Utilities/Firebase/useFirebaseListener";
+import { red, white } from 'color-name'
+import { useUserCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { Play } from '../../../../Commons/Track/play'
 import { COLORS } from '../../../../Constants'
-import { AuthError } from 'expo-auth-session';
+import { AuthError } from 'expo-auth-session'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useColorScheme } from 'react-native';
+import { useColorScheme } from 'react-native'
 import { useFonts } from 'expo-font'
 
 const Icon = createIconSetFromIcoMoon(
@@ -25,10 +35,10 @@ const Icon = createIconSetFromIcoMoon(
     'icomoon.ttf'
 )
 
-export const RoomQueue = ({route, navigation}) => {
-    const { roomID, roomName} = route.params || {};
+export const RoomQueue = ({ route, navigation }) => {
+    const { roomID, roomName } = route.params || {}
 
-    const storeQueue = useQueueStore((state) => state.queue)
+    const storeQueue = {}
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
@@ -36,112 +46,174 @@ export const RoomQueue = ({route, navigation}) => {
     const insets = useSafeAreaInsets()
 
     useEffect(() => {
-        changeCurrentPage("Track")
-        return () => {
-          const nextNavigationStateToVisit = navigation.getState()['routes'].at(-1)
-          console.log(nextNavigationStateToVisit)
-          if (nextNavigationStateToVisit['name'] === 'Chatroom'){
-              changeCurrentPage("Chatroom")
-          } else{
-            changeCurrentPage("Not Track")
-          }
+        changeCurrentPage('Room Queue')
+        const routes = navigation.getState()?.routes
+        const prevRoute = routes[routes.length - 2]
+        return () => changeCurrentPage(prevRoute.name)
+    }, [])
+
+    const handleStartRoom = async () => {
+        console.log('roomId', roomID)
+        console.log('queue', await userQueue_getRoomQueue({ roomID: roomID }))
+        const roomQueue = await userQueue_getRoomQueue({ roomID: roomID })
+        const firstSongId = roomQueue[0].id
+        userQueue_updateRoomQueue({
+            roomID: roomID,
+            userRoomQueueList: roomQueue.slice(1),
+        })
+
+        const createSoundObject = async (uri) => {
+            // clear previous song
+            if (soundObject) {
+                changeIsPlaying(false)
+                soundObject.unloadAsync()
+            }
+
+            const { sound } = await Audio.Sound.createAsync({ uri: uri })
+            changeSoundObject(sound)
+            changeIsPlaying(true)
         }
-    }, []);
+
+        const getTrackData = async () => {
+            try {
+                const trackData = await GetTrack({
+                    accessToken: accessToken,
+                    trackId: firstSongId,
+                })
+                changeSongInfo(
+                    trackData.album.images[0].url,
+                    trackData.name,
+                    trackData.artists[0].name,
+                    trackData.album.name,
+                    trackData.id
+                )
+                createSoundObject(trackData.preview_url)
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
+        getTrackData()
+    }
 
     const [fontsLoaded] = useFonts({
         IcoMoon: require('../../../../../assets/icomoon/icomoon.ttf'),
     })
-  
+
     if (!fontsLoaded) {
         return null
     }
 
     const generateSongs = () => {
         return (
-        <View style={{flex: 1}}>
-            <FlatList
-            data={storeQueue}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={true}
-            renderItem={({ item }) => (
-                <View style={styles.songInQ}>
-                    <Image
-                        style={{
-                            width: 45,
-                            height: 45,
-                            borderRadius: 5
-                        }}
-                        source={item.img}
-                    />
-                    <View style={{ paddingLeft: 10 }}>
-                        <Text style={styles.songName}>{item.title}</Text>
-                        <Text style={styles.artistName}>{item.artist}</Text>
-                    </View>
-                </View>
-            )}/>
-        </View>
-        );
-    };
+            <View style={{ flex: 1 }}>
+                <FlatList
+                    data={storeQueue}
+                    keyExtractor={(item) => item.id}
+                    showsVerticalScrollIndicator={true}
+                    renderItem={({ item }) => (
+                        <View style={styles.songInQ}>
+                            <Image
+                                style={{
+                                    width: 45,
+                                    height: 45,
+                                    borderRadius: 5,
+                                }}
+                                source={item.img}
+                            />
+                            <View style={{ paddingLeft: 10 }}>
+                                <Text style={styles.songName}>{item.title}</Text>
+                                <Text style={styles.artistName}>{item.artist}</Text>
+                            </View>
+                        </View>
+                    )}
+                />
+            </View>
+        )
+    }
 
     return (
-        <GestureHandlerRootView style={[styles.container,  {paddingTop: insets.top,}]}>
-            <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16}}>
-                <TouchableOpacity style={{justifyContent: 'center'}} onPress={() => navigation.goBack()}>
-                    <Icon style={styles.icon} name='down'/>
+        <GestureHandlerRootView style={[styles.container, { paddingTop: insets.top }]}>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingLeft: 16,
+                    paddingRight: 16,
+                    marginBottom: 16,
+                    paddingTop: 16,
+                }}
+            >
+                <TouchableOpacity
+                    style={{ justifyContent: 'center' }}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Icon style={styles.icon} name='down' />
                 </TouchableOpacity>
                 <Text style={styles.headerTxt}> {roomName} </Text>
-                <View style={{height:20, width:20}}></View>
+                <View style={{ height: 20, width: 20 }}></View>
             </View>
 
             <Text style={[styles.subHeaderTxt, { marginBottom: 5 }]}>Now Playing</Text>
             <View style={styles.playingNow}>
-                <Image
-                    style={styles.playlistImage}
-                    source={storeCurrTrack.coverUrl}
-                />
+                <Image style={styles.playlistImage} source={storeCurrTrack.coverUrl} />
                 <View style={styles.songDets}>
-                    <Text style={styles.currSong}>
-                        {storeCurrTrack.songTitle}
-                    </Text>
-                    <Text style={styles.currArtistName}>
-                        {storeCurrTrack.songArtist}
-                    </Text>
+                    <Text style={styles.currSong}>{storeCurrTrack.songTitle}</Text>
+                    <Text style={styles.currArtistName}>{storeCurrTrack.songArtist}</Text>
                 </View>
             </View>
 
             <Text style={styles.subHeaderTxt}>Next from: {roomName}</Text>
             {generateSongs()}
 
-            <View style={{
-                flexDirection: 'row',
-                width: '100vw',
-                paddingVertical: 16,
-            }}>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    width: '100%',
+                    paddingVertical: 16,
+                }}
+            >
                 <View style={styles.butContainer}>
                     <TouchableOpacity
                         style={styles.secButtons}
-                        onPress={() => {navigation.navigate('AddSong',  {roomID: roomID})}}
+                        onPress={() => {
+                            navigation.navigate('AddSong', { roomID: roomID })
+                        }}
                     >
-                        <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Add Songs</Text>
+                        <Text
+                            style={[
+                                styles.subHeaderTxt,
+                                { alignSelf: 'center', color: COLORS.dark },
+                            ]}
+                        >
+                            Add Songs
+                        </Text>
                     </TouchableOpacity>
                 </View>
-                <View style={styles.butContainer}>
+                {/* <View style={styles.butContainer}>
                     <TouchableOpacity
-                        style={[styles.secButtons, {backgroundColor: COLORS.primary}]}
-                        onPress={() => {navigation.navigate('Chatroom', {roomID: roomID})}}
+                        style={[styles.secButtons, { backgroundColor: COLORS.primary }]}
+                        onPress={() => {
+                            navigation.navigate('Chatroom', { roomID: roomID })
+                        }}
                     >
-                        <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Start Listening</Text>
+                        <Text
+                            style={[
+                                styles.subHeaderTxt,
+                                { alignSelf: 'center', color: COLORS.dark },
+                            ]}
+                        >
+                            Start Listening
+                        </Text>
                     </TouchableOpacity>
-                </View>
+                </View> */}
             </View>
-
         </GestureHandlerRootView>
-
-    );
+    )
 }
 
 const styles = StyleSheet.create({
-    container:{
+    container: {
         flex: 1,
         justifyContent: 'flex-start',
         backgroundColor: COLORS.dark,
@@ -152,7 +224,7 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         alignSelf: 'center',
     },
-    icon:{
+    icon: {
         fontSize: 20,
         color: COLORS.white,
     },
@@ -206,15 +278,14 @@ const styles = StyleSheet.create({
         height: 15,
     },
     butContainer: {
-        width: '50%', 
-        alignItems: 'center'
+        width: '50%',
+        alignItems: 'center',
     },
-    secButtons:{
+    secButtons: {
         width: 155,
         backgroundColor: COLORS.light,
         borderRadius: 100,
         height: 42,
         justifyContent: 'center',
-    }
+    },
 })
-
