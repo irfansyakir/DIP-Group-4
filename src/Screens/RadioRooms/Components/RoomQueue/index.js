@@ -17,6 +17,7 @@ import { COLORS } from '../../../../Constants'
 import { AuthError } from 'expo-auth-session';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useColorScheme } from 'react-native';
+import { useFonts } from 'expo-font'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -46,6 +47,14 @@ export const RoomQueue = ({route, navigation}) => {
           }
         }
     }, []);
+
+    const [fontsLoaded] = useFonts({
+        IcoMoon: require('../../../../../assets/icomoon/icomoon.ttf'),
+    })
+  
+    if (!fontsLoaded) {
+        return null
+    }
 
     const generateSongs = () => {
         return (
@@ -106,24 +115,25 @@ export const RoomQueue = ({route, navigation}) => {
             <View style={{
                 flexDirection: 'row',
                 width: '100vw',
-                justifyContent: 'space-between',
-                marginTop: 10,
+                paddingVertical: 16,
             }}>
-                <TouchableOpacity
-                    style={styles.secButtons}
-                    onPress={() => {navigation.navigate('AddSong',  {roomID: roomID})}}
-                >
-                    <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Add Songs</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.secButtons, {backgroundColor: COLORS.primary}]}
-                    onPress={() => {navigation.navigate('Chatroom', {roomID: roomID})}}
-                >
-                    <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Start Listening</Text>
-                </TouchableOpacity>
+                <View style={styles.butContainer}>
+                    <TouchableOpacity
+                        style={styles.secButtons}
+                        onPress={() => {navigation.navigate('AddSong',  {roomID: roomID})}}
+                    >
+                        <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Add Songs</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.butContainer}>
+                    <TouchableOpacity
+                        style={[styles.secButtons, {backgroundColor: COLORS.primary}]}
+                        onPress={() => {navigation.navigate('Chatroom', {roomID: roomID})}}
+                    >
+                        <Text style={[styles.subHeaderTxt, {alignSelf: 'center', color: COLORS.dark}]}>Start Listening</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-
-            <View style={{height: 150, alignItems: 'center', transform:[{scale: 0.98}]}}><Play/></View>
 
         </GestureHandlerRootView>
 
@@ -195,14 +205,16 @@ const styles = StyleSheet.create({
         width: 20,
         height: 15,
     },
+    butContainer: {
+        width: '50%', 
+        alignItems: 'center'
+    },
     secButtons:{
         width: 155,
         backgroundColor: COLORS.light,
         borderRadius: 100,
         height: 42,
         justifyContent: 'center',
-        marginLeft: 10,
-        marginRight: 10,
     }
 })
 
