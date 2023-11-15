@@ -1,34 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import { Image } from 'expo-image'
 import * as ImagePicker from 'expo-image-picker'
-import {
-    StyleSheet,
-    Text,
-    View,
-    ScrollView,
-    TouchableOpacity,
-    Alert,
-    TextInput,
-} from 'react-native'
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useProfileStore } from '../../Store/useProfileStore'
 import { useMusicStore } from '../../Store/useMusicStore'
-import { GetCurrentUserProfile } from '../../Utilities/SpotifyApi/Utils'
 
 export const EditProfile = () => {
-    const [text, onChangeText] = React.useState('')
     const navigation = useNavigation() // Initialize navigation
     const changeIsLoggedIn = useAuthStore((state) => state.changeIsLoggedIn)
-    const changeDisplayName = useProfileStore(
-        (state) => state.changeDisplayName
-    )
+    const changeDisplayName = useProfileStore((state) => state.changeDisplayName)
     const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
     const storeDisplayName = useProfileStore((state) => state.displayName)
     const storeProfileUrl = useProfileStore((state) => state.profileUrl)
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
+    const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
     // managing state for playlist
     const [displayName, setDisplayName] = useState('')
     const [profileUrl, setProfileUrl] = useState('')
@@ -36,12 +26,6 @@ export const EditProfile = () => {
     const handleButtonClick = () => {
         navigation.navigate('ProfileTab')
     }
-
-    //const handleProfileImageClick = () => {
-    //  changeProfileUrl(profileUrl)
-    //  console.log('saved ' + profileUrl)
-    //  navigation.navigate('ProfileTab')
-    //}
 
     const handleProfileImageClick = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -80,6 +64,7 @@ export const EditProfile = () => {
 
     useEffect(() => {
         getInitialProfileData()
+        changeCurrentPage('EditProfile')
     }, [])
 
     let callFunction = (e) => {
@@ -96,10 +81,7 @@ export const EditProfile = () => {
                 style={styles.background}
             />
             <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.buttonBack}
-                    onPress={handleButtonClick}
-                >
+                <TouchableOpacity style={styles.buttonBack} onPress={handleButtonClick}>
                     <Image
                         style={styles.backImage}
                         source={require('../../../assets/Backbutton.png')}
@@ -111,16 +93,9 @@ export const EditProfile = () => {
             <View style={styles.body}>
                 <ScrollView>
                     <Text style={styles.nameText}>{displayName}</Text>
-                    <Image
-                        style={styles.profileImage}
-                        source={profileUrl}
-                        contentFit={'fill'}
-                    />
+                    <Image style={styles.profileImage} source={profileUrl} contentFit={'fill'} />
                     <View>
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={handleProfileImageClick}
-                        >
+                        <TouchableOpacity style={styles.button} onPress={handleProfileImageClick}>
                             <Text style={styles.buttonText}>Change photo</Text>
                         </TouchableOpacity>
                     </View>

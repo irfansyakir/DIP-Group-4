@@ -234,11 +234,8 @@ export const Chatroom = ({ route, navigation }) => {
     useEffect(() => {
         // console.log('RoomID: ' + roomID);
         getRoomDetails().then()
-        const routes = navigation.getState()?.routes
-        const prevRoute = routes[routes.length - 2]
         changeCurrentPage('Chatroom')
         return () => {
-            changeCurrentPage(prevRoute.name)
             changeIsBroadcasting(false)
             changeIsPlaying(false)
         }

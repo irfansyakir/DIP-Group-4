@@ -37,7 +37,7 @@ export const RadioRooms = () => {
 
     useEffect(() => {
         console.log('Fetching rooms...')
-        console.log('currentPage', currentPage)
+        changeCurrentPage('RadioRoom')
         room_getAllRooms()
             .then((roomData) => {
                 if (!roomData) {
@@ -70,16 +70,12 @@ export const RadioRooms = () => {
         navigation.navigate('Chatroom', {
             roomID: roomId,
         })
-        changeCurrentPage('Chatroom')
     }
     function shuffleArray(array) {
         let shuffledArray = [...array]
         for (let i = shuffledArray.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1))
-            ;[shuffledArray[i], shuffledArray[j]] = [
-                shuffledArray[j],
-                shuffledArray[i],
-            ]
+            ;[shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]
         }
         return shuffledArray
     }
@@ -116,10 +112,7 @@ export const RadioRooms = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         // backgroundColor: 'red',
-                        backgroundColor:
-                            selectedRoom === room.id
-                                ? COLORS.darkblue
-                                : COLORS.dark,
+                        backgroundColor: selectedRoom === room.id ? COLORS.darkblue : COLORS.dark,
                         height: selectedRoom === room.id ? 190 : 100,
                         width: '100%',
                     }}
@@ -277,11 +270,7 @@ export const RadioRooms = () => {
                         paddingHorizontal: 10,
                     }}
                 >
-                    <Ionicons
-                        name={'ios-search'}
-                        size={25}
-                        color={COLORS.grey}
-                    />
+                    <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
                     <TextInput
                         autoFocus={false}
                         style={{
