@@ -104,6 +104,7 @@ export const RoomQueue = ({ route, navigation }) => {
         }
 
         getTrackData()
+        changeCurrentPage('Chatroom')
         navigation.navigate('Chatroom', { roomID: roomID })
     }
 
