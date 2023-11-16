@@ -8,6 +8,7 @@ import { Text, View, TextInput, Button, Switch,
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient';
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
+import { user_getUsername } from '../../../../Utilities/Firebase/user_functions';
 import clouds from  '../../../../../assets/clouds.png'
 import raindrops from '../../../../../assets/raindrops.png'
 import palmTrees from '../../../../../assets/palmtrees.png'
@@ -25,6 +26,7 @@ export const CreateRoom = ()=> {
     const insets = useSafeAreaInsets()
     const accessToken = useAuthStore((state) => state.accessToken)
     const [roomName, setRoomName] = useState('');
+    const [username, setUsername] = useState('');
     const [roomDescription, setRoomDescription] = useState('');
     const [themeImageUrl, setThemeImageUrl] = useState('');
     const [uploadedImageUrl, setUploadedImageUrl] = useState('');
@@ -32,6 +34,7 @@ export const CreateRoom = ()=> {
     const changeProfileUrl = useProfileStore((state) => state.changeProfileUrl)
     const changeFollowers = useProfileStore((state) => state.changeFollowers)
     const storeDisplayName = useProfileStore((state) => state.displayName)
+    const userID = useAuthStore((state) => state.userId)
     const storeProfileUrl = useProfileStore((state) => state.profileUrl)
     const getInitialProfileData = async () => {
         // fetch data on load
@@ -47,7 +50,13 @@ export const CreateRoom = ()=> {
           console.error(error)
         }
       }
-    //const storeProfileUrl = useProfileStore((state) => state.profileUrl)
+    
+      const getUsername = async () => {
+        const username = await user_getUsername({userID: userID});
+        // console.log('Room Name: '+ roomDetails["room_name"]);
+        console.log(username);
+        setUsername('darrentjw15');
+      }
     
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch1 = () => {
@@ -117,7 +126,7 @@ export const CreateRoom = ()=> {
         if (roomName != '') {
             console.log('creating room: ' + roomName);
             console.log(roomDescription, themeImageUrl, isPublic, isOthersAddSongs, storeDisplayName);
-            const roomID = push(child(dbRef, '/rooms')).key;
+            const roomID = push(child(dbRef, `/rooms`)).key;
             room_updateRoom({
                 roomID: roomID,
                 roomName: roomName,
@@ -125,25 +134,20 @@ export const CreateRoom = ()=> {
                 themeImageUrl: themeImageUrl,
                 isPublic: isPublic,
                 isOthersAddSongs: isOthersAddSongs,
-                //dj: [storeDisplayName],
-                //users: [storeDisplayName, 'greg', 'ruihan'],
-                dj:{
-                    "username": {
-                    0: storeDisplayName,
-                    },
-                    "profileUrl": {
-                    0: storeProfileUrl,
-                    },
+                dj: {
+                    [userID]: {
+                        'username': username,
+                        'profileUrl': storeProfileUrl,
+                    }
                 },
-                users:{
-                    "username": {
-                    0: storeDisplayName,
-                    },
-                    "profileUrl": {
-                    0: storeProfileUrl,
-                    },
+                users: {
+                  [userID]: {
+                    'username': username,
+                    'owner': true,
+                    'profileUrl': storeProfileUrl,
+                  }
                 }
-            });
+            })
             navigation.navigate('Chatroom', {
                 roomID: roomID,
             })
@@ -161,7 +165,8 @@ export const CreateRoom = ()=> {
         }
         setUploadedImageUrl(questionMark);
         setSelectedChoice(1);
-        console.log(isPublic, isOthersAddSongs, storeDisplayName)
+        getUsername();
+        console.log(isPublic, isOthersAddSongs, storeDisplayName, userID, username)
     }, [])
 
     let callNameFunction = (e) => {

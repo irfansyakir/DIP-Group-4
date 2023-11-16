@@ -25,6 +25,7 @@ import {BoldText, MediumText} from "../../../../Commons/UI/styledText";
 import {useMusicStore} from "../../../../Store/useMusicStore";
 import {ChatroomMusicPlayer} from "./Components/ChatroomMusicPlayer";
 import {useFocusEffect} from "@react-navigation/native";
+import { FlatListComponent } from 'react-native';
 
 export const Chatroom = ({route, navigation}) => {
   const { roomID } = route.params;
@@ -351,14 +352,9 @@ export const Chatroom = ({route, navigation}) => {
               ],
               users:{
                 user_id_1: {
+                  "owner": "false",
                   "username": "askofsf"
                 },
-                user_id_2: {
-                  "username": "ghjk"
-                },
-                user_id_3: {
-                  "username": "qwe"
-                }
               }
             })
           }}

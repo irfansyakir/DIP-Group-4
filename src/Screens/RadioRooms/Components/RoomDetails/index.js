@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Image, Text, View, FlatList, Switch,
     StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView,} from 'react-native';
@@ -6,7 +5,7 @@ import { Image, Text, View, FlatList, Switch,
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient';
-import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
+import { room_updateRoom, room_fetchDJList, room_fetchDJUrlList, room_fetchUserList, room_fetchUserUrlList } from '../../../../Utilities/Firebase/room_functions';
 import clouds from  '../../../../../assets/clouds.png'
 import raindrops from '../../../../../assets/raindrops.png'
 import palmTrees from '../../../../../assets/palmtrees.png'
@@ -67,13 +66,22 @@ export const RoomDetails = ({route, navigation}) => {
       } else {
         setRoomThemeImgURL(themeImageUrl);
       }
+      const DJIDList = await room_fetchDJList({roomID: roomID});
+      setRoomDJIDList(DJIDList);
+      const DJProfileUrlList = await room_fetchDJUrlList({roomID: roomID});
+      setRoomDJProfileUrlList(DJProfileUrlList);
+      const UserIDList = await room_fetchUserList({roomID: roomID});
+      setRoomUserIDList(UserIDList);
+      const UserUrlList = await room_fetchUserUrlList({roomID: roomID});
+      setRoomProfileUrlList(UserUrlList);
+      //setRoomUserIDList(fetchDJNames());
       //every room MUST have a minimum of 1 user (that is the creator)
       //setRoomUserIDList(roomDetails["users"] ? roomDetails["users"] : [])
-      setRoomUserIDList(roomDetails["users"]["username"] ? roomDetails["users"]["username"] : [])
-      setRoomProfileUrlList(roomDetails["users"]["profileUrl"] ? roomDetails["users"]["profileUrl"] : [])
+      //setRoomUserIDList(roomDetails["users"]["../username"] ? roomDetails["users"]["../username"] : [])
+      //setRoomProfileUrlList(roomDetails["users"]["profileUrl"] ? roomDetails["users"]["profileUrl"] : [])
       // console.log(roomUserIDList)
-      setRoomDJIDList(roomDetails["dj"]["username"] ? roomDetails["dj"]["username"] : [])
-      setRoomDJProfileUrlList(roomDetails["dj"]["profileUrl"] ? roomDetails["dj"]["profileUrl"] : [])
+      //setRoomDJIDList(roomDetails["dj"]["username"] ? roomDetails["dj"]["username"] : [])
+      //setRoomDJProfileUrlList(roomDetails["dj"]["profileUrl"] ? roomDetails["dj"]["profileUrl"] : [])
     }
 
     return (
