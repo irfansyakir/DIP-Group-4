@@ -37,6 +37,8 @@ import { userQueue_getQueue } from '../../../../Utilities/Firebase/user_queue_fu
 import { COLORS, SIZES } from '../../../../Constants'
 import { current_track_updateCurrentTrack } from '../../../../Utilities/Firebase/current_track_functions'
 import { useProfileStore } from '../../../../Store/useProfileStore'
+import { Alert } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 
 export const Chatroom = ({ route, navigation }) => {
     const { roomID } = route.params
@@ -64,11 +66,8 @@ export const Chatroom = ({ route, navigation }) => {
     //TODO: Resolve conflict between radioroom queue & user queue so that when radioroom song done playing can go to next radioroom song from any page
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
-    const currentPage = useMusicStore((state) => state.currentPage)
-    const isPlaying = useMusicStore((state) => state.isPlaying)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
 
-    const isDJ = useMusicStore((state) => state.radioRoom_isDJ)
     const changeIsDJ = useMusicStore((state) => state.changeRadioRoom_isDJ)
     const isBroadcasting = useMusicStore((state) => state.radioRoom_isBroadcasting)
     const changeIsBroadcasting = useMusicStore((state) => state.changeRadioRoom_isBroadcasting)
@@ -89,6 +88,7 @@ export const Chatroom = ({ route, navigation }) => {
 
     const storeQueue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
+    const changeIsInsideRoom = useQueueStore((state) => state.changeIsInsideRoom)
     const userId = useAuthStore((state) => state.userId)
 
     const swapToQueue = async () => {
@@ -301,9 +301,23 @@ export const Chatroom = ({ route, navigation }) => {
                 {/* back button */}
                 <TouchableOpacity
                     onPress={() => {
-                        navigation.popToTop()
-                        changeCurrentPage('Radioroom')
-                        swapToQueue()
+                        // Prompt the user with an alert
+                        Alert.alert('Leaving Room', 'Are you sure you want to leave this room?', [
+                            {
+                                text: 'Cancel',
+                                onPress: () => {},
+                                style: 'cancel',
+                            },
+                            {
+                                text: 'OK',
+                                onPress: () => {
+                                    changeCurrentPage('Radioroom')
+                                    navigation.popToTop()
+                                    changeIsBroadcasting(false)
+                                    changeIsPlaying(false)
+                                },
+                            },
+                        ])
                     }}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                 >

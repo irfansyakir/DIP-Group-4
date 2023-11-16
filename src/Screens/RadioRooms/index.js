@@ -33,6 +33,8 @@ export const RadioRooms = () => {
     const [shuffledRooms, setShuffledRooms] = useState([])
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+    const resetPlayer = useMusicStore((state) => state.resetPlayer)
+    const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const currentPage = useMusicStore((state) => state.currentPage)
 
     useEffect(() => {
@@ -67,6 +69,8 @@ export const RadioRooms = () => {
         navigation.navigate('CreateRoom')
     }
     const goToChatroom = (roomId) => {
+        changeIsPlaying(false)
+        resetPlayer()
         navigation.navigate('Chatroom', {
             roomID: roomId,
         })

@@ -290,7 +290,7 @@ export function CurrentlyPlaying() {
                         alignItems: 'center',
                         paddingHorizontal: 15,
                         paddingVertical: 10,
-                        display: currentPage === 'Track' ? 'none' : 'flex',
+                        display: currentPage === 'Track' || 'AddSong' ? 'none' : 'flex',
                     }}
                     onPress={() => {
                         navigation.navigate('Track')

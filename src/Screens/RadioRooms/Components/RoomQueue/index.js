@@ -20,6 +20,7 @@ import 'react-native-gesture-handler'
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler'
 import { useQueueStore } from '../../../../Store/useQueueStore'
 import { useMusicStore } from '../../../../Store/useMusicStore'
+import { useAuthStore } from '../../../../Store/useAuthStore'
 import { red, white } from 'color-name'
 import { useUserCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { Play } from '../../../../Commons/Track/play'
@@ -28,6 +29,8 @@ import { AuthError } from 'expo-auth-session'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useColorScheme } from 'react-native'
 import { useFonts } from 'expo-font'
+import { errorCloseQueueToast } from '../../../../Commons/UI/toaster'
+import { useRoomCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -37,17 +40,18 @@ const Icon = createIconSetFromIcoMoon(
 
 export const RoomQueue = ({ route, navigation }) => {
     const { roomID, roomName } = route.params || {}
-
-    const storeQueue = {}
+    const accessToken = useAuthStore((state) => state.accessToken)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const insets = useSafeAreaInsets()
+    const soundObject = useMusicStore((state) => state.soundObject)
+    const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
+    const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+    const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
+    const storeQueue = useRoomCurrentQueue(roomID)
 
     useEffect(() => {
         changeCurrentPage('RoomQueue')
-        const routes = navigation.getState()?.routes
-        const prevRoute = routes[routes.length - 2]
-        return () => changeCurrentPage(prevRoute.name)
     }, [])
 
     const handleStartRoom = async () => {
@@ -92,6 +96,11 @@ export const RoomQueue = ({ route, navigation }) => {
         }
 
         getTrackData()
+    }
+
+    const handleBackButton = () => {
+        if (!soundObject) errorCloseQueueToast()
+        else navigation.navigate('Chatroom', { roomID: roomID })
     }
 
     const [fontsLoaded] = useFonts({
@@ -142,26 +151,27 @@ export const RoomQueue = ({ route, navigation }) => {
                     paddingTop: 16,
                 }}
             >
-                <TouchableOpacity
-                    style={{ justifyContent: 'center' }}
-                    onPress={() => navigation.goBack()}
-                >
+                <TouchableOpacity style={{ justifyContent: 'center' }} onPress={handleBackButton}>
                     <Icon style={styles.icon} name='down' />
                 </TouchableOpacity>
                 <Text style={styles.headerTxt}> {roomName} </Text>
                 <View style={{ height: 20, width: 20 }}></View>
             </View>
 
-            <Text style={[styles.subHeaderTxt, { marginBottom: 5 }]}>Now Playing</Text>
-            <View style={styles.playingNow}>
-                <Image style={styles.playlistImage} source={storeCurrTrack.coverUrl} />
-                <View style={styles.songDets}>
-                    <Text style={styles.currSong}>{storeCurrTrack.songTitle}</Text>
-                    <Text style={styles.currArtistName}>{storeCurrTrack.songArtist}</Text>
-                </View>
-            </View>
+            {soundObject && (
+                <>
+                    <Text style={[styles.subHeaderTxt, { marginBottom: 5 }]}>Now Playing</Text>
+                    <View style={styles.playingNow}>
+                        <Image style={styles.playlistImage} source={storeCurrTrack.coverUrl} />
+                        <View style={styles.songDets}>
+                            <Text style={styles.currSong}>{storeCurrTrack.songTitle}</Text>
+                            <Text style={styles.currArtistName}>{storeCurrTrack.songArtist}</Text>
+                        </View>
+                    </View>
+                </>
+            )}
 
-            <Text style={styles.subHeaderTxt}>Next from: {roomName}</Text>
+            <Text style={styles.subHeaderTxt}>Queue from: {roomName}</Text>
             {generateSongs()}
 
             <View

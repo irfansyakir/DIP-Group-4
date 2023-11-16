@@ -3,16 +3,18 @@ import { COLORS, SIZES } from '../../../../Constants'
 import { BoldText, MediumText } from '../../../../Commons/UI/styledText'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Audio } from 'expo-av'
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import { SearchTrack } from '../../../../Utilities/SpotifyApi/Utils'
 import { useMusicStore } from '../../../../Store/useMusicStore'
-import { useQueueStore } from '../../../../Store/useQueueStore'
 import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
 import { debounce } from '../../../../Utilities/Functions/debounce'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { userQueue_updateRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
+import {
+    userQueue_updateRoomQueue,
+    userQueue_getRoomQueue,
+} from '../../../../Utilities/Firebase/user_queue_functions'
 
 export const AddSong = ({ route }) => {
     const { roomID } = route.params || {}
@@ -24,13 +26,11 @@ export const AddSong = ({ route }) => {
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+    const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
 
-    const storeQueue = useQueueStore((state) => state.queue)
-    const changeQueue = useQueueStore((state) => state.changeQueue)
-
-    const backButton = () => {
-        navigation.goBack()
-    }
+    useEffect(() => {
+        changeCurrentPage('AddSong')
+    }, [])
 
     const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
@@ -101,7 +101,11 @@ export const AddSong = ({ route }) => {
         }
     }
 
-    const addSongtoRoomQ = (item) => {
+    const addSongtoRoomQ = async (item) => {
+        if (!soundObject) {
+            handleTrackClick(item.id)
+        }
+        const storeQueue = await userQueue_getRoomQueue({ roomID: roomID })
         const addedSong = {
             id: item.id,
             title: item.title,
@@ -112,7 +116,6 @@ export const AddSong = ({ route }) => {
         let newQueue = []
         if (storeQueue) newQueue = [...storeQueue, addedSong]
         else newQueue = [addedSong]
-        changeQueue(newQueue)
 
         userQueue_updateRoomQueue({
             roomID: roomID,
@@ -176,7 +179,7 @@ export const AddSong = ({ route }) => {
                 }}
             >
                 <TouchableOpacity
-                    onPress={backButton}
+                    onPress={() => navigation.goBack()}
                     style={{ justifyContent: 'center', marginTop: 20 }}
                 >
                     <Ionicons name={'arrow-back'} size={25} color={COLORS.grey} />
