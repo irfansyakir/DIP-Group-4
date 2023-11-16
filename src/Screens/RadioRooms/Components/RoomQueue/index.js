@@ -1,39 +1,29 @@
 import {
     View,
     Text,
-    Button,
     StyleSheet,
     TouchableOpacity,
     FlatList,
-    PanResponder,
-    Animated,
-    Dimensions,
 } from 'react-native'
 import { Image } from 'expo-image'
-import { NavigationContainer } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import * as React from 'react'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect } from 'react'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
-import DraggableFlatList from 'react-native-draggable-flatlist'
 import 'react-native-gesture-handler'
-import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler'
-import { useQueueStore } from '../../../../Store/useQueueStore'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useFonts } from 'expo-font'
+import { Audio } from 'expo-av'
+import { COLORS } from '../../../../Constants'
+import { errorCloseQueueToast } from '../../../../Commons/UI/toaster'
+// Store
 import { useMusicStore } from '../../../../Store/useMusicStore'
 import { useAuthStore } from '../../../../Store/useAuthStore'
-import { red, white } from 'color-name'
-import { useRoomTrackIDListener, useUserCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
-import { Play } from '../../../../Commons/Track/play'
-import { COLORS } from '../../../../Constants'
-import { AuthError } from 'expo-auth-session'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useColorScheme } from 'react-native'
-import { useFonts } from 'expo-font'
-import { errorCloseQueueToast } from '../../../../Commons/UI/toaster'
+// Firebase
+import { useRoomTrackIDListener } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { useRoomCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { userQueue_getRoomQueue, userQueue_updateRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
 import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
-import { Audio } from 'expo-av'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),

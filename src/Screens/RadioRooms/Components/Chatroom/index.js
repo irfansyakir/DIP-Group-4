@@ -38,7 +38,6 @@ import { COLORS, SIZES } from '../../../../Constants'
 import { current_track_updateCurrentTrack } from '../../../../Utilities/Firebase/current_track_functions'
 import { useProfileStore } from '../../../../Store/useProfileStore'
 import { Alert } from 'react-native'
-import { useFocusEffect } from '@react-navigation/native'
 
 export const Chatroom = ({ route, navigation }) => {
     const { roomID } = route.params
@@ -67,6 +66,9 @@ export const Chatroom = ({ route, navigation }) => {
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+    const soundObject = useMusicStore((state) => state.soundObject)
+    const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
+    const changeIsInsideRoom = useQueueStore((state) => state.changeIsInsideRoom)
 
     const changeIsDJ = useMusicStore((state) => state.changeRadioRoom_isDJ)
     const isBroadcasting = useMusicStore((state) => state.radioRoom_isBroadcasting)
@@ -86,9 +88,7 @@ export const Chatroom = ({ route, navigation }) => {
 
     // ------------------------------------------------------------------------------------------------- Room Queue Initializations
 
-    const storeQueue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
-    const changeIsInsideRoom = useQueueStore((state) => state.changeIsInsideRoom)
     const userId = useAuthStore((state) => state.userId)
 
     const swapToQueue = async () => {
@@ -310,11 +310,14 @@ export const Chatroom = ({ route, navigation }) => {
                             },
                             {
                                 text: 'OK',
-                                onPress: () => {
-                                    changeCurrentPage('Radioroom')
-                                    navigation.popToTop()
+                                onPress: async () => {
+                                    await soundObject.pauseAsync()
+                                    await soundObject.unloadAsync()
+                                    changeSoundObject(null)
                                     changeIsBroadcasting(false)
-                                    changeIsPlaying(false)
+                                    changeIsInsideRoom(false)
+                                    changeCurrentPage('Home')
+                                    navigation.navigate('Home', { screen: 'HomeTab' })
                                 },
                             },
                         ])
