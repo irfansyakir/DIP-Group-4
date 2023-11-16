@@ -13,7 +13,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { BackgroundImage } from '@rneui/base';
 import * as Clipboard from 'expo-clipboard';
 
-import chatroomBackground from '../../../../../assets/RadioRoomBackground.jpg'
+import goodvibes from '../../../../../assets/themes/goodvibes.jpg'
+import clouds from '../../../../../assets/themes/clouds.png'
+import palmtrees from '../../../../../assets/themes/palmtrees.png'
+import raindrops from '../../../../../assets/themes/raindrops.png'
 
 import {useAuthStore} from '../../../../Store/useAuthStore'
 import MessageBubble from './Components/MessageBubble';
@@ -102,7 +105,8 @@ export const Chatroom = ({route, navigation}) => {
     const roomDetails = await room_getRoom({roomID: roomID});
     // console.log('Room Name: '+ roomDetails["room_name"]);
     setRoomName(roomDetails["room_name"]);
-    setImage(roomDetails["image_url"]);
+    setImage(roomDetails["themeImageUrl"]);
+
     // setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
     if(roomDetails['dj'].includes(userId)){
       changeIsDJ(true)
@@ -277,9 +281,21 @@ export const Chatroom = ({route, navigation}) => {
     }
   }, [roomIsCurrentTrackPlaying]);
 
+  let img = goodvibes
+  switch(roomImage){
+    case 'clouds':
+      image = clouds
+      break;
+    case 'palmtrees':
+      image = palmtrees
+      break;
+    case 'raindrops':
+      image = raindrops
+      break;
+  }
 
   return (
-    <BackgroundImage source={chatroomBackground} blurRadius={5} style={{
+    <BackgroundImage source={img} blurRadius={5} style={{
     flex:1, padding:10, paddingTop: inset.top,}}>
       <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -294,8 +310,13 @@ export const Chatroom = ({route, navigation}) => {
         swapToQueue()
         }} 
         style={{flexDirection: 'row', alignItems:'center',}}>
-        <Ionicons name='chevron-back' size={30} color={COLORS.light} />
-        <BoldText style= {{color: COLORS.light, fontSize: SIZES.medium}}>Leave Room</BoldText>
+        <Ionicons name='chevron-back' size={30} color={COLORS.light} 
+          style={{textShadowColor: COLORS.dark,textShadowRadius: 3,}}/>
+        <BoldText style= {{
+          color: COLORS.light, 
+          fontSize: SIZES.medium, 
+          textShadowColor: COLORS.dark,
+          textShadowRadius: 3,}}>Leave Room</BoldText>
       </TouchableOpacity>
 
       <View style={{flex:1, alignItems:'center',}}>
@@ -317,7 +338,9 @@ export const Chatroom = ({route, navigation}) => {
             });
           }}
         >
-          <BoldText style={{fontSize: 25, color: 'white'}}>{roomName}</BoldText>
+          <BoldText style={{fontSize: 25, color: 'white', width:200}}
+          numberOfLines={1}
+          ellipsizeMode='tail'>{roomName}</BoldText>
         </TouchableOpacity>
 
         <TouchableOpacity

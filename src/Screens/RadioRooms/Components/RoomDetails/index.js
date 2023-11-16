@@ -7,9 +7,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient';
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
-import clouds from  '../../../../../assets/clouds.png'
-import raindrops from '../../../../../assets/raindrops.png'
-import palmTrees from '../../../../../assets/palmtrees.png'
+import clouds from  '../../../../../assets/themes/clouds.png'
+import raindrops from '../../../../../assets/themes/raindrops.png'
+import palmTrees from '../../../../../assets/themes/palmtrees.png'
 
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, SIZES } from "../../../../Constants";

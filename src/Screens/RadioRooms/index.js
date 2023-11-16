@@ -18,6 +18,7 @@ import { BoldText } from "../../Commons/UI/styledText";
 import { COLORS, SIZES } from "../../Constants";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
+import { useProfileStore } from "../../Store/useProfileStore";
 import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_functions'
 
 export const RadioRooms = (currentPage) => {
@@ -30,8 +31,10 @@ export const RadioRooms = (currentPage) => {
 
   const changeQueue = useQueueStore((state) => state.changeQueue)
   const [shuffledRooms, setShuffledRooms] = useState([]);
+  const [yourRooms, setYourRooms] = useState([]);
 
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+  const storeDisplayName = useProfileStore((state) => state.displayName)
 
   useEffect(() => {
     console.log("Fetching rooms...");
@@ -43,17 +46,28 @@ export const RadioRooms = (currentPage) => {
         // console.log("Rooms fetched:", roomData);
 
         // Convert the object to an array
-
         let roomsArray = []
         for (const [key, value] of Object.entries(roomData)) {
           roomsArray.push({...value, id: key})
         }
+        let publicRooms = []
+        let urRooms = []
+        for (const [key, value] of Object.entries(roomsArray)) {
+          for (const [key, value2] of Object.entries(value.users)){
+            if (value2.owner === true && value2.username==storeDisplayName){
+              urRooms.push({...value, id:key})
+            } else if (value.isPublic){
+              publicRooms.push({...value, id:key})
+            }
+          }
+        }
+        setYourRooms(urRooms);
         //need to do this due to database structure having the id as key because flatlist.
         // Shuffle rooms only when the component mounts or when rooms are fetched
         if (shuffledRooms.length === 0) {
-          // console.log(roomsArray)
-          setShuffledRooms(shuffleArray(roomsArray));
+          setShuffledRooms(shuffleArray(publicRooms));
         }
+        
       })
       .catch((error) => {
         console.error("Error fetching rooms:", error);
@@ -91,11 +105,27 @@ export const RadioRooms = (currentPage) => {
 
   const renderItem = ({ item }) => {
     let owner = 'Loading...';
+    let image = require('../../../assets/themes/goodvibes.jpg') 
+    
+    // add here for more themes
+    switch (item.themeImageUrl){
+      case 'clouds':
+        image = require('../../../assets/themes/clouds.png')
+        break;
+      case 'palmtrees':
+        image = require('../../../assets/themes/palmtrees.png')
+        break;
+      case 'raindrops':
+        image = require('../../../assets/themes/raindrops.png')
+        break;
+    }
+    
     for (const [key, value] of Object.entries(item.users)) {
       if(value.owner === true){
         owner = value.username
       }
     }
+    
     return(
       <View style={{
         flexDirection: "row",
@@ -111,8 +141,6 @@ export const RadioRooms = (currentPage) => {
             marginTop: selectedRoom === item.id ? 20 : 0,
             borderRadius: 10,
             flexDirection: "column",
-            alignItems: "center",
-            // backgroundColor: 'red',
             backgroundColor: selectedRoom === item.id ? COLORS.darkblue : COLORS.dark,
             height: selectedRoom === item.id ? 190 : 100,
             width: '100%'
@@ -120,7 +148,9 @@ export const RadioRooms = (currentPage) => {
         >
           <View style={{flexDirection: 'row', marginBottom: 15,}}>
             <Image
-              source={{uri: item.image_url}} // Use the image URL from Firebase
+              // source={{uri: item.image_url}} // Use the image URL from Firebase
+              
+              source={image}
               style={{
                 width: selectedRoom === item.id ? 100 : 80,
                 height: selectedRoom === item.id ? 100 : 80,
@@ -129,11 +159,12 @@ export const RadioRooms = (currentPage) => {
               }}
             />
             {/* Room Title, Created by, Description */}
-            <View style={{marginRight: 15, justifyContent: 'center', maxWidth: '80%'}}>
+            <View style={{marginRight: 15, justifyContent: 'center', flex:1}}>
               <BoldText style={{
                 color: COLORS.light,
                 fontSize: 16,
-              }}>
+              }} numberOfLines={1}
+              ellipsizeMode='tail' >
                 {item.room_name}
               </BoldText>
               <Text numberOfLines={1}
@@ -168,6 +199,7 @@ export const RadioRooms = (currentPage) => {
               borderRadius: 20,
               justifyContent: "center",
               alignItems: "center",
+              alignSelf: 'center',
               width: '50%',
               height: 34,
             }} onPress={() => {
@@ -231,6 +263,17 @@ export const RadioRooms = (currentPage) => {
           />
         </View>
 
+      <BoldText style={{
+      fontSize: SIZES.large,
+      color: COLORS.primary,
+      marginTop: 20,
+      }}>Your Rooms</BoldText>
+      <FlatList
+        data={yourRooms}
+        keyExtractor={(item)=>item.id}
+        renderItem={renderItem}
+      />
+      
       <BoldText style={{
         fontSize: SIZES.large,
         color: COLORS.light,
