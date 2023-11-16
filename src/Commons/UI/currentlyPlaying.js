@@ -1,7 +1,7 @@
 import { View, Image, TouchableOpacity, Pressable, Alert } from 'react-native'
 import { Dimensions } from 'react-native'
 import { LightText, BoldText } from './styledText'
-import { COLORS, SIZES } from '../../Constants'
+import { COLORS, DISPLAY_NONE_ROOMS, SIZES } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { useEffect } from 'react'
@@ -180,7 +180,7 @@ export function CurrentlyPlaying() {
                         alignItems: 'center',
                         paddingHorizontal: 15,
                         paddingVertical: 10,
-                        display: currentPage === 'Track' ? 'none' : 'flex',
+                        display: 'flex',
                     }}
                     onPress={() => {
                         navigation.navigate('Track')
@@ -290,7 +290,7 @@ export function CurrentlyPlaying() {
                         alignItems: 'center',
                         paddingHorizontal: 15,
                         paddingVertical: 10,
-                        display: currentPage === 'Track' || 'AddSong' ? 'none' : 'flex',
+                        display: DISPLAY_NONE_ROOMS.includes(currentPage) ? 'none' : 'flex',
                     }}
                     onPress={() => {
                         navigation.navigate('Track')

@@ -25,4 +25,11 @@ const SIZES = {
   xxLarge: 32,
 }
 
-export { COLORS, SIZES }
+const DISPLAY_NONE_ROOMS = [
+  "CreateRoom",
+  "Track",
+  "AddSong",
+  "RoomQueue"
+]
+
+export { COLORS, SIZES, DISPLAY_NONE_ROOMS }

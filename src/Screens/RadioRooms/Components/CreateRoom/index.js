@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useQueueStore } from '../../../../Store/useQueueStore'
 import {useAuthStore} from "../../../../Store/useAuthStore";
 import {useProfileStore} from "../../../../Store/useProfileStore";
+import { useMusicStore } from "../../../../Store/useMusicStore";
 
 export const CreateRoom = ()=> {
     const insets = useSafeAreaInsets()
@@ -36,7 +37,10 @@ export const CreateRoom = ()=> {
 
     const userID = useAuthStore((state) => state.userId)
     const username = useProfileStore((state) => state.displayName)
-
+    const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+    const soundObject = useMusicStore((state) => state.soundObject)
+    const resetPlayer = useMusicStore((state) => state.resetPlayer)
+    
     //have no idea what this is meant to do but its in the original code soo ill just recreate it
     //use: toggleSwitch(setIsEnabled2) or toggleSwitch(setIsEnabled)
     const toggleSwitch = (callbackFunction) => {
@@ -80,7 +84,10 @@ export const CreateRoom = ()=> {
           console.log('creating room: ' + roomName);
           console.log('room details: ', roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
 
-          delStoreQueue()
+          await soundObject.pauseAsync()
+          await soundObject.unloadAsync()
+          resetPlayer()
+          
           room_updateRoom({
               roomName: roomName,
               roomDescription: roomDescription,
@@ -105,6 +112,7 @@ export const CreateRoom = ()=> {
     }
 
     useEffect(() => {
+      changeCurrentPage("CreateRoom")
         //isPublic and isOthersAddSongs used to be declared here. Don't do that pls. Declare changeable variables on top level instead (using useState)
     }, [])
 

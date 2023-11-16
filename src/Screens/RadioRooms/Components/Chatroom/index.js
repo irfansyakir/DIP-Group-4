@@ -361,6 +361,7 @@ export const Chatroom = ({ route, navigation }) => {
                                 alignItems: 'center',
                             }}
                             onPress={() => {
+                                changeCurrentPage('RoomQueue')
                                 navigation.navigate('RoomQueue', {
                                     roomID: roomID,
                                     roomName: roomName,

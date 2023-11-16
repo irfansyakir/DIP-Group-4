@@ -152,7 +152,7 @@ function RadioRoomStackNavigator() {
             <RadioRoomStack.Screen name='RadioRoom' component={RadioRooms} />
             <RadioRoomStack.Screen name='Chatroom' component={Chatroom} />
             <RadioRoomStack.Screen name='RoomDetails' component={RoomDetails} />
-            <RadioRoomStack.Screen name='RadioRoomQueue' component={RadioRoomQueue} />
+            <RadioRoomStack.Screen name='CreateRoom' component={CreateRoom} />
             <RadioRoomStack.Screen name='Track' component={Track} />
             <RadioRoomStack.Screen name='Playlist' component={Playlist} />
             <RadioRoomStack.Screen name='RoomQueue' component={RoomQueue} />
