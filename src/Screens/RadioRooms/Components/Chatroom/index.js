@@ -82,7 +82,7 @@ export const Chatroom = ({ route, navigation }) => {
 
     const [roomIsCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomID)
     const [roomTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
-    const [roomCurrentTrackID] = useRoomTrackIDListener(roomID)
+    const roomCurrentTrackID = useRoomTrackIDListener(roomID)
 
     // ------------------------------------------------------------------------------------------------- Room Queue Initializations
 
@@ -257,31 +257,31 @@ export const Chatroom = ({ route, navigation }) => {
 
     //Careful with the useEffects below
 
-    useEffect(() => {
-        if (isBroadcasting) {
-            current_track_updateCurrentTrack({
-                roomID: roomID,
-                timeOfLastPlayed: position,
-                trackId: songId,
-            }).then()
-        }
-    }, [position])
-    //separate this just in case of feedback
-    useEffect(() => {
-        current_track_updateCurrentTrack({
-            roomID: roomID,
-            isCurrentTrackPlaying: isBroadcasting,
-        }).then()
-    }, [isBroadcasting])
+    // useEffect(() => {
+    //     if (isBroadcasting) {
+    //         current_track_updateCurrentTrack({
+    //             roomID: roomID,
+    //             timeOfLastPlayed: position,
+    //             trackId: songId,
+    //         }).then()
+    //     }
+    // }, [position])
+    // //separate this just in case of feedback
+    // useEffect(() => {
+    //     current_track_updateCurrentTrack({
+    //         roomID: roomID,
+    //         isCurrentTrackPlaying: isBroadcasting,
+    //     }).then()
+    // }, [isBroadcasting])
 
-    useEffect(() => {
-        if (roomIsCurrentTrackPlaying) {
-            changeIsPlaying(true)
-        } else {
-            changeIsPlaying(false)
-            changeIsBroadcasting(false)
-        }
-    }, [roomIsCurrentTrackPlaying])
+    // useEffect(() => {
+    //     if (roomIsCurrentTrackPlaying) {
+    //         changeIsPlaying(true)
+    //     } else {
+    //         changeIsPlaying(false)
+    //         changeIsBroadcasting(false)
+    //     }
+    // }, [roomIsCurrentTrackPlaying])
 
     return (
         <BackgroundImage

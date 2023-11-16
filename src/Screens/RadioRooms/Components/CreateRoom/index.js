@@ -84,9 +84,11 @@ export const CreateRoom = ()=> {
           console.log('creating room: ' + roomName);
           console.log('room details: ', roomDescription, themeImageUrl, isPublic, isOthersAddSongs);
 
-          await soundObject.pauseAsync()
-          await soundObject.unloadAsync()
-          resetPlayer()
+          if (soundObject) {
+            await soundObject.pauseAsync()
+            await soundObject.unloadAsync()
+            resetPlayer()
+          } 
           
           room_updateRoom({
               roomName: roomName,

@@ -14,7 +14,7 @@ export function useRoomTrackIDListener(roomID) {
         })
     }, [])
 
-    return [trackID]
+    return trackID
 }
 
 export function useUserCurrentQueue(userID) {

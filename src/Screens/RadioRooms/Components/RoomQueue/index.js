@@ -22,7 +22,7 @@ import { useQueueStore } from '../../../../Store/useQueueStore'
 import { useMusicStore } from '../../../../Store/useMusicStore'
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import { red, white } from 'color-name'
-import { useUserCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
+import { useRoomTrackIDListener, useUserCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { Play } from '../../../../Commons/Track/play'
 import { COLORS } from '../../../../Constants'
 import { AuthError } from 'expo-auth-session'
@@ -31,6 +31,9 @@ import { useColorScheme } from 'react-native'
 import { useFonts } from 'expo-font'
 import { errorCloseQueueToast } from '../../../../Commons/UI/toaster'
 import { useRoomCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
+import { userQueue_getRoomQueue, userQueue_updateRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
+import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
+import { Audio } from 'expo-av'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -49,16 +52,21 @@ export const RoomQueue = ({ route, navigation }) => {
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const storeQueue = useRoomCurrentQueue(roomID)
+    const currentTrackId = useRoomTrackIDListener(roomID)
 
     useEffect(() => {
         changeCurrentPage('RoomQueue')
     }, [])
 
     const handleStartRoom = async () => {
-        console.log('roomId', roomID)
-        console.log('queue', await userQueue_getRoomQueue({ roomID: roomID }))
         const roomQueue = await userQueue_getRoomQueue({ roomID: roomID })
+        if (!roomQueue || roomQueue.length === 0) {
+            errorCloseQueueToast()
+            return
+        }
+
         const firstSongId = roomQueue[0].id
+
         userQueue_updateRoomQueue({
             roomID: roomID,
             userRoomQueueList: roomQueue.slice(1),
@@ -96,6 +104,7 @@ export const RoomQueue = ({ route, navigation }) => {
         }
 
         getTrackData()
+        navigation.navigate('Chatroom', { roomID: roomID })
     }
 
     const handleBackButton = () => {
@@ -141,19 +150,19 @@ export const RoomQueue = ({ route, navigation }) => {
 
     return (
         <GestureHandlerRootView style={[styles.container, { paddingTop: insets.top }]}>
-            <View
+             <View
                 style={{
                     flexDirection: 'row',
-                    justifyContent: 'space-between',
+                    justifyContent: currentTrackId ? 'space-between' : "center",
                     paddingLeft: 16,
                     paddingRight: 16,
                     marginBottom: 16,
                     paddingTop: 16,
                 }}
             >
-                <TouchableOpacity style={{ justifyContent: 'center' }} onPress={handleBackButton}>
+                {currentTrackId && <TouchableOpacity style={{ justifyContent: 'center' }} onPress={handleBackButton}>
                     <Icon style={styles.icon} name='down' />
-                </TouchableOpacity>
+                </TouchableOpacity>}
                 <Text style={styles.headerTxt}> {roomName} </Text>
                 <View style={{ height: 20, width: 20 }}></View>
             </View>
@@ -177,6 +186,7 @@ export const RoomQueue = ({ route, navigation }) => {
             <View
                 style={{
                     flexDirection: 'row',
+                    justifyContent: 'center',
                     width: '100%',
                     paddingVertical: 16,
                 }}
@@ -198,12 +208,10 @@ export const RoomQueue = ({ route, navigation }) => {
                         </Text>
                     </TouchableOpacity>
                 </View>
-                <View style={styles.butContainer}>
+                {!currentTrackId && <View style={styles.butContainer}>
                     <TouchableOpacity
                         style={[styles.secButtons, { backgroundColor: COLORS.primary }]}
-                        onPress={() => {
-                            navigation.navigate('Chatroom', { roomID: roomID })
-                        }}
+                        onPress={handleStartRoom}
                     >
                         <Text
                             style={[
@@ -214,7 +222,7 @@ export const RoomQueue = ({ route, navigation }) => {
                             Start Listening
                         </Text>
                     </TouchableOpacity>
-                </View>
+                </View>}
             </View>
         </GestureHandlerRootView>
     )

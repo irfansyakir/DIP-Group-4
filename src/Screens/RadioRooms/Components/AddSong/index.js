@@ -102,9 +102,9 @@ export const AddSong = ({ route }) => {
     }
 
     const addSongtoRoomQ = async (item) => {
-        if (!soundObject) {
-            handleTrackClick(item.id)
-        }
+        // if (!soundObject) {
+        //     handleTrackClick(item.id)
+        // }
         const storeQueue = await userQueue_getRoomQueue({ roomID: roomID })
         const addedSong = {
             id: item.id,
