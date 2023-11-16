@@ -5,7 +5,7 @@ import {
   TextInput,
   FlatList,
   Image,
-  ToastAndroid
+  Dimensions
 } from 'react-native'
 import { COLORS, SIZES } from '../../../../Constants'
 import { BoldText, MediumText } from '../../../../Commons/UI/styledText'
@@ -22,6 +22,7 @@ import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
 import { debounce } from '../../../../Utilities/Functions/debounce'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { userQueue_updateRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
+import Toast from 'react-native-root-toast';
 
 export const AddSong = ({route}) => {
   const { roomID } = route.params || {};
@@ -36,10 +37,34 @@ export const AddSong = ({route}) => {
 
   const storeQueue = useQueueStore((state) => state.queue)
   const changeQueue = useQueueStore((state) => state.changeQueue)
+  const screenWidth = Dimensions.get('window').width
 
   const backButton = () => {
     navigation.goBack()
   }
+
+  const showToast = () => Toast.show('Added to queue', {
+    duration: 1500,
+    position: -60,
+    shadow: true,
+    animation: true,
+    hideOnPress: true,
+    backgroundColor: COLORS.light,
+    textColor: COLORS.dark,
+    textStyle: {
+      fontSize: SIZES.medium,
+      fontWeight: 'bold',
+      textAlign: 'left',
+    },
+    opacity: 1, 
+    delay: 0,
+    containerStyle: {
+      width: screenWidth - 20,
+      padding: 20,
+      marginHorizontal: 16,
+      borderRadius: 10
+    },
+  });
 
   const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
@@ -136,27 +161,6 @@ export const AddSong = ({route}) => {
   if (!fontsLoaded) {
       return null
   }
-  const showToast = () => {
-    ToastAndroid.show('A pikachu appeared nearby !', ToastAndroid.SHORT);
-  };
-
-  const showToastWithGravity = () => {
-    ToastAndroid.showWithGravity(
-      'All Your Base Are Belong To Us',
-      ToastAndroid.SHORT,
-      ToastAndroid.CENTER,
-    );
-  };
-
-  const showToastWithGravityAndOffset = () => {
-    ToastAndroid.showWithGravityAndOffset(
-      'A wild toast appeared!',
-      ToastAndroid.LONG,
-      ToastAndroid.BOTTOM,
-      25,
-      50,
-    );
-  };
 
   const renderItem = ({ item }) => (
       <View
@@ -189,7 +193,6 @@ export const AddSong = ({route}) => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => {
           addSongtoRoomQ(item) 
-          // showMsg()
           showToast()
           }}>
           <Ionicons name={'add-circle-outline'} size={35} color={COLORS.light} />

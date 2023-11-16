@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View, Image, Touchable } from 'react-native'
+import { Text, TouchableOpacity, View, Image, Touchable, Dimensions} from 'react-native'
 import { COLORS, SIZES } from '../../Constants'
 import { Audio } from 'expo-av'
 import { useFonts } from 'expo-font'
@@ -12,6 +12,7 @@ import {
   userQueue_getQueue,
   userQueue_updateQueue,
 } from '../../Utilities/Firebase/user_queue_functions'
+import Toast from 'react-native-root-toast';
 
 const Icon = createIconSetFromIcoMoon(
   require('../../../assets/icomoon/selection.json'),
@@ -29,6 +30,7 @@ export default function SingleSong({ item }) {
   const storeQueue = useQueueStore((state) => state.queue)
   const changeQueue = useQueueStore((state) => state.changeQueue)
   const userId = useAuthStore((state) => state.userId)
+  const screenWidth = Dimensions.get('window').width
 
   const handleTrackClick = (trackId) => {
     const createSoundObject = async (uri) => {
@@ -89,6 +91,28 @@ export default function SingleSong({ item }) {
     })
   }
 
+  const showToast = () => Toast.show('Added to queue', {
+    duration: 1500,
+    position: -135,
+    shadow: true,
+    animation: true,
+    hideOnPress: true,
+    backgroundColor: COLORS.light,
+    textColor: COLORS.dark,
+    textStyle: {
+      fontSize: SIZES.medium,
+      fontWeight: 'bold',
+      textAlign: 'left',
+    },
+    opacity: 1, 
+    delay: 0,
+    containerStyle: {
+      width: screenWidth - 20,
+      padding: 20,
+      marginHorizontal: 16,
+      borderRadius: 10
+    },
+  });
 
   const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
 
@@ -118,7 +142,10 @@ export default function SingleSong({ item }) {
       </TouchableOpacity>
       <TouchableOpacity 
         style={{justifyContent: 'center'}} 
-        onPress={() => addSongtoQ()}
+        onPress={() => {
+          addSongtoQ()
+          showToast()
+        }}
       >
           <Icon style={{fontSize: 30, color: COLORS.white,}} name='addqueue'/>
       </TouchableOpacity>
