@@ -32,6 +32,8 @@ export const RadioRooms = (currentPage) => {
 
   const changeQueue = useQueueStore((state) => state.changeQueue)
   const [shuffledRooms, setShuffledRooms] = useState([]);
+  const userID = useAuthStore((state) => state.userId)
+
 
   const [joinedPrivateRooms, setJoinedPrivateRooms] = useState([]);
   const [publicRooms, setPublicRooms] = useState([])

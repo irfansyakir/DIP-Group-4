@@ -50,7 +50,6 @@ export const Chatroom = ({route, navigation}) => {
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
   const [roomName, setRoomName] = useState('Loading...');
   const [roomImage, setImage] = useState('');
-
   const [numOfListeners, setNumOfListeners] = useState(0)
 
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
@@ -114,7 +113,7 @@ export const Chatroom = ({route, navigation}) => {
       changeIsDJ(false)
     }
     setNumOfListeners(Object.keys(roomDetails.users).length)
-    // console.log(roomUserIDList)
+    console.log("users: " + Object.keys(roomDetails.users))
     // setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
     // roomDetails["dj"].includes()
   }
@@ -310,11 +309,11 @@ export const Chatroom = ({route, navigation}) => {
         swapToQueue()
         }} 
         style={{flexDirection: 'row', alignItems:'center',}}>
-        <Ionicons name='chevron-back' size={30} color={COLORS.light} 
+        <Ionicons name='chevron-back' size={30} color={COLORS.light}
           style={{textShadowColor: COLORS.dark,textShadowRadius: 3,}}/>
         <BoldText style= {{
-          color: COLORS.light, 
-          fontSize: SIZES.medium, 
+          color: COLORS.light,
+          fontSize: SIZES.medium,
           textShadowColor: COLORS.dark,
           textShadowRadius: 3,}}>Leave Room</BoldText>
       </TouchableOpacity>
