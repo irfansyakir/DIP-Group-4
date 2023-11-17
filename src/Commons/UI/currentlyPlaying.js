@@ -255,12 +255,11 @@ export function CurrentlyPlaying() {
                 disabled={!soundObject}
             >
                 {!soundObject ? (
-                    <View style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+                    <View style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 4 }}>
                         <BoldText
                             style={{
                                 color: 'white',
                                 fontSize: SIZES.medium,
-                                marginBottom: 3,
                             }}
                         >
                             No song is currently playing now :(

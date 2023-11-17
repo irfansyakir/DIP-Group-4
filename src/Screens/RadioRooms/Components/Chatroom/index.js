@@ -279,15 +279,17 @@ export const Chatroom = ({ route, navigation }) => {
 
     useEffect(() => {
         if (role === 'listener') {
-            createSoundObject(roomCurrentTrackURL).then()
+            if (roomCurrentTrackURL) createSoundObject(roomCurrentTrackURL).then()
         }
     }, [roomCurrentTrackURL])
 
     useEffect(() => {
         if (role === 'listener') {
-            if (Math.abs(position - roomTimeOfLastPlayed) > 200) {
-                changePosition(roomTimeOfLastPlayed)
-                soundObject.setPositionAsync(value).then()
+            if (Math.abs(position - roomTimeOfLastPlayed) > 500) {
+                if (roomTimeOfLastPlayed) {
+                    changePosition(roomTimeOfLastPlayed)
+                    soundObject.setPositionAsync(roomTimeOfLastPlayed).then()
+                }
             }
         }
     }, [roomTimeOfLastPlayed])
