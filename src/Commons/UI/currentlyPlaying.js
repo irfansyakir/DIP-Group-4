@@ -13,7 +13,7 @@ import { Audio } from 'expo-av'
 import { useAuthStore } from '../../Store/useAuthStore'
 import {
     userQueue_getRoomQueue,
-    userQueue_updateQueue,
+    userQueue_updatexQueue,
     userQueue_updateRoomQueue,
 } from '../../Utilities/Firebase/user_queue_functions'
 import { current_track_updateCurrentTrack } from '../../Utilities/Firebase/current_track_functions'

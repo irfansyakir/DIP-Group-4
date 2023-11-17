@@ -161,6 +161,7 @@ export const Play = ({ previousPage }) => {
                 songTitle: trackData.name,
                 songArtist: trackData.artists[0].name,
                 songAlbum: trackData.album.name,
+                songId: trackId,
                 preview_url: trackData.preview_url,
             }
         } catch (err) {
@@ -211,7 +212,7 @@ export const Play = ({ previousPage }) => {
                     navigation.navigate('RoomQueue', { roomID: roomId })
                     emptyQueue()
                 } else {
-                    const { coverUrl, songAlbum, songArtist, songTitle, preview_url } =
+                    const { coverUrl, songAlbum, songArtist, songTitle, songId, preview_url } =
                         await getTrackData(roomQueue[0].id)
                     await current_track_updateCurrentTrack({
                         roomID: roomId,
@@ -221,6 +222,7 @@ export const Play = ({ previousPage }) => {
                             songAlbum: songAlbum,
                             songArtist: songArtist,
                             songTitle: songTitle,
+                            songId: songId,
                         },
                     })
                     await userQueue_updateRoomQueue({

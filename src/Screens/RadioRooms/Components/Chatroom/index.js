@@ -271,7 +271,7 @@ export const Chatroom = ({ route, navigation }) => {
         }
         const { sound } = await Audio.Sound.createAsync({ uri: uri })
         changeSoundObject(sound)
-        changeIsPlaying(true)
+        // changeIsPlaying(true)
     }
 
     useEffect(() => {
@@ -282,14 +282,14 @@ export const Chatroom = ({ route, navigation }) => {
 
     useEffect(() => {
         if (role === 'listener') {
-            console.log('from useEffect', roomCurrentTrackURL)
             if (roomCurrentTrackURL) createSoundObject(roomCurrentTrackURL).then()
         }
     }, [roomCurrentTrackURL])
 
     useEffect(() => {
         if (role === 'listener') {
-            if (roomSongInfo) changeSongInfo(roomSongInfo)
+            const { coverUrl, songTitle, songArtist, songAlbum, songId } = roomSongInfo
+            if (roomSongInfo) changeSongInfo(coverUrl, songTitle, songArtist, songAlbum, songId)
         }
     }, [roomSongInfo])
 

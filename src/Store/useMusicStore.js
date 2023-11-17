@@ -24,7 +24,10 @@ export const useMusicStore = create((set) => ({
         console.log('changePage', page)
         set(() => ({ currentPage: page }))
     },
-    changeSoundObject: (sound) => set(() => ({ soundObject: sound })),
+    changeSoundObject: (sound) => {
+        set(() => ({ soundObject: sound }))
+        console.log('created sound object')
+    },
     addToPlaylist: (track) => set(() => ({ playlist: [...playlist, track] })),
     clearPlaylist: () => set(() => ({ playlist: [] })),
     changeIsPlaying: (isPlaying) => set(() => ({ isPlaying: isPlaying })),

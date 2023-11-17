@@ -7,7 +7,6 @@ export function useRoomTrackURLListener(roomID) {
     const [trackURL, setTrackURL] = useState()
     const trackURLRef = ref(db, `/current_track/${roomID}/track_url`)
     current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
-        console.log('currentTrack', currentTrack.track_url)
         setTrackURL(currentTrack.track_url)
     })
 
