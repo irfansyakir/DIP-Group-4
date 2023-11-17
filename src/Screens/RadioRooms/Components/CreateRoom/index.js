@@ -55,8 +55,8 @@ export const CreateRoom = ()=> {
         const username = await user_getUsername({userID: userID});
         // console.log('Room Name: '+ roomDetails["room_name"]);
         console.log(username);
-        // setUsername('darren');
-        setUsername(username);
+        setUsername('darren');
+        //setUsername(username);
       }
     
     const [isEnabled, setIsEnabled] = useState(false);
@@ -135,12 +135,9 @@ export const CreateRoom = ()=> {
                 themeImageUrl: themeImageUrl,
                 isPublic: isPublic,
                 isOthersAddSongs: isOthersAddSongs,
-                dj: {
-                    [userID]: {
-                        'username': username,
-                        'profileUrl': storeProfileUrl,
-                    }
-                },
+                dj: [
+                    username,
+                ],
                 users: {
                   [userID]: {
                     'username': username,

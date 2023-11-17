@@ -66,10 +66,7 @@ export const RoomDetails = ({route, navigation}) => {
       } else {
         setRoomThemeImgURL(themeImageUrl);
       }
-      const DJIDList = await room_fetchDJList({roomID: roomID});
-      setRoomDJIDList(DJIDList);
-      const DJProfileUrlList = await room_fetchDJUrlList({roomID: roomID});
-      setRoomDJProfileUrlList(DJProfileUrlList);
+      setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
       const UserIDList = await room_fetchUserList({roomID: roomID});
       setRoomUserIDList(UserIDList);
       const UserUrlList = await room_fetchUserUrlList({roomID: roomID});
@@ -114,7 +111,7 @@ export const RoomDetails = ({route, navigation}) => {
         </Text>
 
         <View>
-        <Text style={{ color: COLORS.light, fontSize: 15, paddingVertical: 6, marginLeft: 10}}>DJs:</Text></View>
+        <Text style={{ color: COLORS.light, fontSize: 15, paddingVertical: 6, marginLeft: 10}}>DJ:</Text></View>
         <View style={styles.header}>
         <FlatList
           data={roomDJIDList}
