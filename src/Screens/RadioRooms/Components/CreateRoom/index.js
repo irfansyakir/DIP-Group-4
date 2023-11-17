@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Image, Text, View, TextInput, Switch,
     StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useNavigation, StackActions } from '@react-navigation/native'; // Import useNavigation
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, SIZES } from "../../../../Constants";
@@ -94,7 +94,7 @@ export const CreateRoom = ()=> {
               }
           })
             .then(roomID => {
-              navigation.navigate('RoomQueue', {roomID: roomID, roomName: roomName})
+              navigation.dispatch(StackActions.replace('RoomQueue', {roomID: roomID, roomName: roomName}));
             });
     
         } else {
