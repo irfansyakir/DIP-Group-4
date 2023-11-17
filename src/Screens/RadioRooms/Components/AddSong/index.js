@@ -90,7 +90,7 @@ export const AddSong = ({ route }) => {
                     flexDirection: 'row',
                     alignItems: 'center',
                 }}
-                onPress={() => debouncedTrackClick(item.id)}
+                disabled={true}
             >
                 {/* SONG IMAGE */}
                 <Image

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import { Text, View, Image, TouchableOpacity, ScrollView } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useFonts } from 'expo-font'
@@ -8,6 +8,7 @@ import { useMusicStore } from '../../Store/useMusicStore'
 import { BackgroundImage } from '@rneui/base'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { COLORS } from '../../Constants'
+import { useQueueStore } from '../../Store/useQueueStore'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -20,6 +21,7 @@ export const Track = ({ navigation }) => {
     const songInfo = useMusicStore((state) => state.songInfo)
     const [previousPage, setPreviousPage] = useState('')
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+    const role = useQueueStore((state) => state.role)
 
     useEffect(() => {
         const routes = navigation.getState()?.routes
@@ -43,11 +45,7 @@ export const Track = ({ navigation }) => {
                 backgroundColor: COLORS.dark,
             }}
         >
-            <BackgroundImage
-                style={{ flex: 1 }}
-                src={songInfo.coverUrl}
-                blurRadius={90}
-            >
+            <BackgroundImage style={{ flex: 1 }} src={songInfo.coverUrl} blurRadius={90}>
                 <LinearGradient
                     colors={['#121212', 'transparent']}
                     start={{ x: 0, y: 1 }}
@@ -81,11 +79,7 @@ export const Track = ({ navigation }) => {
                                     navigation.pop()
                                 }}
                             >
-                                <Icon
-                                    style={{ color: '#FFF' }}
-                                    name='down'
-                                    size={20}
-                                />
+                                <Icon style={{ color: '#FFF' }} name='down' size={20} />
                             </TouchableOpacity>
 
                             <Text
@@ -107,16 +101,10 @@ export const Track = ({ navigation }) => {
 
                             <TouchableOpacity
                                 onPress={() => {
-                                    changeCurrentPage(
-                                        navigation.navigate('SearchClick')
-                                    )
+                                    changeCurrentPage(navigation.navigate('SearchClick'))
                                 }}
                             >
-                                <Icon
-                                    style={{ color: '#FFF' }}
-                                    name='more'
-                                    size={25}
-                                />
+                                <Icon style={{ color: '#FFF' }} name='more' size={25} />
                             </TouchableOpacity>
                         </View>
 
@@ -164,23 +152,23 @@ export const Track = ({ navigation }) => {
                                     {songInfo.songArtist}
                                 </Text>
                             </View>
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('Queue')}
-                            >
-                                <Icon
-                                    style={{
-                                        color: '#FFF',
-                                        marginRight: 10,
-                                        marginTop: 15,
-                                    }}
-                                    name='viewqueue'
-                                    size={33}
-                                />
-                            </TouchableOpacity>
+                            {role === 'personal' && (
+                                <TouchableOpacity onPress={() => navigation.navigate('Queue')}>
+                                    <Icon
+                                        style={{
+                                            color: '#FFF',
+                                            marginRight: 10,
+                                            marginTop: 15,
+                                        }}
+                                        name='viewqueue'
+                                        size={33}
+                                    />
+                                </TouchableOpacity>
+                            )}
                         </View>
 
                         {/* SLIDER, PLAY BUTTON */}
-                        <Play previousPage={previousPage}/>
+                        <Play previousPage={previousPage} />
 
                         {/* LYRICS */}
                         <View
@@ -212,17 +200,13 @@ export const Track = ({ navigation }) => {
                                     lineHeight: 25,
                                 }}
                             >
-                                "Lorem ipsum dolor sit amet, consectetur
-                                adipiscing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua. Ut
-                                enim ad minim veniam, quis nostrud exercitation
-                                ullamco laboris nisi ut aliquip ex ea commodo
-                                consequat. Duis aute irure dolor in
-                                reprehenderit in voluptate velit esse cillum
-                                dolore eu fugiat nulla pariatur. Excepteur sint
-                                occaecat cupidatat non proident, sunt in culpa
-                                qui officia deserunt mollit anim id est
-                                laborum."
+                                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+                                ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                                aliquip ex ea commodo consequat. Duis aute irure dolor in
+                                reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                                culpa qui officia deserunt mollit anim id est laborum."
                             </Text>
                         </View>
                     </ScrollView>

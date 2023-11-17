@@ -11,7 +11,14 @@ import { useQueueStore } from '../../Store/useQueueStore'
 import { COLORS } from '../../Constants'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
-import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
+import {
+    userQueue_getRoomQueue,
+    userQueue_updateQueue,
+    userQueue_updateRoomQueue,
+} from '../../Utilities/Firebase/user_queue_functions'
+import { current_track_updateCurrentTrack } from '../../Utilities/Firebase/current_track_functions'
+import { emptyQueue } from '../UI/toaster'
+import { useNavigation } from '@react-navigation/native'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -36,11 +43,13 @@ export const Play = ({ previousPage }) => {
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeDuration = useMusicStore((state) => state.changeDuration)
+    const roomId = useMusicStore((state) => state.radioRoom_roomId)
 
     const radioRoom_isDJ = useMusicStore((state) => state.radioRoom_isDJ)
 
     // queue store
     const queue = useQueueStore((state) => state.queue)
+    const role = useQueueStore((state) => state.role)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const isShuffle = useQueueStore((state) => state.isShuffle)
     const changeIsShuffle = useQueueStore((state) => state.changeIsShuffle)
@@ -48,6 +57,7 @@ export const Play = ({ previousPage }) => {
     // auth store
     const accessToken = useAuthStore((state) => state.accessToken)
     const userId = useAuthStore((state) => state.userId)
+    const navigation = useNavigation()
 
     useEffect(() => {
         console.log(previousPage)
@@ -86,7 +96,7 @@ export const Play = ({ previousPage }) => {
     }
 
     const handleSlider = async (value) => {
-        if (previousPage !== 'Chatroom') {
+        if (role === 'broadcaster' || role === 'personal') {
             changePosition(value)
             await soundObject.setPositionAsync(value)
         } else {
@@ -121,41 +131,39 @@ export const Play = ({ previousPage }) => {
         }
     }
 
-    const handleNextSong = (trackId) => {
-        const createSoundObject = async (uri) => {
-            // clear previous song
-            if (soundObject) {
-                changeIsPlaying(false)
-                soundObject.unloadAsync()
-            }
-            const { sound } = await Audio.Sound.createAsync({ uri: uri })
-            changeSoundObject(sound)
-            changeIsPlaying(true)
+    const createSoundObject = async (uri) => {
+        // clear previous song
+        if (soundObject) {
+            changeIsPlaying(false)
+            soundObject.unloadAsync()
         }
+        const { sound } = await Audio.Sound.createAsync({ uri: uri })
+        changeSoundObject(sound)
+        changeIsPlaying(true)
+    }
 
-        const getTrackData = async () => {
-            try {
-                const trackData = await GetTrack({
-                    accessToken: accessToken,
-                    trackId: trackId,
-                })
-                changeSongInfo(
-                    trackData.album.images[0].url,
-                    trackData.name,
-                    trackData.artists[0].name,
-                    trackData.album.name
-                )
-                createSoundObject(trackData.preview_url)
-            } catch (err) {
-                console.error(err)
-            }
-        }
+    const getTrackData = async (trackId) => {
         changeIsPlaying(false)
-        getTrackData()
+        try {
+            const trackData = await GetTrack({
+                accessToken: accessToken,
+                trackId: trackId,
+            })
+            changeSongInfo(
+                trackData.album.images[0].url,
+                trackData.name,
+                trackData.artists[0].name,
+                trackData.album.name
+            )
+            createSoundObject(trackData.preview_url)
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     const handleNext = async () => {
-        if (previousPage !== 'Chatroom') {
+        if (role === 'personal') {
+            console.log('personal queue next')
             if (queue.length !== 0) {
                 if (isShuffle) {
                     const index = Math.floor(Math.random() * (queue.length + 1))
@@ -163,7 +171,7 @@ export const Play = ({ previousPage }) => {
                     const tempQueue = queue
                     tempQueue.splice(index, 1)
                     changeQueue(tempQueue)
-                    handleNextSong(currSong.id)
+                    getTrackData(currSong.id)
                     userQueue_updateQueue({ userID: userId, userQueueList: tempQueue })
                 } else {
                     const currSong = queue[0]
@@ -172,7 +180,7 @@ export const Play = ({ previousPage }) => {
                         userID: userId,
                         userQueueList: queue.slice(1),
                     })
-                    handleNextSong(currSong.id)
+                    getTrackData(currSong.id)
                 }
             } else {
                 changeIsPlaying(false)
@@ -180,19 +188,31 @@ export const Play = ({ previousPage }) => {
                 changePosition(0)
             }
         } else {
-            if (radioRoom_isDJ) {
-                if (queue.length !== 0) {
-                    const currSong = queue[0]
-                    changeQueue(queue.slice(1))
-                    userQueue_updateQueue({
-                        userID: userId,
-                        userQueueList: queue.slice(1),
-                    })
-                    handleNextSong(currSong.id)
-                } else {
-                    changeIsPlaying(false)
+            if (role === 'broadcaster') {
+                const roomQueue = await userQueue_getRoomQueue({ roomID: roomId })
+                if (!roomQueue || roomQueue.length === 0) {
                     await soundObject.setPositionAsync(0)
+                    await current_track_updateCurrentTrack({
+                        roomID: roomId,
+                        trackURL: null,
+                        isCurrentTrackPlaying: false,
+                    })
                     changePosition(0)
+                    soundObject.unloadAsync()
+                    changeSoundObject(null)
+                    changeCurrentPage('RoomQueue')
+                    navigation.navigate('RoomQueue', { roomID: roomId })
+                    emptyQueue()
+                } else {
+                    const preview_url = await getTrackData(roomQueue[0].id)
+                    await current_track_updateCurrentTrack({
+                        roomID: roomId,
+                        trackURL: preview_url,
+                    })
+                    await userQueue_updateRoomQueue({
+                        roomID: roomId,
+                        userRoomQueueList: roomQueue.length === 1 ? [] : roomQueue.slice(1),
+                    })
                 }
             } else {
                 Alert.alert('Dj permissions', 'Not a DJ', [
@@ -225,7 +245,10 @@ export const Play = ({ previousPage }) => {
 
             {/* CONTROLS */}
             <View style={styles.controls}>
-                <TouchableOpacity onPress={() => changeIsShuffle(!isShuffle)}>
+                <TouchableOpacity
+                    disabled={role !== 'personal'}
+                    onPress={() => changeIsShuffle(!isShuffle)}
+                >
                     <Icon
                         style={[
                             styles.icon,
@@ -254,7 +277,10 @@ export const Play = ({ previousPage }) => {
                     <Icon style={[styles.icon, styles.rot]} name='back' size={30} />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => changeIsRepeat(!isRepeat)}>
+                <TouchableOpacity
+                    disabled={role !== 'personal'}
+                    onPress={() => changeIsRepeat(!isRepeat)}
+                >
                     <Icon
                         style={{
                             color: isRepeat ? COLORS.primary : COLORS.white,
