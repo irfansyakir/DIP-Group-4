@@ -99,9 +99,11 @@ export const RadioRooms = (currentPage) => {
     // Navigate to "CreateRoom" screen when the button is clicked
     navigation.navigate("CreateRoom");
   };
-  const goToChatroom = (roomId) => {
+  const goToChatroom = async ({roomID, userID, username}) => {
+    await swapToRoomQueue(roomID)
+    await room_addUser({roomID: roomID, userID: userID, username: username})
     navigation.navigate('Chatroom', {
-      roomID: roomId,
+      roomID: roomID,
     })
     changeCurrentPage('Chatroom')
 
@@ -226,10 +228,7 @@ export const RadioRooms = (currentPage) => {
               width: '50%',
               height: 34,
             }} onPress={() => {
-              goToChatroom(item.id)
-              swapToRoomQueue(item.id)
-
-              room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName})
+              goToChatroom({roomID: item.id, userID: storeUserID, username: storeDisplayName})
               // console.log(item)
               // if(userAlreadyInRoom){
               //   room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName}).then()
@@ -278,15 +277,11 @@ export const RadioRooms = (currentPage) => {
           onSubmit={() => {
             let privateFound = privateRooms.find(element => element.id === roomCodeQuery)
             if(privateFound) {
-              goToChatroom(privateFound.id)
-              swapToRoomQueue(privateFound.id)
-              room_addUser({roomID: privateFound.id, userID: storeUserID, username: storeDisplayName})
+              goToChatroom({roomID: privateFound.id, userID: storeUserID, username: storeDisplayName})
             } else {
               let theRestOfTheRoomsFound = publicRooms.concat(joinedPrivateRooms).find(element => element.id === roomCodeQuery)
               if(theRestOfTheRoomsFound) {
-                goToChatroom(theRestOfTheRoomsFound.id)
-                swapToRoomQueue(theRestOfTheRoomsFound.id)
-                room_addUser({roomID: theRestOfTheRoomsFound.id, userID: storeUserID, username: storeDisplayName})
+                goToChatroom({roomID: theRestOfTheRoomsFound.id, userID: storeUserID, username: storeDisplayName})
               }
             }
           }}
@@ -300,9 +295,7 @@ export const RadioRooms = (currentPage) => {
           dataSet={joinedPrivateRooms.concat(publicRooms)}
           onSelectItem={(item) => {
             if(item) {
-              goToChatroom(item.id)
-              swapToRoomQueue(item.id)
-              room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName})
+              goToChatroom({roomID: item.id, userID: storeUserID, username: storeDisplayName})
             }
           }}
           inputContainerStyle={{
