@@ -38,6 +38,7 @@ import { COLORS, SIZES } from '../../../../Constants'
 import { current_track_updateCurrentTrack } from '../../../../Utilities/Firebase/current_track_functions'
 import { useProfileStore } from '../../../../Store/useProfileStore'
 import { Alert } from 'react-native'
+import { Audio } from 'expo-av'
 
 export const Chatroom = ({ route, navigation }) => {
     const { roomID } = route.params
