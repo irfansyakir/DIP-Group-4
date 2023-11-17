@@ -266,9 +266,10 @@ export const Chatroom = ({ route, navigation }) => {
     const createSoundObject = async (uri) => {
         // clear previous song
         if (soundObject) {
-            changeIsPlaying(false)
+            soundObject.pauseAsync()
             soundObject.unloadAsync()
         }
+        console.log('uri', uri)
         const { sound } = await Audio.Sound.createAsync({ uri: uri })
         changeSoundObject(sound)
         // changeIsPlaying(true)
@@ -283,6 +284,13 @@ export const Chatroom = ({ route, navigation }) => {
     useEffect(() => {
         if (role === 'listener') {
             if (roomCurrentTrackURL) createSoundObject(roomCurrentTrackURL).then()
+            else {
+                if (soundObject) {
+                    soundObject.pauseAsync()
+                    soundObject.unloadAsync()
+                    changeSoundObject(null)
+                }
+            }
         }
     }, [roomCurrentTrackURL])
 
@@ -297,8 +305,10 @@ export const Chatroom = ({ route, navigation }) => {
 
     useEffect(() => {
         if (role === 'listener') {
+            console.log(position, roomTimeOfLastPlayed)
             if (Math.abs(position - roomTimeOfLastPlayed) > 500) {
                 if (roomTimeOfLastPlayed !== null) {
+                    console.log('updating to', roomTimeOfLastPlayed)
                     changePosition(roomTimeOfLastPlayed)
                     if (soundObject) soundObject.setPositionAsync(roomTimeOfLastPlayed).then()
                 }
@@ -338,6 +348,7 @@ export const Chatroom = ({ route, navigation }) => {
                                         await soundObject.pauseAsync()
                                         await soundObject.unloadAsync()
                                         changeSoundObject(null)
+                                        changePosition(0)
                                     }
                                     changeIsBroadcasting(false)
                                     changeRole('personal')

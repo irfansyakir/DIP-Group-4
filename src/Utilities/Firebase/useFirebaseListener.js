@@ -7,7 +7,9 @@ export function useRoomTrackURLListener(roomID) {
     const [trackURL, setTrackURL] = useState()
     const trackURLRef = ref(db, `/current_track/${roomID}/track_url`)
     current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
-        if (currentTrack) setTrackURL(currentTrack.track_url)
+        if (currentTrack) {
+            setTrackURL(currentTrack.track_url)
+        }
     })
 
     useEffect(() => {
@@ -102,7 +104,6 @@ export function useTimeOfLastPlayedListener(roomID) {
     useEffect(() => {
         current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
             if (currentTrack) {
-                console.log('currentTrack', currentTrack.time_of_last_played)
                 setTimeOfLastPlayed(currentTrack.time_of_last_played)
             }
         })
@@ -118,6 +119,11 @@ export function useIsCurrentTrackPlayingListener(roomID) {
     const [isCurrentTrackPlaying, setIsCurrentTrackPlaying] = useState(false)
 
     const isCurrentTrackPlayingRef = ref(db, `/current_track/${roomID}/is_current_track_playing`)
+    current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
+        if (currentTrack) {
+            setIsCurrentTrackPlaying(currentTrack.is_current_track_playing)
+        }
+    })
 
     useEffect(() => {
         return onValue(isCurrentTrackPlayingRef, (snapshot) => {

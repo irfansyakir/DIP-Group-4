@@ -97,7 +97,7 @@ function HomeTabs() {
                 component={ProfileStackNavigator}
                 options={{ unmountOnBlur: true }}
             />
-            <Tab.Screen name='TestAPI' component={TestAPI} />
+            {/* <Tab.Screen name='TestAPI' component={TestAPI} /> */}
         </Tab.Navigator>
     )
 }
