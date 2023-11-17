@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useQueueStore } from '../../Store/useQueueStore'
 import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
-import { room_getAllRooms } from "../../Utilities/Firebase/room_functions";
+import {room_addUser, room_getAllRooms} from "../../Utilities/Firebase/room_functions";
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BoldText } from "../../Commons/UI/styledText";
 import { COLORS, SIZES } from "../../Constants";
@@ -104,6 +104,10 @@ export const RadioRooms = (currentPage) => {
   const swapToRoomQueue = async (roomId) => {
     const roomQueue =  await userQueue_getRoomQueue({ roomID: roomId })
     changeQueue(roomQueue)
+  }
+
+  const userAlreadyInRoom = (userID, roomID) => {
+
   }
 
   const VirtualizedList = ({children}) => {
@@ -223,6 +227,12 @@ export const RadioRooms = (currentPage) => {
             }} onPress={() => {
               goToChatroom(item.id)
               swapToRoomQueue(item.id)
+
+              room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName})
+              // console.log(item)
+              // if(userAlreadyInRoom){
+              //   room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName}).then()
+              // }
             }}>
               <Text style={{
                 fontSize: 14,
