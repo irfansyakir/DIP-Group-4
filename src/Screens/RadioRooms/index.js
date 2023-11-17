@@ -26,14 +26,16 @@ export const RadioRooms = (currentPage) => {
   const insets = useSafeAreaInsets()
   const windowWidth = Dimensions.get('window').width;
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [roomCodeQuery, setRoomCodeQuery] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const navigation = useNavigation(); // Initialize navigation\
 
   const changeQueue = useQueueStore((state) => state.changeQueue)
   const [shuffledRooms, setShuffledRooms] = useState([]);
-  const [joinedPrivateRooms, setjoinedPrivateRooms] = useState([]);
+
+  const [joinedPrivateRooms, setJoinedPrivateRooms] = useState([]);
   const [publicRooms, setPublicRooms] = useState([])
+  const [privateRooms, setPrivateRooms] = useState([])
 
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
   const storeDisplayName = useProfileStore((state) => state.displayName)
@@ -55,6 +57,7 @@ export const RadioRooms = (currentPage) => {
         }
         let tempPublicRooms = []
         let urRooms = []
+        let tempPrivateRooms = []
         //roomID is in roomValues
         for (const [_, roomValues] of Object.entries(roomsArray)) {
           let hasJoinedThisRoom = false
@@ -69,11 +72,14 @@ export const RadioRooms = (currentPage) => {
           if(!hasJoinedThisRoom){
             if (roomValues.isPublic){
               tempPublicRooms.push({...roomValues, title: roomValues.room_name})
+            } else {
+              tempPrivateRooms.push({...roomValues, title: roomValues.room_name})
             }
           }
         }
-        setjoinedPrivateRooms(urRooms)
+        setJoinedPrivateRooms(urRooms)
         setPublicRooms(tempPublicRooms)
+        setPrivateRooms(tempPrivateRooms)
         //need to do this due to database structure having the id as key because flatlist.
         // Shuffle rooms only when the component mounts or when rooms are fetched
         if (shuffledRooms.length === 0) {
@@ -117,20 +123,6 @@ export const RadioRooms = (currentPage) => {
 
   const userAlreadyInRoom = (userID, roomID) => {
 
-  }
-
-  const VirtualizedList = ({children}) => {
-    return (
-      <FlatList
-        data={[]}
-        keyExtractor={() => "key"}
-        renderItem={null}
-        ListHeaderComponent={
-          <>{children}</>
-        }
-        style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}
-      />
-    )
   }
 
   const renderItem = ({ item }) => {
@@ -257,27 +249,7 @@ export const RadioRooms = (currentPage) => {
 
   return (
     <View style={{flex:1, paddingTop: insets.top, backgroundColor: COLORS.dark, width: windowWidth}}>
-      <AutocompleteDropdown
-        clearOnFocus={false}
-        closeOnBlur={true}
-        closeOnSubmit={false}
-        onSubmit={(item) => {
-          // console.log(joinedPrivateRooms.concat(publicRooms))
-        }}
-        matchFrom={'any'}
-        initialValue={''}
-        // suggestionsListMaxHeight={}
-        // initialValue={{ id: '2' }} // or just '2'
-        dataSet={joinedPrivateRooms.concat(publicRooms)}
-        onSelectItem={(item) => {
-          if(item) {
-            goToChatroom(item.id)
-            swapToRoomQueue(item.id)
-            room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName})
-          }
-        }}
-      />
-      <VirtualizedList>
+      <ScrollView style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}>
         <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
           <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
             RadioRooms
@@ -299,27 +271,78 @@ export const RadioRooms = (currentPage) => {
 
         {/* SEARCH BAR */}
 
-        <View style={{
-          marginTop: 10,
-          flexDirection: 'row',
-          backgroundColor: '#333',
-          borderRadius: 10,
-          alignItems: 'center',
-          paddingHorizontal: 10,}}>
-          <Ionicons name={'ios-search'} size={25} color={COLORS.grey} />
-          <TextInput
-            autoFocus={false}
-            style={{
+        <AutocompleteDropdown
+          clearOnFocus={false}
+          closeOnBlur={true}
+          closeOnSubmit={false}
+          onSubmit={() => {
+            let privateFound = privateRooms.find(element => element.id === roomCodeQuery)
+            if(privateFound) {
+              goToChatroom(privateFound.id)
+              swapToRoomQueue(privateFound.id)
+              room_addUser({roomID: privateFound.id, userID: storeUserID, username: storeDisplayName})
+            } else {
+              let theRestOfTheRoomsFound = publicRooms.concat(joinedPrivateRooms).find(element => element.id === roomCodeQuery)
+              if(theRestOfTheRoomsFound) {
+                goToChatroom(theRestOfTheRoomsFound.id)
+                swapToRoomQueue(theRestOfTheRoomsFound.id)
+                room_addUser({roomID: theRestOfTheRoomsFound.id, userID: storeUserID, username: storeDisplayName})
+              }
+            }
+          }}
+          onChangeText={(text) => {
+            setRoomCodeQuery(text)
+          }}
+          matchFrom={'any'}
+          initialValue={''}
+          // suggestionsListMaxHeight={}
+          // initialValue={{ id: '2' }} // or just '2'
+          dataSet={joinedPrivateRooms.concat(publicRooms)}
+          onSelectItem={(item) => {
+            if(item) {
+              goToChatroom(item.id)
+              swapToRoomQueue(item.id)
+              room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName})
+            }
+          }}
+          inputContainerStyle={{
+            marginTop: 10,
+            flexDirection: 'row',
+            backgroundColor: '#333',
+            borderRadius: 10,
+            alignItems: 'center',
+            paddingHorizontal: 10,
+          }}
+          textInputProps={{
+            autoFocus:false,
+            style:{
               color: COLORS.light,
               width: 250,
               fontSize: SIZES.medium,
-              padding: 10,}}
-            placeholder='Search by room code'
-            placeholderTextColor={COLORS.grey}
-            value={searchQuery}
-            onChangeText={(text) => setSearchQuery(text)}
-          />
-        </View>
+              padding: 10
+            },
+            placeholder:'Search by room code or name',
+            placeholderTextColor: COLORS.grey
+          }}
+          suggestionsListContainerStyle={{
+            // color: COLORS.darkblue,
+            backgroundColor: '#333',
+          }}
+          suggestionsListTextStyle={{
+            color: COLORS.light,
+            width: 250,
+            fontSize: SIZES.medium,
+            padding: 10
+          }}
+
+
+
+          // renderItem={(item, searchText) => {
+          //   return(
+          //     <Text>Test</Text>
+          //   )
+          // }}
+        />
 
         <BoldText style={{
           fontSize: SIZES.large,
@@ -345,7 +368,7 @@ export const RadioRooms = (currentPage) => {
           renderItem={renderItem}
           style={{marginBottom:150}}
         />
-      </VirtualizedList>
+      </ScrollView>
     {/*<ScrollView style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}>*/}
 
     {/*</ScrollView>*/}
