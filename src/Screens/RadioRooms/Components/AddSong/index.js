@@ -45,7 +45,7 @@ export const AddSong = ({route}) => {
 
   const showToast = () => Toast.show('Added to queue', {
     duration: 1500,
-    position: -60,
+    position: -10,
     shadow: true,
     animation: true,
     hideOnPress: true,
