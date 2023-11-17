@@ -35,6 +35,7 @@ export const RadioRooms = (currentPage) => {
 
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
   const storeDisplayName = useProfileStore((state) => state.displayName)
+  const storeUserID = useAuthStore((state) => state.userId)
 
   useEffect(() => {
     console.log("Fetching rooms...");
@@ -52,12 +53,14 @@ export const RadioRooms = (currentPage) => {
         }
         let publicRooms = []
         let urRooms = []
-        for (const [key, value] of Object.entries(roomsArray)) {
-          for (const [key, value2] of Object.entries(value.users)){
-            if (value2.owner === true && value2.username==storeDisplayName){
-              urRooms.push({...value, id:key})
-            } else if (value.isPublic){
-              publicRooms.push({...value, id:key})
+        //roomID is in roomValues
+        for (const [_, roomValues] of Object.entries(roomsArray)) {
+          // console.log(roomValues)
+          for (const [userID, userDetails] of Object.entries(roomValues.users)){
+            if (userID === storeUserID){
+              urRooms.push({...roomValues})
+            } else if (roomValues.isPublic){
+              publicRooms.push({...roomValues})
             }
           }
         }
@@ -103,6 +106,20 @@ export const RadioRooms = (currentPage) => {
     changeQueue(roomQueue)
   }
 
+  const VirtualizedList = ({children}) => {
+    return (
+      <FlatList
+        data={[]}
+        keyExtractor={() => "key"}
+        renderItem={null}
+        ListHeaderComponent={
+          <>{children}</>
+        }
+        style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}
+      />
+    )
+  }
+
   const renderItem = ({ item }) => {
     let owner = 'Loading...';
     let image = require('../../../assets/themes/goodvibes.jpg') 
@@ -133,6 +150,7 @@ export const RadioRooms = (currentPage) => {
       }}>
         <TouchableOpacity
           onPress={() => {
+            // console.log(item)
             handleRoomSelect(item.id)
           }}
           style={{
@@ -220,28 +238,28 @@ export const RadioRooms = (currentPage) => {
 
   return (
     <View style={{flex:1, paddingTop: insets.top, backgroundColor: COLORS.dark, width: windowWidth}}>
-    <ScrollView style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}>
-      <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
-      <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
-        RadioRooms
-      </BoldText>
-      {/* CREATE ROOM BUTTON */}
-      <TouchableOpacity style={{
-        justifyContent: "center",
-        alignItems: "center",
-        height: 45,
-        width: 60,
-        borderRadius: 30,
-        marginTop: 7,
-      }} onPress={handleButtonClick}>
-        <Text style={{
-          fontSize: 40,
-          color: "#41BBC4",}}>+</Text>
-      </TouchableOpacity>
-      </View>
+      <VirtualizedList>
+        <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
+          <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
+            RadioRooms
+          </BoldText>
+          {/* CREATE ROOM BUTTON */}
+          <TouchableOpacity style={{
+            justifyContent: "center",
+            alignItems: "center",
+            height: 45,
+            width: 60,
+            borderRadius: 30,
+            marginTop: 7,
+          }} onPress={handleButtonClick}>
+            <Text style={{
+              fontSize: 40,
+              color: "#41BBC4",}}>+</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* SEARCH BAR */}
-      <View style={{
+        {/* SEARCH BAR */}
+        <View style={{
           marginTop: 10,
           flexDirection: 'row',
           backgroundColor: '#333',
@@ -263,31 +281,34 @@ export const RadioRooms = (currentPage) => {
           />
         </View>
 
-      <BoldText style={{
-      fontSize: SIZES.large,
-      color: COLORS.primary,
-      marginTop: 20,
-      }}>Your Rooms</BoldText>
-      <FlatList
-        data={yourRooms}
-        keyExtractor={(item)=>item.id}
-        renderItem={renderItem}
-      />
-      
-      <BoldText style={{
-        fontSize: SIZES.large,
-        color: COLORS.light,
-        marginTop: 20,
+        <BoldText style={{
+          fontSize: SIZES.large,
+          color: COLORS.primary,
+          marginTop: 20,
+        }}>Your Rooms</BoldText>
+        <FlatList
+          data={yourRooms}
+          keyExtractor={(item)=>item.id}
+          renderItem={renderItem}
+        />
+
+        <BoldText style={{
+          fontSize: SIZES.large,
+          color: COLORS.light,
+          marginTop: 20,
         }}>Recommended for you</BoldText>
 
-      <FlatList
-       // data={shuffledRooms.slice(0, 5)} // Display a random selection of 5 rooms
-        data={shuffledRooms} //for now display all rooms cuz easier debugging
-       keyExtractor={(item) => item.id}
-       renderItem={renderItem}
-       style={{marginBottom:150}}
-      />
-    </ScrollView>
+        <FlatList
+          // data={shuffledRooms.slice(0, 5)} // Display a random selection of 5 rooms
+          data={shuffledRooms} //for now display all rooms cuz easier debugging
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          style={{marginBottom:150}}
+        />
+      </VirtualizedList>
+    {/*<ScrollView style={{ padding: 20, paddingTop:0, flex: 1, backgroundColor: COLORS.dark,}}>*/}
+
+    {/*</ScrollView>*/}
     </View>
   );
 };
