@@ -20,6 +20,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { useProfileStore } from "../../Store/useProfileStore";
 import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_functions'
+import {AutocompleteDropdown} from "react-native-autocomplete-dropdown";
 
 export const RadioRooms = (currentPage) => {
   const insets = useSafeAreaInsets()
@@ -31,7 +32,8 @@ export const RadioRooms = (currentPage) => {
 
   const changeQueue = useQueueStore((state) => state.changeQueue)
   const [shuffledRooms, setShuffledRooms] = useState([]);
-  const [yourRooms, setYourRooms] = useState([]);
+  const [joinedPrivateRooms, setjoinedPrivateRooms] = useState([]);
+  const [publicRooms, setPublicRooms] = useState([])
 
   const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
   const storeDisplayName = useProfileStore((state) => state.displayName)
@@ -51,24 +53,31 @@ export const RadioRooms = (currentPage) => {
         for (const [key, value] of Object.entries(roomData)) {
           roomsArray.push({...value, id: key})
         }
-        let publicRooms = []
+        let tempPublicRooms = []
         let urRooms = []
         //roomID is in roomValues
         for (const [_, roomValues] of Object.entries(roomsArray)) {
+          let hasJoinedThisRoom = false
           // console.log(roomValues)
           for (const [userID, userDetails] of Object.entries(roomValues.users)){
             if (userID === storeUserID){
-              urRooms.push({...roomValues})
-            } else if (roomValues.isPublic){
-              publicRooms.push({...roomValues})
+              urRooms.push({...roomValues, title: roomValues.room_name})
+              hasJoinedThisRoom = true
+              break
+            }
+          }
+          if(!hasJoinedThisRoom){
+            if (roomValues.isPublic){
+              tempPublicRooms.push({...roomValues, title: roomValues.room_name})
             }
           }
         }
-        setYourRooms(urRooms);
+        setjoinedPrivateRooms(urRooms)
+        setPublicRooms(tempPublicRooms)
         //need to do this due to database structure having the id as key because flatlist.
         // Shuffle rooms only when the component mounts or when rooms are fetched
         if (shuffledRooms.length === 0) {
-          setShuffledRooms(shuffleArray(publicRooms));
+          setShuffledRooms(shuffleArray(tempPublicRooms));
         }
         
       })
@@ -248,6 +257,26 @@ export const RadioRooms = (currentPage) => {
 
   return (
     <View style={{flex:1, paddingTop: insets.top, backgroundColor: COLORS.dark, width: windowWidth}}>
+      <AutocompleteDropdown
+        clearOnFocus={false}
+        closeOnBlur={true}
+        closeOnSubmit={false}
+        onSubmit={(item) => {
+          // console.log(joinedPrivateRooms.concat(publicRooms))
+        }}
+        matchFrom={'any'}
+        initialValue={''}
+        // suggestionsListMaxHeight={}
+        // initialValue={{ id: '2' }} // or just '2'
+        dataSet={joinedPrivateRooms.concat(publicRooms)}
+        onSelectItem={(item) => {
+          if(item) {
+            goToChatroom(item.id)
+            swapToRoomQueue(item.id)
+            room_addUser({roomID: item.id, userID: storeUserID, username: storeDisplayName})
+          }
+        }}
+      />
       <VirtualizedList>
         <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
           <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20}}>
@@ -269,6 +298,7 @@ export const RadioRooms = (currentPage) => {
         </View>
 
         {/* SEARCH BAR */}
+
         <View style={{
           marginTop: 10,
           flexDirection: 'row',
@@ -297,7 +327,7 @@ export const RadioRooms = (currentPage) => {
           marginTop: 20,
         }}>Your Rooms</BoldText>
         <FlatList
-          data={yourRooms}
+          data={joinedPrivateRooms}
           keyExtractor={(item)=>item.id}
           renderItem={renderItem}
         />
