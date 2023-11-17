@@ -11,6 +11,7 @@ import { useQueueStore } from '../../Store/useQueueStore'
 import { COLORS } from '../../Constants'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
+import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -41,8 +42,12 @@ export const Play = ({previousPage}) => {
     // queue store
     const queue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
+    const isShuffle = useQueueStore((state) => state.isShuffle)
+    const changeIsShuffle = useQueueStore((state) => state.changeIsShuffle)
 
+    // auth store
     const accessToken = useAuthStore((state) => state.accessToken)
+    const userId = useAuthStore((state) => state.userId)
 
     useEffect(() => {
         console.log(previousPage)
@@ -162,9 +167,19 @@ export const Play = ({previousPage}) => {
     const handleNext = async () => {
         if(previousPage !== 'Chatroom'){
             if (queue.length !== 0) {
-                const currSong = queue[0]
-                changeQueue(queue.slice(1))
-                handleNextSong(currSong.id)
+                if (isShuffle){
+                    const index = Math.floor(Math.random()*(queue.length+1))
+                    const currSong = queue[index]
+                    queue.splice(index, 1)
+                    changeQueue(queue)
+                    handleNextSong(currSong.id)
+                    userQueue_updateQueue({ userID: userId, userQueueList: queue})
+                } else {
+                    const currSong = queue[0]
+                    changeQueue(queue.slice(1))
+                    handleNextSong(currSong.id)
+                    userQueue_updateQueue({ userID: userId, userQueueList: queue})
+                }
             } else {
                 changeIsPlaying(false)
                 await soundObject.setPositionAsync(0)
@@ -214,8 +229,11 @@ export const Play = ({previousPage}) => {
 
             {/* CONTROLS */}
             <View style={styles.controls}>
-                <TouchableOpacity>
-                    <Icon style={styles.icon} name='shuffle' size={25} />
+                <TouchableOpacity onPress={() => changeIsShuffle(!isShuffle)}>
+                    <Icon style={[styles.icon, {
+                        color: isShuffle ? COLORS.primary : COLORS.white,
+                    }]} 
+                    name='shuffle' size={25} />
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={handlePrev}>

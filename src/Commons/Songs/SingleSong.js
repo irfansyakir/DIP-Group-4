@@ -132,12 +132,12 @@ export default function SingleSong({ item }) {
           style={{ width: 50, height: 50, borderRadius: 10, marginRight: 15 }}
           src={item.coverUrl}
         />
-        <View>
+        <View style={{flex: 1}}>
           {/* TITLE AND ARTIST */}
-          <Text style={{ color: '#FFF', fontSize: SIZES.medium }}>
+          <Text numberOfLines={1} ellipsizeMode='tail' style={{ color: '#FFF', fontSize: SIZES.medium,}}>
             {item.title}
           </Text>
-          <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
+          <Text numberOfLines={1} ellipsizeMode='tail' style={{ color: COLORS.grey }}>{item.artist}</Text>
         </View>
       </TouchableOpacity>
       <TouchableOpacity 

@@ -183,7 +183,7 @@ export const AddSong = ({route}) => {
             height: 50,
             borderRadius: 10,
             marginRight: 15,}} src={item.coverUrl} />
-          <View>
+          <View style={{flex: 1}}>
             {/* TITLE AND ARTIST */}
             <Text numberOfLines={1} ellipsizeMode='tail' style={{color:'#FFF', fontSize: SIZES.medium,}}>
               {item.title}
