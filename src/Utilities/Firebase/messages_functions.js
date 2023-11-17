@@ -27,6 +27,20 @@ export async function message_setMessage({roomID, username, message, timestamp})
   }
 }
 
+export async function message_removeAllMessageInRoom({roomID}){
+  if (roomID === null) {
+    throw new Error("roomId is missing in removing message function.");
+  }
+  const updates = {};
+  updates[`/messages/${roomID}`] = null
+  try {
+    await update(dbRef, updates)
+    // await console.log("room deleted successfully")
+  }catch (e) {
+    console.log(e)
+    throw e
+  }
+}
 export async function message_getMessage({roomID}) {
   if (roomID === null) {
     throw new Error("roomId is missing in message_getMessage.");
