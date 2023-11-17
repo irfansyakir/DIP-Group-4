@@ -71,6 +71,16 @@ export const RoomDetails = ({route, navigation}) => {
       setRoomUserIDList(UserIDList);
       const UserUrlList = await room_fetchUserUrlList({roomID: roomID});
       setRoomProfileUrlList(UserUrlList);
+      let DJUrlList = [];
+      roomDJIDList.forEach((DJID) => {
+        let index = roomUserIDList.indexOf(DJID);
+        if (index !== -1) {
+          DJUrlList.push(roomProfileUrlList[index]);
+        } else {
+          console.log(`UserID ${DJID} not found in UserIDList`);
+        }
+      });
+      setRoomDJProfileUrlList(DJUrlList);
       //setRoomUserIDList(fetchDJNames());
       //every room MUST have a minimum of 1 user (that is the creator)
       //setRoomUserIDList(roomDetails["users"] ? roomDetails["users"] : [])
@@ -111,7 +121,7 @@ export const RoomDetails = ({route, navigation}) => {
         </Text>
 
         <View>
-        <Text style={{ color: COLORS.light, fontSize: 15, paddingVertical: 6, marginLeft: 10}}>DJ:</Text></View>
+        <Text style={{ color: COLORS.light, fontSize: 15, paddingVertical: 6, marginLeft: 10}}>DJs:</Text></View>
         <View style={styles.header}>
         <FlatList
           data={roomDJIDList}
