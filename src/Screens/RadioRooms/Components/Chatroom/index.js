@@ -23,6 +23,7 @@ import {
 import {
     useIsCurrentTrackPlayingListener,
     useMessageListener,
+    useRoomSongInfoListener,
     useRoomTrackURLListener,
     useTimeOfLastPlayedListener,
 } from '../../../../Utilities/Firebase/useFirebaseListener'
@@ -80,6 +81,7 @@ export const Chatroom = ({ route, navigation }) => {
 
     const position = useMusicStore((state) => state.position)
     const changePosition = useMusicStore((state) => state.changePosition)
+    const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
 
     const [roomUserIDList, setRoomUserIDList] = useState([])
     const [roomDJIDList, setRoomDJIDList] = useState([])
@@ -89,6 +91,7 @@ export const Chatroom = ({ route, navigation }) => {
     const roomIsCurrentTrackPlaying = useIsCurrentTrackPlayingListener(roomID)
     const roomTimeOfLastPlayed = useTimeOfLastPlayedListener(roomID)
     const roomCurrentTrackURL = useRoomTrackURLListener(roomID)
+    const roomSongInfo = useRoomSongInfoListener(roomID)
 
     // ------------------------------------------------------------------------------------------------- Room Queue Initializations
 
@@ -279,16 +282,23 @@ export const Chatroom = ({ route, navigation }) => {
 
     useEffect(() => {
         if (role === 'listener') {
+            console.log('from useEffect', roomCurrentTrackURL)
             if (roomCurrentTrackURL) createSoundObject(roomCurrentTrackURL).then()
         }
     }, [roomCurrentTrackURL])
 
     useEffect(() => {
         if (role === 'listener') {
+            if (roomSongInfo) changeSongInfo(roomSongInfo)
+        }
+    }, [roomSongInfo])
+
+    useEffect(() => {
+        if (role === 'listener') {
             if (Math.abs(position - roomTimeOfLastPlayed) > 500) {
-                if (roomTimeOfLastPlayed) {
+                if (roomTimeOfLastPlayed !== null) {
                     changePosition(roomTimeOfLastPlayed)
-                    soundObject.setPositionAsync(roomTimeOfLastPlayed).then()
+                    if (soundObject) soundObject.setPositionAsync(roomTimeOfLastPlayed).then()
                 }
             }
         }

@@ -115,7 +115,13 @@ export function CurrentlyPlaying() {
                 trackData.album.name
             )
             createSoundObject(trackData.preview_url)
-            return trackData.preview_url
+            return {
+                coverUrl: trackData.album.images[0].url,
+                songTitle: trackData.name,
+                songArtist: trackData.artists[0].name,
+                songAlbum: trackData.album.name,
+                preview_url: trackData.preview_url,
+            }
         } catch (err) {
             console.error(err)
         }
@@ -181,10 +187,18 @@ export function CurrentlyPlaying() {
             navigation.navigate('RoomQueue', { roomID: roomId })
             emptyQueue()
         } else {
-            const preview_url = await getTrackData(roomQueue[0].id)
+            const { coverUrl, songAlbum, songArtist, songTitle, preview_url } = await getTrackData(
+                roomQueue[0].id
+            )
             await current_track_updateCurrentTrack({
                 roomID: roomId,
                 trackURL: preview_url,
+                songInfo: {
+                    coverUrl: coverUrl,
+                    songAlbum: songAlbum,
+                    songArtist: songArtist,
+                    songTitle: songTitle,
+                },
             })
             await userQueue_updateRoomQueue({
                 roomID: roomId,
@@ -222,11 +236,6 @@ export function CurrentlyPlaying() {
             }).then()
         }
     }, [isPlaying])
-
-    useEffect(() => {
-        if (role === 'listener') {
-        }
-    })
 
     if (currentPage === 'Chatroom') {
         return (

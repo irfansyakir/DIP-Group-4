@@ -1,10 +1,15 @@
 import { onValue, ref } from 'firebase/database'
 import { db } from '../../../firebaseConfig'
 import { useEffect, useState } from 'react'
+import { current_track_getCurrentTrack } from './current_track_functions'
 
 export function useRoomTrackURLListener(roomID) {
     const [trackURL, setTrackURL] = useState()
     const trackURLRef = ref(db, `/current_track/${roomID}/track_url`)
+    current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
+        console.log('currentTrack', currentTrack.track_url)
+        setTrackURL(currentTrack.track_url)
+    })
 
     useEffect(() => {
         return onValue(trackURLRef, (snapshot) => {
@@ -14,6 +19,20 @@ export function useRoomTrackURLListener(roomID) {
     }, [])
 
     return trackURL
+}
+
+export function useRoomSongInfoListener(roomID) {
+    const [songInfo, setSongInfo] = useState()
+    const songInfoRef = ref(db, `/current_track/${roomID}/song_info`)
+
+    useEffect(() => {
+        return onValue(songInfoRef, (snapshot) => {
+            const data = snapshot.val()
+            setSongInfo(data)
+        })
+    }, [])
+
+    return songInfo
 }
 
 export function useUserCurrentQueue(userID) {
@@ -82,6 +101,10 @@ export function useTimeOfLastPlayedListener(roomID) {
     const timeOfLastPlayedRef = ref(db, `/current_track/${roomID}/time_of_last_played`)
 
     useEffect(() => {
+        current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
+            console.log('currentTrack', currentTrack.time_of_last_played)
+            setTimeOfLastPlayed(currentTrack.time_of_last_played)
+        })
         return onValue(timeOfLastPlayedRef, (snapshot) => {
             const data = snapshot.val()
             setTimeOfLastPlayed(data)

@@ -6,6 +6,7 @@ export async function current_track_updateCurrentTrack({
     trackURL,
     timeOfLastPlayed,
     isCurrentTrackPlaying,
+    songInfo,
 }) {
     if (roomID === null) {
         throw new Error('roomID is missing in current_track_updateCurrentTrack.')
@@ -20,6 +21,9 @@ export async function current_track_updateCurrentTrack({
     }
     if (isCurrentTrackPlaying !== undefined) {
         updates[`/current_track/${roomID}/is_current_track_playing`] = isCurrentTrackPlaying
+    }
+    if (songInfo !== undefined) {
+        updates[`/current_track/${roomID}/song_info`] = songInfo
     }
     try {
         await update(dbRef, updates)
