@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View, Image, Touchable } from 'react-native'
+import { Text, TouchableOpacity, View, Image, Touchable, Dimensions } from 'react-native'
 import { COLORS, SIZES } from '../../Constants'
 import { Audio } from 'expo-av'
 import { useFonts } from 'expo-font'
@@ -12,6 +12,7 @@ import {
     userQueue_getQueue,
     userQueue_updateQueue,
 } from '../../Utilities/Firebase/user_queue_functions'
+import { addQueue } from '../UI/toaster'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -29,6 +30,7 @@ export default function SingleSong({ item }) {
     const storeQueue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const userId = useAuthStore((state) => state.userId)
+    const screenWidth = Dimensions.get('window').width
 
     const handleTrackClick = (trackId) => {
         const createSoundObject = async (uri) => {
@@ -108,15 +110,29 @@ export default function SingleSong({ item }) {
                 {/* SONG IMAGE */}
                 <Image
                     style={{ width: 50, height: 50, borderRadius: 10, marginRight: 15 }}
-                    src={item.img}
+                    src={item.coverUrl}
                 />
-                <View>
+                <View style={{ flex: 1 }}>
                     {/* TITLE AND ARTIST */}
-                    <Text style={{ color: '#FFF', fontSize: SIZES.medium }}>{item.title}</Text>
-                    <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
+                    <Text
+                        numberOfLines={1}
+                        ellipsizeMode='tail'
+                        style={{ color: '#FFF', fontSize: SIZES.medium }}
+                    >
+                        {item.title}
+                    </Text>
+                    <Text numberOfLines={1} ellipsizeMode='tail' style={{ color: COLORS.grey }}>
+                        {item.artist}
+                    </Text>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity style={{ justifyContent: 'center' }} onPress={() => addSongtoQ()}>
+            <TouchableOpacity
+                style={{ justifyContent: 'center' }}
+                onPress={() => {
+                    addSongtoQ()
+                    addQueue()
+                }}
+            >
                 <Icon style={{ fontSize: 30, color: COLORS.white }} name='addqueue' />
             </TouchableOpacity>
         </View>

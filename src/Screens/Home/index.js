@@ -156,8 +156,6 @@ export const Home = () => {
                 accessToken: accessToken,
             })
 
-            console.log(queueData)
-
             if (queueData.currently_playing) {
                 const artistNames = queueData.currently_playing.artists
                     .map((artist) => artist.name)

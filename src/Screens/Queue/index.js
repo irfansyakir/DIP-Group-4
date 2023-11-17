@@ -38,15 +38,23 @@ export const Queue = ({navigation}) => {
 
     // Generating list of songs from store
     const generateSongs = () => {        
+        const orderQ = storeQueue.map((item, index) => {
+            return { ...item, orderId: index + 1}
+        })
+
         return (
         <View style={{flex: 1}}>
             <DraggableFlatList
-            data={storeQueue}
+            data={orderQ}
             onDragEnd={({data}) => {
-                changeQueue(data)
-                userQueue_updateQueue({ userID: userId, userQueueList: data})
+                const saveQ = data.map((item) => {
+                                const { orderId, ...rest } = item 
+                                return rest
+                            })
+                changeQueue(saveQ)
+                userQueue_updateQueue({ userID: userId, userQueueList: saveQ})
             }}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.orderId}
             showsVerticalScrollIndicator={false}
             renderItem={({ item, drag, isActive }) => (
                 <View style={[styles.songInQ,
@@ -96,7 +104,7 @@ export const Queue = ({navigation}) => {
                     source={storeCurrTrack.coverUrl}
                 /> 
                 <View style={styles.songDets}>
-                    <Text style={styles.currSong}>
+                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.currSong}>
                         {storeCurrTrack.songTitle}
                     </Text>
                     <Text style={styles.currArtistName}>
@@ -150,6 +158,7 @@ const styles = StyleSheet.create({
     songDets: {
         justifyContent: 'center',
         padding: 10,
+        flex: 1,
     },
     currSong: {
         fontSize: 17,

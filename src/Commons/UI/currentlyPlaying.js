@@ -20,6 +20,7 @@ import {
     current_track_getCurrentTrack,
     current_track_updateCurrentTrack,
 } from '../../Utilities/Firebase/current_track_functions'
+import { emptyQueue } from './toaster'
 
 const SongProgessBar = ({ currentTime, duration, currentPage }) => {
     return (
@@ -176,10 +177,11 @@ export function CurrentlyPlaying() {
             changePosition(0)
             soundObject.unloadAsync()
             changeSoundObject(null)
+            changeCurrentPage('RoomQueue')
             navigation.navigate('RoomQueue', { roomID: roomId })
+            emptyQueue()
         } else {
             const preview_url = await getTrackData(roomQueue[0].id)
-            console.log('preview_url', preview_url)
             await current_track_updateCurrentTrack({
                 roomID: roomId,
                 trackURL: preview_url,

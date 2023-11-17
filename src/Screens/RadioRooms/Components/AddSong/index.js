@@ -1,31 +1,24 @@
-import { Text, TouchableOpacity, View, TextInput, FlatList, Image } from 'react-native'
+import { Text, TouchableOpacity, View, TextInput, FlatList, Image, Dimensions } from 'react-native'
 import { COLORS, SIZES } from '../../../../Constants'
-import { BoldText, MediumText } from '../../../../Commons/UI/styledText'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { Audio } from 'expo-av'
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import { SearchTrack } from '../../../../Utilities/SpotifyApi/Utils'
 import { useMusicStore } from '../../../../Store/useMusicStore'
-import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
-import { debounce } from '../../../../Utilities/Functions/debounce'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
     userQueue_updateRoomQueue,
     userQueue_getRoomQueue,
 } from '../../../../Utilities/Firebase/user_queue_functions'
+import { addQueue } from '../../../../Commons/UI/toaster'
+import { useFonts } from 'expo-font'
 
 export const AddSong = ({ route }) => {
     const { roomID } = route.params || {}
-
     const insets = useSafeAreaInsets()
     // Initialize navigation
     const navigation = useNavigation()
-    const soundObject = useMusicStore((state) => state.soundObject)
-    const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
-    const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
-    const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
 
     useEffect(() => {
@@ -64,9 +57,6 @@ export const AddSong = ({ route }) => {
     }
 
     const addSongtoRoomQ = async (item) => {
-        // if (!soundObject) {
-        //     handleTrackClick(item.id)
-        // }
         const storeQueue = await userQueue_getRoomQueue({ roomID: roomID })
         const addedSong = {
             id: item.id,
@@ -100,7 +90,7 @@ export const AddSong = ({ route }) => {
                     flexDirection: 'row',
                     alignItems: 'center',
                 }}
-                disabled={true}
+                onPress={() => debouncedTrackClick(item.id)}
             >
                 {/* SONG IMAGE */}
                 <Image
@@ -112,7 +102,7 @@ export const AddSong = ({ route }) => {
                     }}
                     src={item.coverUrl}
                 />
-                <View>
+                <View style={{ flex: 1 }}>
                     {/* TITLE AND ARTIST */}
                     <Text
                         numberOfLines={1}
@@ -124,11 +114,24 @@ export const AddSong = ({ route }) => {
                     <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => addSongtoRoomQ(item)}>
-                <Ionicons name={'add-circle-outline'} style={{}} size={35} color={COLORS.light} />
+            <TouchableOpacity
+                onPress={() => {
+                    addSongtoRoomQ(item)
+                    addQueue()
+                }}
+            >
+                <Ionicons name={'add-circle-outline'} size={35} color={COLORS.light} />
             </TouchableOpacity>
         </View>
     )
+
+    const [fontsLoaded] = useFonts({
+        IcoMoon: require('../../../../../assets/icomoon/icomoon.ttf'),
+    })
+
+    if (!fontsLoaded) {
+        return null
+    }
 
     return (
         <View style={{ backgroundColor: COLORS.dark, flex: 1 }}>

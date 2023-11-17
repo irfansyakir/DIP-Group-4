@@ -12,6 +12,7 @@ import { errorCloseQueueToast } from '../../../../Commons/UI/toaster'
 // Store
 import { useMusicStore } from '../../../../Store/useMusicStore'
 import { useAuthStore } from '../../../../Store/useAuthStore'
+import { useQueueStore } from '../../../../Store/useQueueStore'
 // Firebase
 import { useRoomTrackURLListener } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { useRoomCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
@@ -20,8 +21,10 @@ import {
     userQueue_updateRoomQueue,
 } from '../../../../Utilities/Firebase/user_queue_functions'
 import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
-import { useQueueStore } from '../../../../Store/useQueueStore'
-import { useEffect } from 'react'
+
+import { useEffect, useState } from 'react'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { current_track_updateCurrentTrack } from '../../../../Utilities/Firebase/current_track_functions'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -32,8 +35,12 @@ const Icon = createIconSetFromIcoMoon(
 export const RoomQueue = ({ route, navigation }) => {
     const { roomID, roomName } = route.params || {}
     const accessToken = useAuthStore((state) => state.accessToken)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
+    const [refresh, setRefresh] = useState(false)
+
     const insets = useSafeAreaInsets()
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
@@ -41,11 +48,12 @@ export const RoomQueue = ({ route, navigation }) => {
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeRoomId = useMusicStore((state) => state.changeRadioRoom_roomId)
     const changeRole = useQueueStore((state) => state.changeRole)
-    const storeQueue = useRoomCurrentQueue(roomID)
+    const storeQueue = useRoomCurrentQueue(roomID) || []
 
     useEffect(() => {
         changeCurrentPage('RoomQueue')
     }, [])
+
     const [fontsLoaded] = useFonts({
         IcoMoon: require('../../../../../assets/icomoon/icomoon.ttf'),
     })
@@ -54,49 +62,54 @@ export const RoomQueue = ({ route, navigation }) => {
         return null
     }
 
+    const createSoundObject = async (uri) => {
+        // clear previous song
+        if (soundObject) {
+            changeIsPlaying(false)
+            soundObject.unloadAsync()
+        }
+        const { sound } = await Audio.Sound.createAsync({ uri: uri })
+        changeSoundObject(sound)
+        changeIsPlaying(true)
+    }
+
+    const getTrackData = async (trackId) => {
+        changeIsPlaying(false)
+        try {
+            const trackData = await GetTrack({
+                accessToken: accessToken,
+                trackId: trackId,
+            })
+            changeSongInfo(
+                trackData.album.images[0].url,
+                trackData.name,
+                trackData.artists[0].name,
+                trackData.album.name
+            )
+            createSoundObject(trackData.preview_url)
+            return trackData.preview_url
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
     const handleStartRoom = async () => {
         const roomQueue = await userQueue_getRoomQueue({ roomID: roomID })
         if (!roomQueue || roomQueue.length === 0) {
             errorCloseQueueToast()
             return
         }
-        const firstSongId = roomQueue[0].id
-        userQueue_updateRoomQueue({
+
+        const preview_url = await getTrackData(roomQueue[0].id)
+        await current_track_updateCurrentTrack({
             roomID: roomID,
-            userRoomQueueList: roomQueue.slice(1),
+            trackURL: preview_url,
         })
-        const createSoundObject = async (uri) => {
-            // clear previous song
-            if (soundObject) {
-                changeIsPlaying(false)
-                soundObject.unloadAsync()
-            }
+        await userQueue_updateRoomQueue({
+            roomID: roomID,
+            userRoomQueueList: roomQueue.length === 1 ? [] : roomQueue.slice(1),
+        })
 
-            const { sound } = await Audio.Sound.createAsync({ uri: uri })
-            changeSoundObject(sound)
-            changeIsPlaying(true)
-        }
-
-        const getTrackData = async () => {
-            try {
-                const trackData = await GetTrack({
-                    accessToken: accessToken,
-                    trackId: firstSongId,
-                })
-                changeSongInfo(
-                    trackData.album.images[0].url,
-                    trackData.name,
-                    trackData.artists[0].name,
-                    trackData.album.name,
-                    trackData.id
-                )
-                createSoundObject(trackData.preview_url)
-            } catch (err) {
-                console.error(err)
-            }
-        }
-
-        getTrackData()
         changeRoomId(roomID)
         changeCurrentPage('Chatroom')
         changeRole('broadcaster')
@@ -108,27 +121,74 @@ export const RoomQueue = ({ route, navigation }) => {
         else navigation.navigate('Chatroom', { roomID: roomID })
     }
 
+    const delSongfromRoomQ = (item) => {
+        storeQueue.splice(item.orderId - 1, 1)
+        changeQueue(storeQueue)
+
+        userQueue_updateRoomQueue({
+            roomID: roomID,
+            userRoomQueueList: storeQueue,
+        })
+
+        setRefresh(!refresh)
+    }
+
     const generateSongs = () => {
+        const orderQ = storeQueue.map((item, index) => {
+            return { ...item, orderId: index + 1 }
+        })
+
         return (
             <View style={{ flex: 1 }}>
                 <FlatList
-                    data={storeQueue}
-                    keyExtractor={(item) => item.id}
+                    data={orderQ}
+                    keyExtractor={(item) => item.orderId}
                     showsVerticalScrollIndicator={true}
+                    extraData={refresh}
                     renderItem={({ item }) => (
-                        <View style={styles.songInQ}>
-                            <Image
-                                style={{
-                                    width: 45,
-                                    height: 45,
-                                    borderRadius: 5,
-                                }}
-                                source={item.img}
-                            />
-                            <View style={{ paddingLeft: 10 }}>
-                                <Text style={styles.songName}>{item.title}</Text>
-                                <Text style={styles.artistName}>{item.artist}</Text>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                height: 60,
+                                paddingLeft: 16,
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <View style={styles.songInQ}>
+                                <Image
+                                    style={{
+                                        width: 45,
+                                        height: 45,
+                                        borderRadius: 5,
+                                    }}
+                                    source={item.img}
+                                />
+                                <View style={{ flex: 1, paddingLeft: 10 }}>
+                                    <Text
+                                        numberOfLines={1}
+                                        ellipsizeMode='tail'
+                                        style={styles.songName}
+                                    >
+                                        {item.title}
+                                    </Text>
+                                    <Text
+                                        numberOfLines={1}
+                                        ellipsizeMode='tail'
+                                        style={styles.artistName}
+                                    >
+                                        {item.artist}
+                                    </Text>
+                                </View>
                             </View>
+                            <TouchableOpacity
+                                style={{ paddingRight: 16 }}
+                                onPress={() => {
+                                    delSongfromRoomQ(item)
+                                }}
+                            >
+                                <Ionicons name={'trash-outline'} size={25} color={COLORS.light} />
+                            </TouchableOpacity>
                         </View>
                     )}
                 />
@@ -272,9 +332,7 @@ const styles = StyleSheet.create({
     songInQ: {
         flexDirection: 'row',
         alignItems: 'center',
-        height: 60,
-        paddingLeft: 16,
-        // backgroundColor: 'green'
+        flex: 1,
     },
     songName: {
         fontSize: 17,

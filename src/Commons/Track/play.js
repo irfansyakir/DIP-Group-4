@@ -21,7 +21,6 @@ const Icon = createIconSetFromIcoMoon(
 
 export const Play = ({ previousPage }) => {
     const [localPosition, setLocalPosition] = useState(0)
-    const userId = useAuthStore((state) => state.userId)
 
     // music store
     const isPlaying = useMusicStore((state) => state.isPlaying)
@@ -43,8 +42,12 @@ export const Play = ({ previousPage }) => {
     // queue store
     const queue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
+    const isShuffle = useQueueStore((state) => state.isShuffle)
+    const changeIsShuffle = useQueueStore((state) => state.changeIsShuffle)
 
+    // auth store
     const accessToken = useAuthStore((state) => state.accessToken)
+    const userId = useAuthStore((state) => state.userId)
 
     useEffect(() => {
         console.log(previousPage)
@@ -154,13 +157,23 @@ export const Play = ({ previousPage }) => {
     const handleNext = async () => {
         if (previousPage !== 'Chatroom') {
             if (queue.length !== 0) {
-                const currSong = queue[0]
-                changeQueue(queue.slice(1))
-                userQueue_updateQueue({
-                    userID: userId,
-                    userQueueList: queue.slice(1),
-                })
-                handleNextSong(currSong.id)
+                if (isShuffle) {
+                    const index = Math.floor(Math.random() * (queue.length + 1))
+                    const currSong = queue[index]
+                    const tempQueue = queue
+                    tempQueue.splice(index, 1)
+                    changeQueue(tempQueue)
+                    handleNextSong(currSong.id)
+                    userQueue_updateQueue({ userID: userId, userQueueList: tempQueue })
+                } else {
+                    const currSong = queue[0]
+                    changeQueue(queue.slice(1))
+                    userQueue_updateQueue({
+                        userID: userId,
+                        userQueueList: queue.slice(1),
+                    })
+                    handleNextSong(currSong.id)
+                }
             } else {
                 changeIsPlaying(false)
                 await soundObject.setPositionAsync(0)
@@ -212,8 +225,17 @@ export const Play = ({ previousPage }) => {
 
             {/* CONTROLS */}
             <View style={styles.controls}>
-                <TouchableOpacity>
-                    <Icon style={styles.icon} name='shuffle' size={25} />
+                <TouchableOpacity onPress={() => changeIsShuffle(!isShuffle)}>
+                    <Icon
+                        style={[
+                            styles.icon,
+                            {
+                                color: isShuffle ? COLORS.primary : COLORS.white,
+                            },
+                        ]}
+                        name='shuffle'
+                        size={25}
+                    />
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={handlePrev}>
