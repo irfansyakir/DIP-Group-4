@@ -20,6 +20,8 @@ import { COLORS, SIZES } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
 import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_functions'
+import { current_track_getCurrentTrack } from '../../Utilities/Firebase/current_track_functions'
+import { Audio } from 'expo-av'
 
 export const RadioRooms = () => {
     const insets = useSafeAreaInsets()
@@ -27,14 +29,15 @@ export const RadioRooms = () => {
 
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedRoom, setSelectedRoom] = useState(null)
-    const navigation = useNavigation() // Initialize navigation\
+    const navigation = useNavigation() // Initialize navigation
 
-    const changeQueue = useQueueStore((state) => state.changeQueue)
     const [shuffledRooms, setShuffledRooms] = useState([])
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const resetPlayer = useMusicStore((state) => state.resetPlayer)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+    const soundObject = useMusicStore((state) => state.soundObject)
+    const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeRole = useQueueStore((state) => state.changeRole)
 
     useEffect(() => {
@@ -84,9 +87,14 @@ export const RadioRooms = () => {
         return shuffledArray
     }
 
-    const swapToRoomQueue = async (roomId) => {
-        const roomQueue = await userQueue_getRoomQueue({ roomID: roomId })
-        changeQueue(roomQueue)
+    const handleJoinRoom = async (room) => {
+        if (soundObject) {
+            await soundObject.pauseAsync()
+            await soundObject.unloadAsync()
+            resetPlayer()
+        }
+        changeRole('listener')
+        goToChatroom(room.id)
     }
 
     const roomItems = shuffledRooms.map((room) => {
@@ -186,10 +194,8 @@ export const RadioRooms = () => {
                                 width: '50%',
                                 height: 34,
                             }}
-                            onPress={() => {
-                                goToChatroom(room.id)
-                                changeRole('listener')
-                                // swapToRoomQueue(room.id)
+                            onPress={async () => {
+                                await handleJoinRoom(room)
                             }}
                         >
                             <Text

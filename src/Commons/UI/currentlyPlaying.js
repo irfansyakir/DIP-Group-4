@@ -16,10 +16,7 @@ import {
     userQueue_updateQueue,
     userQueue_updateRoomQueue,
 } from '../../Utilities/Firebase/user_queue_functions'
-import {
-    current_track_getCurrentTrack,
-    current_track_updateCurrentTrack,
-} from '../../Utilities/Firebase/current_track_functions'
+import { current_track_updateCurrentTrack } from '../../Utilities/Firebase/current_track_functions'
 import { emptyQueue } from './toaster'
 
 const SongProgessBar = ({ currentTime, duration, currentPage }) => {
@@ -68,12 +65,12 @@ export function CurrentlyPlaying() {
     const changeRadioRoom_isBroadcasting = useMusicStore(
         (state) => state.changeRadioRoom_isBroadcasting
     )
-
     // queue store
     const queue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const role = useQueueStore((state) => state.role)
 
+    // listener
     const navigation = useNavigation()
     const insets = useSafeAreaInsets()
 
@@ -132,13 +129,15 @@ export function CurrentlyPlaying() {
 
             // if currently playing song is completed
             if (status.positionMillis > status.durationMillis - 90) {
-                clearInterval(intervalId)
-                if (isRepeat) {
-                    changeIsPlaying(false)
-                    await soundObject.setPositionAsync(0)
-                    changePosition(0)
-                    changeIsPlaying(true)
-                    return
+                if (role === 'personal' || role === 'broadcaster') {
+                    clearInterval(intervalId)
+                    if (isRepeat) {
+                        changeIsPlaying(false)
+                        await soundObject.setPositionAsync(0)
+                        changePosition(0)
+                        changeIsPlaying(true)
+                        return
+                    }
                 }
 
                 if (role === 'personal') {
@@ -173,6 +172,7 @@ export function CurrentlyPlaying() {
             await current_track_updateCurrentTrack({
                 roomID: roomId,
                 trackURL: null,
+                isCurrentTrackPlaying: false,
             })
             changePosition(0)
             soundObject.unloadAsync()
@@ -215,7 +215,18 @@ export function CurrentlyPlaying() {
         if (soundObject) {
             isPlaying ? play() : pause()
         }
+        if (role === 'broadcaster') {
+            current_track_updateCurrentTrack({
+                roomID: roomId,
+                isCurrentTrackPlaying: isPlaying,
+            }).then()
+        }
     }, [isPlaying])
+
+    useEffect(() => {
+        if (role === 'listener') {
+        }
+    })
 
     if (currentPage === 'Chatroom') {
         return (

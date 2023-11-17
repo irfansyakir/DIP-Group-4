@@ -9,7 +9,6 @@ export function useRoomTrackURLListener(roomID) {
     useEffect(() => {
         return onValue(trackURLRef, (snapshot) => {
             const data = snapshot.val()
-            // console.log(data)
             setTrackURL(data)
         })
     }, [])
@@ -89,7 +88,7 @@ export function useTimeOfLastPlayedListener(roomID) {
         })
     }, [])
 
-    return [timeOfLastPlayed]
+    return timeOfLastPlayed
 }
 export function useIsCurrentTrackPlayingListener(roomID) {
     const [isCurrentTrackPlaying, setIsCurrentTrackPlaying] = useState(false)
@@ -104,7 +103,7 @@ export function useIsCurrentTrackPlayingListener(roomID) {
         })
     }, [])
 
-    return [isCurrentTrackPlaying]
+    return isCurrentTrackPlaying
 }
 
 export function useRoomCurrentQueue(roomID) {

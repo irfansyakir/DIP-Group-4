@@ -68,6 +68,7 @@ export const Chatroom = ({ route, navigation }) => {
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
+    const role = useQueueStore((state) => state.role)
     const changeRole = useQueueStore((state) => state.changeRole)
 
     const changeIsDJ = useMusicStore((state) => state.changeRadioRoom_isDJ)
@@ -77,14 +78,15 @@ export const Chatroom = ({ route, navigation }) => {
     const songId = useMusicStore((state) => state.songInfo.songId)
 
     const position = useMusicStore((state) => state.position)
+    const changePosition = useMusicStore((state) => state.changePosition)
 
     const [roomUserIDList, setRoomUserIDList] = useState([])
     const [roomDJIDList, setRoomDJIDList] = useState([])
 
     const [roomIsUserListening, setRoomIsUserListening] = useState(false)
 
-    const [roomIsCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomID)
-    const [roomTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
+    const roomIsCurrentTrackPlaying = useIsCurrentTrackPlayingListener(roomID)
+    const roomTimeOfLastPlayed = useTimeOfLastPlayedListener(roomID)
     const roomCurrentTrackURL = useRoomTrackURLListener(roomID)
 
     // ------------------------------------------------------------------------------------------------- Room Queue Initializations
@@ -257,31 +259,37 @@ export const Chatroom = ({ route, navigation }) => {
 
     //Careful with the useEffects below
 
-    // useEffect(() => {
-    //     if (isBroadcasting) {
-    //         current_track_updateCurrentTrack({
-    //             roomID: roomID,
-    //             timeOfLastPlayed: position,
-    //             trackId: songId,
-    //         }).then()
-    //     }
-    // }, [position])
-    // //separate this just in case of feedback
-    // useEffect(() => {
-    //     current_track_updateCurrentTrack({
-    //         roomID: roomID,
-    //         isCurrentTrackPlaying: isBroadcasting,
-    //     }).then()
-    // }, [isBroadcasting])
+    const createSoundObject = async (uri) => {
+        // clear previous song
+        if (soundObject) {
+            changeIsPlaying(false)
+            soundObject.unloadAsync()
+        }
+        const { sound } = await Audio.Sound.createAsync({ uri: uri })
+        changeSoundObject(sound)
+        changeIsPlaying(true)
+    }
 
-    // useEffect(() => {
-    //     if (roomIsCurrentTrackPlaying) {
-    //         changeIsPlaying(true)
-    //     } else {
-    //         changeIsPlaying(false)
-    //         changeIsBroadcasting(false)
-    //     }
-    // }, [roomIsCurrentTrackPlaying])
+    useEffect(() => {
+        if (role === 'listener') {
+            changeIsPlaying(roomIsCurrentTrackPlaying)
+        }
+    }, [roomIsCurrentTrackPlaying])
+
+    useEffect(() => {
+        if (role === 'listener') {
+            createSoundObject(roomCurrentTrackURL).then()
+        }
+    }, [roomCurrentTrackURL])
+
+    useEffect(() => {
+        if (role === 'listener') {
+            if (Math.abs(position - roomTimeOfLastPlayed) > 200) {
+                changePosition(roomTimeOfLastPlayed)
+                soundObject.setPositionAsync(value).then()
+            }
+        }
+    }, [roomTimeOfLastPlayed])
 
     return (
         <BackgroundImage
