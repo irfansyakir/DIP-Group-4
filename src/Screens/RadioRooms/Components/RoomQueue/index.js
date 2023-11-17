@@ -18,6 +18,8 @@ import { AuthError } from 'expo-auth-session';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useColorScheme } from 'react-native';
 import { useFonts } from 'expo-font'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { userQueue_updateRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -29,9 +31,12 @@ export const RoomQueue = ({route, navigation}) => {
     const { roomID, roomName} = route.params || {};
 
     const storeQueue = useQueueStore((state) => state.queue)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
+
+    const [refresh, setRefresh] = useState(false);
 
     const insets = useSafeAreaInsets()
 
@@ -56,33 +61,61 @@ export const RoomQueue = ({route, navigation}) => {
         return null
     }
 
+    const delSongfromRoomQ = (item) => { 
+        storeQueue.splice(item.orderId-1, 1)
+        changeQueue(storeQueue)
+    
+        userQueue_updateRoomQueue({ 
+          roomID: roomID, 
+          userRoomQueueList: storeQueue
+        })
+
+        setRefresh(!refresh)
+    }
+
     const generateSongs = () => {
+        const orderQ = storeQueue.map((item, index) => {
+            return { ...item, orderId: index + 1}
+        })
+
         return (
         <View style={{flex: 1}}>
             <FlatList
-            data={storeQueue}
-            keyExtractor={(item) => item.id}
+            data={orderQ}
+            keyExtractor={(item) => item.orderId}
             showsVerticalScrollIndicator={true}
+            extraData={refresh}
             renderItem={({ item }) => (
-                <View style={styles.songInQ}>
-                    <Image
-                        style={{
-                            width: 45,
-                            height: 45,
-                            borderRadius: 5
-                        }}
-                        source={item.img}
-                    />
-                    <View style={{ paddingLeft: 10 }}>
-                        <Text style={styles.songName}>{item.title}</Text>
-                        <Text style={styles.artistName}>{item.artist}</Text>
+                <View style={{
+                    flexDirection:'row', 
+                    height: 60,
+                    paddingLeft: 16,
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                }}>
+                    <View style={styles.songInQ}>
+                            <Image
+                                style={{
+                                    width: 45,
+                                    height: 45,
+                                    borderRadius: 5
+                                }}
+                                source={item.img}
+                            />
+                            <View style={{ flex: 1, paddingLeft: 10 }}>
+                                <Text numberOfLines={1} ellipsizeMode='tail' style={styles.songName}>{item.title}</Text>
+                                <Text numberOfLines={1} ellipsizeMode='tail' style={styles.artistName}>{item.artist}</Text>
+                            </View>
                     </View>
+                    <TouchableOpacity style={{paddingRight: 16}} onPress={() => {delSongfromRoomQ(item)}}>
+                        <Ionicons name={'trash-outline'} size={25} color={COLORS.light} />
+                    </TouchableOpacity>
                 </View>
             )}/>
         </View>
         );
     };
-
+    
     return (
         <GestureHandlerRootView style={[styles.container,  {paddingTop: insets.top,}]}>
             <View style={{ flexDirection:'row', justifyContent: 'space-between', paddingLeft: 16, paddingRight: 16, marginBottom: 16, paddingTop: 16}}>
@@ -189,9 +222,7 @@ const styles = StyleSheet.create({
     songInQ: {
         flexDirection: 'row',
         alignItems: 'center',
-        height: 60,
-        paddingLeft: 16,
-        // backgroundColor: 'green'
+        flex: 1,
     },
     songName: {
         fontSize: 17,
