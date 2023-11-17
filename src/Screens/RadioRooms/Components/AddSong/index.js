@@ -32,43 +32,6 @@ export const AddSong = ({ route }) => {
         changeCurrentPage('AddSong')
     }, [])
 
-    const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
-
-    const handleTrackClick = (trackId) => {
-        const createSoundObject = async (uri) => {
-            // clear previous song
-            if (soundObject) {
-                changeIsPlaying(false)
-                soundObject.unloadAsync()
-            }
-
-            const { sound } = await Audio.Sound.createAsync({ uri: uri })
-            changeSoundObject(sound)
-            changeIsPlaying(true)
-        }
-
-        const getTrackData = async () => {
-            try {
-                const trackData = await GetTrack({
-                    accessToken: accessToken,
-                    trackId: trackId,
-                })
-                changeSongInfo(
-                    trackData.album.images[0].url,
-                    trackData.name,
-                    trackData.artists[0].name,
-                    trackData.album.name,
-                    trackData.id
-                )
-                createSoundObject(trackData.preview_url)
-            } catch (err) {
-                console.error(err)
-            }
-        }
-
-        getTrackData()
-    }
-
     const [input, setInput] = useState()
     const [data, setData] = useState([])
 
@@ -84,7 +47,6 @@ export const AddSong = ({ route }) => {
                     accessToken: accessToken,
                     text: text,
                 })
-                // console.log(trackdata.tracks.items[0].artists[0].name)
                 const trackArray = []
                 trackdata.tracks.items.map((track) => {
                     trackArray.push({
@@ -138,7 +100,7 @@ export const AddSong = ({ route }) => {
                     flexDirection: 'row',
                     alignItems: 'center',
                 }}
-                onPress={() => debouncedTrackClick(item.id)}
+                disabled={true}
             >
                 {/* SONG IMAGE */}
                 <Image

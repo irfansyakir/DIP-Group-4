@@ -1,13 +1,6 @@
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    FlatList,
-} from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native'
 import { Image } from 'expo-image'
 import * as React from 'react'
-import { useEffect } from 'react'
 import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -20,10 +13,15 @@ import { errorCloseQueueToast } from '../../../../Commons/UI/toaster'
 import { useMusicStore } from '../../../../Store/useMusicStore'
 import { useAuthStore } from '../../../../Store/useAuthStore'
 // Firebase
-import { useRoomTrackIDListener } from '../../../../Utilities/Firebase/useFirebaseListener'
+import { useRoomTrackURLListener } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { useRoomCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
-import { userQueue_getRoomQueue, userQueue_updateRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
+import {
+    userQueue_getRoomQueue,
+    userQueue_updateRoomQueue,
+} from '../../../../Utilities/Firebase/user_queue_functions'
 import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
+import { useQueueStore } from '../../../../Store/useQueueStore'
+import { useEffect } from 'react'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -41,12 +39,20 @@ export const RoomQueue = ({ route, navigation }) => {
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
+    const changeRoomId = useMusicStore((state) => state.changeRadioRoom_roomId)
+    const changeRole = useQueueStore((state) => state.changeRole)
     const storeQueue = useRoomCurrentQueue(roomID)
-    const currentTrackId = useRoomTrackIDListener(roomID)
 
     useEffect(() => {
         changeCurrentPage('RoomQueue')
     }, [])
+    const [fontsLoaded] = useFonts({
+        IcoMoon: require('../../../../../assets/icomoon/icomoon.ttf'),
+    })
+
+    if (!fontsLoaded) {
+        return null
+    }
 
     const handleStartRoom = async () => {
         const roomQueue = await userQueue_getRoomQueue({ roomID: roomID })
@@ -54,14 +60,11 @@ export const RoomQueue = ({ route, navigation }) => {
             errorCloseQueueToast()
             return
         }
-
         const firstSongId = roomQueue[0].id
-
         userQueue_updateRoomQueue({
             roomID: roomID,
             userRoomQueueList: roomQueue.slice(1),
         })
-
         const createSoundObject = async (uri) => {
             // clear previous song
             if (soundObject) {
@@ -94,21 +97,15 @@ export const RoomQueue = ({ route, navigation }) => {
         }
 
         getTrackData()
+        changeRoomId(roomID)
         changeCurrentPage('Chatroom')
+        changeRole('broadcaster')
         navigation.navigate('Chatroom', { roomID: roomID })
     }
 
     const handleBackButton = () => {
         if (!soundObject) errorCloseQueueToast()
         else navigation.navigate('Chatroom', { roomID: roomID })
-    }
-
-    const [fontsLoaded] = useFonts({
-        IcoMoon: require('../../../../../assets/icomoon/icomoon.ttf'),
-    })
-
-    if (!fontsLoaded) {
-        return null
     }
 
     const generateSongs = () => {
@@ -141,19 +138,24 @@ export const RoomQueue = ({ route, navigation }) => {
 
     return (
         <GestureHandlerRootView style={[styles.container, { paddingTop: insets.top }]}>
-             <View
+            <View
                 style={{
                     flexDirection: 'row',
-                    justifyContent: currentTrackId ? 'space-between' : "center",
+                    justifyContent: soundObject ? 'space-between' : 'center',
                     paddingLeft: 16,
                     paddingRight: 16,
                     marginBottom: 16,
                     paddingTop: 16,
                 }}
             >
-                {currentTrackId && <TouchableOpacity style={{ justifyContent: 'center' }} onPress={handleBackButton}>
-                    <Icon style={styles.icon} name='down' />
-                </TouchableOpacity>}
+                {soundObject && (
+                    <TouchableOpacity
+                        style={{ justifyContent: 'center' }}
+                        onPress={handleBackButton}
+                    >
+                        <Icon style={styles.icon} name='down' />
+                    </TouchableOpacity>
+                )}
                 <Text style={styles.headerTxt}> {roomName} </Text>
                 <View style={{ height: 20, width: 20 }}></View>
             </View>
@@ -199,21 +201,23 @@ export const RoomQueue = ({ route, navigation }) => {
                         </Text>
                     </TouchableOpacity>
                 </View>
-                {!currentTrackId && <View style={styles.butContainer}>
-                    <TouchableOpacity
-                        style={[styles.secButtons, { backgroundColor: COLORS.primary }]}
-                        onPress={handleStartRoom}
-                    >
-                        <Text
-                            style={[
-                                styles.subHeaderTxt,
-                                { alignSelf: 'center', color: COLORS.dark },
-                            ]}
+                {!soundObject && (
+                    <View style={styles.butContainer}>
+                        <TouchableOpacity
+                            style={[styles.secButtons, { backgroundColor: COLORS.primary }]}
+                            onPress={handleStartRoom}
                         >
-                            Start Listening
-                        </Text>
-                    </TouchableOpacity>
-                </View>}
+                            <Text
+                                style={[
+                                    styles.subHeaderTxt,
+                                    { alignSelf: 'center', color: COLORS.dark },
+                                ]}
+                            >
+                                Start Listening
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
         </GestureHandlerRootView>
     )

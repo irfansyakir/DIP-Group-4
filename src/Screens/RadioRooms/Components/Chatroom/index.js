@@ -23,7 +23,7 @@ import {
 import {
     useIsCurrentTrackPlayingListener,
     useMessageListener,
-    useRoomTrackIDListener,
+    useRoomTrackURLListener,
     useTimeOfLastPlayedListener,
 } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -68,11 +68,12 @@ export const Chatroom = ({ route, navigation }) => {
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
-    const changeIsInsideRoom = useQueueStore((state) => state.changeIsInsideRoom)
+    const changeRole = useQueueStore((state) => state.changeRole)
 
     const changeIsDJ = useMusicStore((state) => state.changeRadioRoom_isDJ)
     const isBroadcasting = useMusicStore((state) => state.radioRoom_isBroadcasting)
     const changeIsBroadcasting = useMusicStore((state) => state.changeRadioRoom_isBroadcasting)
+    const changeRadioRoom_roomId = useMusicStore((state) => state.changeRadioRoom_roomId)
     const songId = useMusicStore((state) => state.songInfo.songId)
 
     const position = useMusicStore((state) => state.position)
@@ -84,7 +85,7 @@ export const Chatroom = ({ route, navigation }) => {
 
     const [roomIsCurrentTrackPlaying] = useIsCurrentTrackPlayingListener(roomID)
     const [roomTimeOfLastPlayed] = useTimeOfLastPlayedListener(roomID)
-    const roomCurrentTrackID = useRoomTrackIDListener(roomID)
+    const roomCurrentTrackURL = useRoomTrackURLListener(roomID)
 
     // ------------------------------------------------------------------------------------------------- Room Queue Initializations
 
@@ -237,7 +238,6 @@ export const Chatroom = ({ route, navigation }) => {
         changeCurrentPage('Chatroom')
         return () => {
             changeIsBroadcasting(false)
-            changeIsPlaying(false)
         }
     }, [])
 
@@ -311,11 +311,13 @@ export const Chatroom = ({ route, navigation }) => {
                             {
                                 text: 'OK',
                                 onPress: async () => {
-                                    await soundObject.pauseAsync()
-                                    await soundObject.unloadAsync()
-                                    changeSoundObject(null)
+                                    if (soundObject) {
+                                        await soundObject.pauseAsync()
+                                        await soundObject.unloadAsync()
+                                        changeSoundObject(null)
+                                    }
                                     changeIsBroadcasting(false)
-                                    changeIsInsideRoom(false)
+                                    changeRole('personal')
                                     changeCurrentPage('Home')
                                     navigation.navigate('Home', { screen: 'HomeTab' })
                                 },

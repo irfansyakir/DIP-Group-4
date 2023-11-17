@@ -1,6 +1,6 @@
-import { View, Image, TouchableOpacity, Pressable, Alert } from 'react-native'
+import { View, Image, TouchableOpacity, Pressable, Alert, Text } from 'react-native'
 import { Dimensions } from 'react-native'
-import { LightText, BoldText } from './styledText'
+import { LightText, BoldText, MediumText } from './styledText'
 import { COLORS, DISPLAY_NONE_ROOMS, SIZES } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
@@ -11,7 +11,15 @@ import { useQueueStore } from '../../Store/useQueueStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
 import { useAuthStore } from '../../Store/useAuthStore'
-import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
+import {
+    userQueue_getRoomQueue,
+    userQueue_updateQueue,
+    userQueue_updateRoomQueue,
+} from '../../Utilities/Firebase/user_queue_functions'
+import {
+    current_track_getCurrentTrack,
+    current_track_updateCurrentTrack,
+} from '../../Utilities/Firebase/current_track_functions'
 
 const SongProgessBar = ({ currentTime, duration, currentPage }) => {
     return (
@@ -55,6 +63,7 @@ export function CurrentlyPlaying() {
     const isRepeat = useMusicStore((state) => state.isRepeat)
 
     const radioRoom_isDJ = useMusicStore((state) => state.radioRoom_isDJ)
+    const roomId = useMusicStore((state) => state.radioRoom_roomId)
     const changeRadioRoom_isBroadcasting = useMusicStore(
         (state) => state.changeRadioRoom_isBroadcasting
     )
@@ -62,6 +71,7 @@ export function CurrentlyPlaying() {
     // queue store
     const queue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
+    const role = useQueueStore((state) => state.role)
 
     const navigation = useNavigation()
     const insets = useSafeAreaInsets()
@@ -82,37 +92,35 @@ export function CurrentlyPlaying() {
         }
     }
 
-    const handleNextSong = (trackId) => {
-        const createSoundObject = async (uri) => {
-            // clear previous song
-            if (soundObject) {
-                changeIsPlaying(false)
-                soundObject.unloadAsync()
-            }
-            const { sound } = await Audio.Sound.createAsync({ uri: uri })
-            changeSoundObject(sound)
-            changeIsPlaying(true)
+    const createSoundObject = async (uri) => {
+        // clear previous song
+        if (soundObject) {
+            changeIsPlaying(false)
+            soundObject.unloadAsync()
         }
+        const { sound } = await Audio.Sound.createAsync({ uri: uri })
+        changeSoundObject(sound)
+        changeIsPlaying(true)
+    }
 
-        const getTrackData = async () => {
-            try {
-                const trackData = await GetTrack({
-                    accessToken: accessToken,
-                    trackId: trackId,
-                })
-                changeSongInfo(
-                    trackData.album.images[0].url,
-                    trackData.name,
-                    trackData.artists[0].name,
-                    trackData.album.name
-                )
-                createSoundObject(trackData.preview_url)
-            } catch (err) {
-                console.error(err)
-            }
-        }
+    const getTrackData = async (trackId) => {
         changeIsPlaying(false)
-        getTrackData()
+        try {
+            const trackData = await GetTrack({
+                accessToken: accessToken,
+                trackId: trackId,
+            })
+            changeSongInfo(
+                trackData.album.images[0].url,
+                trackData.name,
+                trackData.artists[0].name,
+                trackData.album.name
+            )
+            createSoundObject(trackData.preview_url)
+            return trackData.preview_url
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     const updatePosition = async (intervalId) => {
@@ -129,22 +137,68 @@ export function CurrentlyPlaying() {
                     await soundObject.setPositionAsync(0)
                     changePosition(0)
                     changeIsPlaying(true)
-                } else if (queue.length !== 0) {
-                    const currSong = queue[0]
-                    changeQueue(queue.slice(1))
-                    userQueue_updateQueue({
-                        userID: userId,
-                        userQueueList: queue.slice(1),
-                    })
-                    handleNextSong(currSong.id)
-                } else {
-                    changeIsPlaying(false)
-                    await soundObject.setPositionAsync(0)
-                    changePosition(0)
+                    return
+                }
+
+                if (role === 'personal') {
+                    if (queue.length !== 0) {
+                        const currSong = queue[0]
+                        changeQueue(queue.slice(1))
+                        userQueue_updateQueue({
+                            userID: userId,
+                            userQueueList: queue.slice(1),
+                        })
+                        await getTrackData(currSong.id)
+                    } else {
+                        changeIsPlaying(false)
+                        await soundObject.setPositionAsync(0)
+                        changePosition(0)
+                    }
+                    return
+                }
+
+                if (role === 'broadcaster') {
+                    handleNextSongRoom()
                 }
             }
         }
     }
+
+    const handleNextSongRoom = async () => {
+        changeIsPlaying(false)
+        const roomQueue = await userQueue_getRoomQueue({ roomID: roomId })
+        if (!roomQueue || roomQueue.length === 0) {
+            await soundObject.setPositionAsync(0)
+            await current_track_updateCurrentTrack({
+                roomID: roomId,
+                trackURL: null,
+            })
+            changePosition(0)
+            soundObject.unloadAsync()
+            changeSoundObject(null)
+            navigation.navigate('RoomQueue', { roomID: roomId })
+        } else {
+            const preview_url = await getTrackData(roomQueue[0].id)
+            console.log('preview_url', preview_url)
+            await current_track_updateCurrentTrack({
+                roomID: roomId,
+                trackURL: preview_url,
+            })
+            await userQueue_updateRoomQueue({
+                roomID: roomId,
+                userRoomQueueList: roomQueue.length === 1 ? [] : roomQueue.slice(1),
+            })
+        }
+    }
+
+    useEffect(() => {
+        if (role === 'broadcaster') {
+            current_track_updateCurrentTrack({
+                roomID: roomId,
+                timeOfLastPlayed: position,
+            }).then()
+        }
+    }, [position])
 
     useEffect(() => {
         if (soundObject && isPlaying) {
@@ -153,7 +207,7 @@ export function CurrentlyPlaying() {
             // Clean up the interval when the component unmounts
             return () => clearInterval(intervalId)
         }
-    }, [soundObject, isPlaying])
+    }, [soundObject, isPlaying, role])
 
     useEffect(() => {
         if (soundObject) {
@@ -161,218 +215,240 @@ export function CurrentlyPlaying() {
         }
     }, [isPlaying])
 
-    if (soundObject) {
-        if (currentPage === 'Chatroom') {
-            return (
-                <Pressable
+    if (currentPage === 'Chatroom') {
+        return (
+            <Pressable
+                style={{
+                    position: 'absolute',
+                    width: screenWidth - 20,
+                    left: 10,
+                    right: 10,
+                    height: 100,
+                    bottom: 0,
+                    top: insets.top + 100,
+                    transition: 'all 0.3s ease-out',
+                    backgroundColor: COLORS.darkblue,
+                    borderRadius: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: 15,
+                    paddingVertical: 10,
+                    display: 'flex',
+                }}
+                onPress={() => {
+                    navigation.navigate('Track')
+                    changeCurrentPage('Track')
+                }}
+                disabled={!soundObject}
+            >
+                {!soundObject ? (
+                    <View
+                        style={{ display: 'flex', width: '100%', alignItems: 'center', gap: '4' }}
+                    >
+                        <BoldText
+                            style={{
+                                color: 'white',
+                                fontSize: SIZES.medium,
+                            }}
+                        >
+                            No song is currently playing now :(
+                        </BoldText>
+                        <MediumText
+                            style={{
+                                color: 'white',
+                                fontSize: SIZES.small,
+                            }}
+                        >
+                            If you're the DJ, please add some song to queue!
+                        </MediumText>
+                    </View>
+                ) : (
+                    <>
+                        <Image
+                            style={{
+                                width: 70,
+                                height: 70,
+                                borderRadius: 5,
+                            }}
+                            src={songInfo.coverUrl}
+                        />
+                        <View
+                            aria-label='text and bar'
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                flex: 1,
+                                height: '100%',
+                                paddingLeft: 10,
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <View
+                                aria-label='text and play button box'
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    marginVertical: 10,
+                                }}
+                            >
+                                <View
+                                    aria-label='text box'
+                                    style={{
+                                        flexGrow: 1,
+                                        display: 'flex',
+                                    }}
+                                >
+                                    <BoldText
+                                        style={{
+                                            color: 'white',
+                                            fontSize: SIZES.medium,
+                                        }}
+                                    >
+                                        {songInfo.songTitle}
+                                    </BoldText>
+                                    <LightText
+                                        style={{
+                                            color: COLORS.light,
+                                            fontSize: SIZES.sm,
+                                        }}
+                                    >
+                                        {songInfo.songArtist}
+                                    </LightText>
+                                </View>
+
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (radioRoom_isDJ) {
+                                            changeIsPlaying(!isPlaying)
+                                            //since isPlaying does not update instantaneously, use !isPlaying as workaround
+                                            changeRadioRoom_isBroadcasting(!isPlaying)
+                                        } else {
+                                            Alert.alert('Dj permissions', 'Not a DJ', [
+                                                {
+                                                    text: 'OK :(',
+                                                    onPress: () => console.log('OK Pressed'),
+                                                },
+                                            ])
+                                        }
+                                    }}
+                                    style={{ marginRight: 5 }}
+                                >
+                                    {/* update state for pause and play */}
+                                    {!isPlaying ? (
+                                        <Ionicons name='play' size={35} color={COLORS.white} />
+                                    ) : (
+                                        <Ionicons name='pause' size={35} color={COLORS.white} />
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                            <SongProgessBar
+                                currentTime={position}
+                                duration={duration - 39}
+                                currentPage={currentPage}
+                            />
+                        </View>
+                    </>
+                )}
+            </Pressable>
+        )
+    } else if (soundObject) {
+        return (
+            <Pressable
+                style={{
+                    position: 'absolute',
+                    width: screenWidth - 20,
+                    left: 10,
+                    right: 10,
+                    height: 70,
+                    bottom: insets.bottom + 60,
+                    top: null,
+                    transition: 'all 0.3s ease-out',
+                    backgroundColor: COLORS.darkblue,
+                    borderRadius: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: 15,
+                    paddingVertical: 10,
+                    display: DISPLAY_NONE_ROOMS.includes(currentPage) ? 'none' : 'flex',
+                }}
+                onPress={() => {
+                    navigation.navigate('Track')
+                    changeCurrentPage('Track')
+                }}
+            >
+                <Image
                     style={{
-                        position: 'absolute',
-                        width: screenWidth - 20,
-                        left: 10,
-                        right: 10,
-                        height: 100,
-                        bottom: 0,
-                        top: insets.top + 100,
-                        transition: 'all 0.3s ease-out',
-                        backgroundColor: COLORS.darkblue,
-                        borderRadius: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingHorizontal: 15,
-                        paddingVertical: 10,
+                        width: 50,
+                        height: 50,
+                        borderRadius: 5,
+                    }}
+                    src={songInfo.coverUrl}
+                />
+                <View
+                    aria-label='text and bar'
+                    style={{
                         display: 'flex',
-                    }}
-                    onPress={() => {
-                        navigation.navigate('Track')
-                        changeCurrentPage('Track')
+                        flexDirection: 'column',
+                        flex: 1,
+                        height: '100%',
+                        paddingLeft: 10,
+                        justifyContent: 'center',
                     }}
                 >
-                    <Image
-                        style={{
-                            width: 70,
-                            height: 70,
-                            borderRadius: 5,
-                        }}
-                        src={songInfo.coverUrl}
-                    />
                     <View
-                        aria-label='text and bar'
+                        aria-label='text and play button box'
                         style={{
                             display: 'flex',
-                            flexDirection: 'column',
-                            flex: 1,
-                            height: '100%',
-                            paddingLeft: 10,
-                            justifyContent: 'center',
+                            flexDirection: 'row',
+                            marginVertical: 5,
                         }}
                     >
                         <View
-                            aria-label='text and play button box'
+                            aria-label='text box'
                             style={{
+                                flexGrow: 1,
                                 display: 'flex',
-                                flexDirection: 'row',
-                                marginVertical: 10,
                             }}
                         >
-                            <View
-                                aria-label='text box'
+                            <BoldText
                                 style={{
-                                    flexGrow: 1,
-                                    display: 'flex',
+                                    color: 'white',
+                                    fontSize: SIZES.sm,
                                 }}
                             >
-                                <BoldText
-                                    style={{
-                                        color: 'white',
-                                        fontSize: SIZES.medium,
-                                    }}
-                                >
-                                    {songInfo.songTitle}
-                                </BoldText>
-                                <LightText
-                                    style={{
-                                        color: COLORS.light,
-                                        fontSize: SIZES.sm,
-                                    }}
-                                >
-                                    {songInfo.songArtist}
-                                </LightText>
-                            </View>
-
-                            <TouchableOpacity
-                                onPress={() => {
-                                    if (radioRoom_isDJ) {
-                                        changeIsPlaying(!isPlaying)
-                                        //since isPlaying does not update instantaneously, use !isPlaying as workaround
-                                        changeRadioRoom_isBroadcasting(!isPlaying)
-                                    } else {
-                                        Alert.alert('Dj permissions', 'Not a DJ', [
-                                            {
-                                                text: 'OK :(',
-                                                onPress: () => console.log('OK Pressed'),
-                                            },
-                                        ])
-                                    }
+                                {songInfo.songTitle}
+                            </BoldText>
+                            <LightText
+                                style={{
+                                    color: COLORS.light,
+                                    fontSize: SIZES.small,
                                 }}
-                                style={{ marginRight: 5 }}
                             >
-                                {/* update state for pause and play */}
-                                {!isPlaying ? (
-                                    <Ionicons name='play' size={35} color={COLORS.white} />
-                                ) : (
-                                    <Ionicons name='pause' size={35} color={COLORS.white} />
-                                )}
-                            </TouchableOpacity>
+                                {songInfo.songArtist}
+                            </LightText>
                         </View>
-                        <SongProgessBar
-                            currentTime={position}
-                            duration={duration - 39}
-                            currentPage={currentPage}
-                        />
+
+                        <TouchableOpacity
+                            onPress={() => {
+                                changeIsPlaying(!isPlaying)
+                            }}
+                            style={{ marginRight: 5 }}
+                        >
+                            {/* update state for pause and play */}
+                            {!isPlaying ? (
+                                <Ionicons name='play' size={24} color={COLORS.white} />
+                            ) : (
+                                <Ionicons name='pause' size={24} color={COLORS.white} />
+                            )}
+                        </TouchableOpacity>
                     </View>
-                </Pressable>
-            )
-        } else {
-            return (
-                <Pressable
-                    style={{
-                        position: 'absolute',
-                        width: screenWidth - 20,
-                        left: 10,
-                        right: 10,
-                        height: 70,
-                        bottom: insets.bottom + 60,
-                        top: null,
-                        transition: 'all 0.3s ease-out',
-                        backgroundColor: COLORS.darkblue,
-                        borderRadius: 10,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        paddingHorizontal: 15,
-                        paddingVertical: 10,
-                        display: DISPLAY_NONE_ROOMS.includes(currentPage) ? 'none' : 'flex',
-                    }}
-                    onPress={() => {
-                        navigation.navigate('Track')
-                        changeCurrentPage('Track')
-                    }}
-                >
-                    <Image
-                        style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 5,
-                        }}
-                        src={songInfo.coverUrl}
+                    <SongProgessBar
+                        currentTime={position}
+                        duration={duration - 39}
+                        currentPage={currentPage}
                     />
-                    <View
-                        aria-label='text and bar'
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            flex: 1,
-                            height: '100%',
-                            paddingLeft: 10,
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <View
-                            aria-label='text and play button box'
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                marginVertical: 5,
-                            }}
-                        >
-                            <View
-                                aria-label='text box'
-                                style={{
-                                    flexGrow: 1,
-                                    display: 'flex',
-                                }}
-                            >
-                                <BoldText
-                                    style={{
-                                        color: 'white',
-                                        fontSize: SIZES.sm,
-                                    }}
-                                >
-                                    {songInfo.songTitle}
-                                </BoldText>
-                                <LightText
-                                    style={{
-                                        color: COLORS.light,
-                                        fontSize: SIZES.small,
-                                    }}
-                                >
-                                    {songInfo.songArtist}
-                                </LightText>
-                            </View>
-
-                            <TouchableOpacity
-                                onPress={() => {
-                                    changeIsPlaying(!isPlaying)
-                                }}
-                                style={{ marginRight: 5 }}
-                            >
-                                {/* update state for pause and play */}
-                                {!isPlaying ? (
-                                    <Ionicons name='play' size={24} color={COLORS.white} />
-                                ) : (
-                                    <Ionicons name='pause' size={24} color={COLORS.white} />
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                        <SongProgessBar
-                            currentTime={position}
-                            duration={duration - 39}
-                            currentPage={currentPage}
-                        />
-                    </View>
-                </Pressable>
-            )
-        }
-    } else {
-        return null
+                </View>
+            </Pressable>
+        )
     }
 }

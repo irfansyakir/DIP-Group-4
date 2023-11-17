@@ -18,7 +18,7 @@ export const useMusicStore = create((set) => ({
 
     radioRoom_isDJ: false,
     radioRoom_isBroadcasting: false,
-    radioRoom_roomID: '',
+    radioRoom_roomId: '',
 
     changeCurrentPage: (page) => {
         console.log('changePage', page)
@@ -43,7 +43,9 @@ export const useMusicStore = create((set) => ({
     changeIsRepeat: (isRepeat) => set(() => ({ isRepeat: isRepeat })),
 
     changeRadioRoom_isDJ: (isDJ) => set(() => ({ radioRoom_isDJ: isDJ })),
-    changeRadioRoom_isBroadcasting: (isDJ) => set(() => ({ radioRoom_isBroadcasting: isDJ })),
+    changeRadioRoom_isBroadcasting: (isBroadcasting) =>
+        set(() => ({ radioRoom_isBroadcasting: isBroadcasting })),
+    changeRadioRoom_roomId: (roomId) => set(() => ({ radioRoom_roomId: roomId })),
 
     resetPlayer: () => {
         set(() => ({

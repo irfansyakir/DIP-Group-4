@@ -35,7 +35,7 @@ export const RadioRooms = () => {
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const resetPlayer = useMusicStore((state) => state.resetPlayer)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
-    const changeIsInsideRoom = useQueueStore((state) => state.changeIsInsideRoom)
+    const changeRole = useQueueStore((state) => state.changeRole)
 
     useEffect(() => {
         console.log('Fetching rooms...')
@@ -188,7 +188,7 @@ export const RadioRooms = () => {
                             }}
                             onPress={() => {
                                 goToChatroom(room.id)
-                                changeIsInsideRoom(true)
+                                changeRole('listener')
                                 // swapToRoomQueue(room.id)
                             }}
                         >

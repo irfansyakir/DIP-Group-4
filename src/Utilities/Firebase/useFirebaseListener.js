@@ -2,19 +2,19 @@ import { onValue, ref } from 'firebase/database'
 import { db } from '../../../firebaseConfig'
 import { useEffect, useState } from 'react'
 
-export function useRoomTrackIDListener(roomID) {
-    const [trackID, setTrackID] = useState()
-    const trackIDRef = ref(db, `/current_track/${roomID}/track_id`)
+export function useRoomTrackURLListener(roomID) {
+    const [trackURL, setTrackURL] = useState()
+    const trackURLRef = ref(db, `/current_track/${roomID}/track_url`)
 
     useEffect(() => {
-        return onValue(trackIDRef, (snapshot) => {
+        return onValue(trackURLRef, (snapshot) => {
             const data = snapshot.val()
             // console.log(data)
-            setTrackID(data)
+            setTrackURL(data)
         })
     }, [])
 
-    return trackID
+    return trackURL
 }
 
 export function useUserCurrentQueue(userID) {

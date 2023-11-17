@@ -33,7 +33,7 @@ export const CreateRoom = ()=> {
     const [isEnabled, setIsEnabled] = useState(false);
     const [isEnabled2, setIsEnabled2] = useState(false);
 
-    const changeIsInsideRoom = useQueueStore((state) => state.changeIsInsideRoom)
+    const changeRole = useQueueStore((state) => state.changeRole)
 
     const userID = useAuthStore((state) => state.userId)
     const username = useProfileStore((state) => state.displayName)
@@ -105,7 +105,7 @@ export const CreateRoom = ()=> {
               }
           })
             .then(roomID => {
-              changeIsInsideRoom(true)
+              changeRole("personal")
               navigation.navigate('RoomQueue', {roomID: roomID, roomName: roomName})
             });
     
