@@ -181,17 +181,14 @@ export const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    borderTopRightRadius: 30,
-    borderTopLeftRadius: 30,
+    borderRadius: 30,
     padding: 10,
-    marginTop: 25,
     justifyContent: 'left',
     flexDirection: 'row',
 },
   header1: {
     backgroundColor: 'white',
-    borderBottomRightRadius: 30,
-    borderBottomLeftRadius: 30,
+    borderRadius: 30,
     padding: 10,
     justifyContent: 'left',
     flexDirection: 'row',
@@ -207,6 +204,7 @@ export const styles = StyleSheet.create({
     marginLeft: 10,
   },
   profileImage: {
+    borderRadius: 10,
     width: 50, // Adjust the width as needed
     height: 50, // Adjust the height as needed
     marginRight: 10, // Add margin to separate image and text
