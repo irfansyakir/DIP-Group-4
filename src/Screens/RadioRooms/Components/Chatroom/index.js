@@ -288,8 +288,10 @@ export const Chatroom = ({ route, navigation }) => {
 
     useEffect(() => {
         if (role === 'listener') {
-            const { coverUrl, songTitle, songArtist, songAlbum, songId } = roomSongInfo
-            if (roomSongInfo) changeSongInfo(coverUrl, songTitle, songArtist, songAlbum, songId)
+            if (roomSongInfo) {
+                const { coverUrl, songTitle, songArtist, songAlbum, songId } = roomSongInfo
+                changeSongInfo(coverUrl, songTitle, songArtist, songAlbum, songId)
+            }
         }
     }, [roomSongInfo])
 

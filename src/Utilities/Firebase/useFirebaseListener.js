@@ -7,7 +7,7 @@ export function useRoomTrackURLListener(roomID) {
     const [trackURL, setTrackURL] = useState()
     const trackURLRef = ref(db, `/current_track/${roomID}/track_url`)
     current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
-        setTrackURL(currentTrack.track_url)
+        if (currentTrack) setTrackURL(currentTrack.track_url)
     })
 
     useEffect(() => {
@@ -101,8 +101,10 @@ export function useTimeOfLastPlayedListener(roomID) {
 
     useEffect(() => {
         current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
-            console.log('currentTrack', currentTrack.time_of_last_played)
-            setTimeOfLastPlayed(currentTrack.time_of_last_played)
+            if (currentTrack) {
+                console.log('currentTrack', currentTrack.time_of_last_played)
+                setTimeOfLastPlayed(currentTrack.time_of_last_played)
+            }
         })
         return onValue(timeOfLastPlayedRef, (snapshot) => {
             const data = snapshot.val()

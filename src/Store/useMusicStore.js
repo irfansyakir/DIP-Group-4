@@ -26,7 +26,7 @@ export const useMusicStore = create((set) => ({
     },
     changeSoundObject: (sound) => {
         set(() => ({ soundObject: sound }))
-        console.log('created sound object')
+        console.log('created sound object', sound)
     },
     addToPlaylist: (track) => set(() => ({ playlist: [...playlist, track] })),
     clearPlaylist: () => set(() => ({ playlist: [] })),
