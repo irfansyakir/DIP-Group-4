@@ -49,7 +49,7 @@ export const Chatroom = ({route, navigation}) => {
   const [message, setMessage] = useState(''); // State to store the message text
   const [chatMessages, setChatMessages] = useState([]); // State to store chat messages
   const [roomName, setRoomName] = useState('Loading...');
-  const [roomImage, setImage] = useState('');
+  const [roomImage, setRoomImage] = useState(goodvibes);
   const [numOfListeners, setNumOfListeners] = useState(0)
 
   const scrollViewRef = useRef(); // Create a ref for the ScrollView
@@ -104,7 +104,18 @@ export const Chatroom = ({route, navigation}) => {
     const roomDetails = await room_getRoom({roomID: roomID});
     // console.log('Room Name: '+ roomDetails["room_name"]);
     setRoomName(roomDetails["room_name"]);
-    setImage(roomDetails["themeImageUrl"]);
+    let tempImg = roomDetails["themeImageUrl"].toLowerCase()
+    switch(tempImg){
+      case 'clouds':
+        setRoomImage(clouds)
+        break;
+      case 'palmtrees':
+        setRoomImage(palmtrees)
+        break;
+      case 'raindrops':
+        setRoomImage(raindrops)
+        break;
+    }
 
     // setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
     if(roomDetails['dj'].includes(userId)){
@@ -280,21 +291,8 @@ export const Chatroom = ({route, navigation}) => {
     }
   }, [roomIsCurrentTrackPlaying]);
 
-  let img = goodvibes
-  switch(roomImage){
-    case 'clouds':
-      image = clouds
-      break;
-    case 'palmtrees':
-      image = palmtrees
-      break;
-    case 'raindrops':
-      image = raindrops
-      break;
-  }
-
   return (
-    <BackgroundImage source={img} blurRadius={5} style={{
+    <BackgroundImage source={roomImage} blurRadius={5} style={{
     flex:1, padding:10, paddingTop: inset.top,}}>
       <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
