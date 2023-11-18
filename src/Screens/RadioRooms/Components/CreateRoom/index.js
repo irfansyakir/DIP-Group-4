@@ -55,8 +55,8 @@ export const CreateRoom = ()=> {
         const username = await user_getUsername({userID: userID});
         // console.log('Room Name: '+ roomDetails["room_name"]);
         console.log(username);
-        setUsername('darren');
-        //setUsername(username);
+        //setUsername('darren');
+        setUsername(username);
       }
     
     const [isEnabled, setIsEnabled] = useState(false);
@@ -72,25 +72,25 @@ export const CreateRoom = ()=> {
     };
 
     const setIsPublic = () => {
-        if (isPublic == 'yes') {
-            isPublic = 'no';
-            console.log('isPublic is a no blah')
+        if (isPublic == true) {
+            isPublic = false;
+            console.log('isPublic is a false blah')
             //() => setIndex(0);
         } else {
-            isPublic = 'yes';
-            console.log('isPublic is a yes')
+            isPublic = true;
+            console.log('isPublic is a true')
             //() => setIndex(1);
         }
     }
 
     const setIsOthersAddSongs = () => {
-        if (isOthersAddSongs == 'yes') {
-            isOthersAddSongs = 'no';
-            console.log('isOthersAddSongs is a no')
+        if (isOthersAddSongs == true) {
+            isOthersAddSongs = false;
+            console.log('isOthersAddSongs is a false')
             //() => setIndex(0);
         } else {
-            isOthersAddSongs = 'yes';
-            console.log('isOthersAddSongs is a yes')
+            isOthersAddSongs = true;
+            console.log('isOthersAddSongs is a true')
             //() => setIndex(1);
         }
     }
@@ -156,8 +156,8 @@ export const CreateRoom = ()=> {
 
     useEffect(() => {
         console.log('helloooo')
-        isPublic = 'yes';
-        isOthersAddSongs = 'no';
+        isPublic = true;
+        isOthersAddSongs = false;
         if (storeDisplayName == '') {
             getInitialProfileData()
         }
