@@ -170,9 +170,16 @@ export const Play = ({ previousPage }) => {
     const handleNext = async () => {
         if (role === 'personal') {
             console.log('personal queue next')
+            if (isRepeat) {
+                changeIsPlaying(false)
+                await soundObject.setPositionAsync(0)
+                changePosition(0)
+                changeIsPlaying(true)
+                return
+            }
             if (queue.length !== 0) {
                 if (isShuffle) {
-                    const index = Math.floor(Math.random() * (queue.length + 1))
+                    const index = Math.floor(Math.random() * queue.length)
                     const currSong = queue[index]
                     const tempQueue = queue
                     tempQueue.splice(index, 1)

@@ -97,7 +97,7 @@ export function useUserListener(userID) {
 }
 
 export function useTimeOfLastPlayedListener(roomID) {
-    const [timeOfLastPlayed, setTimeOfLastPlayed] = useState(0)
+    const [timeOfLastPlayed, setTimeOfLastPlayed] = useState(null)
 
     const timeOfLastPlayedRef = ref(db, `/current_track/${roomID}/time_of_last_played`)
 

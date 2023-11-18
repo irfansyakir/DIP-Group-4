@@ -216,7 +216,6 @@ export const Chatroom = ({ route, navigation }) => {
             {
                 text: 'OK',
                 onPress: async () => {
-                    changeRole('personal')
                     changeIsBroadcasting(false)
                     const object = await room_checkIfOwner({ roomID: roomID, userID: userId })
                     const isOwner = object ? object.owner : false
@@ -301,12 +300,9 @@ export const Chatroom = ({ route, navigation }) => {
         }
         const { sound } = await Audio.Sound.createAsync({ uri: uri })
         changeSoundObject(sound)
-        console.log('afterCreateObject', roomIsCurrentTrackPlaying, roomTimeOfLastPlayed)
-        // changeIsPlaying(true)
     }
 
     useEffect(() => {
-        console.log('isPlaying listener')
         if (!soundObject) return
         if (role === 'listener') {
             changeIsPlaying(roomIsCurrentTrackPlaying)
@@ -314,7 +310,6 @@ export const Chatroom = ({ route, navigation }) => {
     }, [roomIsCurrentTrackPlaying, soundObject])
 
     useEffect(() => {
-        console.log('url listener')
         if (role === 'listener') {
             if (roomCurrentTrackURL) createSoundObject(roomCurrentTrackURL).then()
             else {
@@ -337,16 +332,13 @@ export const Chatroom = ({ route, navigation }) => {
     }, [roomSongInfo])
 
     useEffect(() => {
-        console.log('time listener')
+        if (roomTimeOfLastPlayed === null) return
         if (role === 'listener') {
-            console.log('position', position, roomTimeOfLastPlayed)
             if (Math.abs(position - roomTimeOfLastPlayed) > 500) {
-                if (roomTimeOfLastPlayed !== null) {
-                    console.log('updating to', roomTimeOfLastPlayed)
-                    if (!soundObject) return
-                    changePosition(roomTimeOfLastPlayed)
-                    soundObject.setPositionAsync(roomTimeOfLastPlayed)
-                }
+                if (!soundObject) return
+                console.log('updating to', roomTimeOfLastPlayed)
+                changePosition(roomTimeOfLastPlayed)
+                soundObject.setPositionAsync(roomTimeOfLastPlayed)
             }
         }
     }, [roomTimeOfLastPlayed, soundObject])

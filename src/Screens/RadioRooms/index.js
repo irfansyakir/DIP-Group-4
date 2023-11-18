@@ -93,8 +93,14 @@ export const RadioRooms = () => {
 
     const handleJoinRoom = async (room) => {
         if (soundObject) {
-            await soundObject.pauseAsync()
-            await soundObject.unloadAsync()
+            try {
+                await soundObject.pauseAsync()
+                await soundObject.unloadAsync()
+                changeSoundObject(null)
+                console.log('success delete from join room')
+            } catch (err) {
+                console.error(err)
+            }
         }
         room_addUser({ roomID: room.id, userID: userId, username: username })
         goToChatroom(room.id)

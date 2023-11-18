@@ -53,6 +53,8 @@ export const Home = () => {
     const changeProfileURL = useProfileStore((state) => state.changeProfileUrl)
 
     const changeQueue = useQueueStore((state) => state.changeQueue)
+    const role = useQueueStore((state) => state.role)
+    const changeRole = useQueueStore((state) => state.changeRole)
 
     const handleTrackClick = (trackId) => {
         const createSoundObject = async (uri) => {
@@ -192,11 +194,12 @@ export const Home = () => {
     }
 
     useEffect(() => {
-        if (soundObject) {
+        if (role === 'broadcaster' || (role === 'listener' && soundObject)) {
             soundObject.pauseAsync().then()
             soundObject.unloadAsync().then()
             changeSoundObject(null)
             changePosition(0)
+            changeRole('personal')
         }
         getRecentlyPlayed()
         getPlaylistData()

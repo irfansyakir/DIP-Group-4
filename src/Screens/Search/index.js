@@ -1,4 +1,5 @@
 import { Text, TouchableOpacity, View, TextInput, FlatList, Image } from 'react-native'
+import { createIconSetFromIcoMoon } from '@expo/vector-icons'
 import { COLORS, SIZES } from '../../Constants'
 import { BoldText, MediumText } from '../../Commons/UI/styledText'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -11,6 +12,16 @@ import { useMusicStore } from '../../Store/useMusicStore'
 import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { debounce } from '../../Utilities/Functions/debounce'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { addQueue } from '../../Commons/UI/toaster'
+import { useFonts } from 'expo-font'
+import { useQueueStore } from '../../Store/useQueueStore'
+import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
+
+const Icon = createIconSetFromIcoMoon(
+    require('../../../assets/icomoon/selection.json'),
+    'IcoMoon',
+    'icomoon.ttf'
+)
 
 export const Search = () => {
     const insets = useSafeAreaInsets()
@@ -59,9 +70,29 @@ export const SearchClick = () => {
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
+    const storeQueue = useQueueStore((state) => state.queue)
+    const changeQueue = useQueueStore((state) => state.changeQueue)
+    const userId = useAuthStore((state) => state.userId)
 
     const backButton = () => {
         navigation.goBack()
+    }
+
+    const addSongtoQ = (item) => {
+        console.log(item)
+        const addedSong = {
+            id: item.id,
+            title: item.title,
+            artist: item.artist,
+            img: item.coverUrl,
+        }
+        const newQueue = [addedSong, ...storeQueue]
+
+        changeQueue(newQueue)
+        userQueue_updateQueue({
+            userID: userId,
+            userQueueList: newQueue,
+        })
     }
 
     const debouncedTrackClick = debounce((trackId) => handleTrackClick(trackId))
@@ -133,14 +164,27 @@ export const SearchClick = () => {
         }
     }
 
+    const [fontsLoaded] = useFonts({
+        IcoMoon: require('../../../assets/icomoon/icomoon.ttf'),
+    })
+
+    if (!fontsLoaded) {
+        return null
+    }
+
     const renderItem = ({ item }) => (
-        <TouchableOpacity onPress={() => debouncedTrackClick(item.id)}>
-            <View
+        <View
+            key={item.id}
+            style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between' }}
+        >
+            <TouchableOpacity
                 style={{
+                    flex: 1,
                     flexDirection: 'row',
                     paddingVertical: 7,
                     alignItems: 'center',
                 }}
+                onPress={() => debouncedTrackClick(item.id)}
             >
                 {/* SONG IMAGE */}
                 <Image
@@ -163,8 +207,17 @@ export const SearchClick = () => {
                     </Text>
                     <Text style={{ color: COLORS.grey }}>{item.artist}</Text>
                 </View>
-            </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{ justifyContent: 'center' }}
+                onPress={() => {
+                    addSongtoQ(item)
+                    addQueue()
+                }}
+            >
+                <Icon style={{ fontSize: 30, color: COLORS.white }} name='addqueue' />
+            </TouchableOpacity>
+        </View>
     )
 
     return (
