@@ -33,7 +33,6 @@ export const Play = ({ previousPage }) => {
     const isPlaying = useMusicStore((state) => state.isPlaying)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const position = useMusicStore((state) => state.position)
-    const duration = useMusicStore((state) => state.duration)
     const changePosition = useMusicStore((state) => state.changePosition)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const soundObject = useMusicStore((state) => state.soundObject)
@@ -42,7 +41,6 @@ export const Play = ({ previousPage }) => {
     const songInfo = useMusicStore((state) => state.songInfo)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
-    const changeDuration = useMusicStore((state) => state.changeDuration)
     const roomId = useMusicStore((state) => state.radioRoom_roomId)
 
     const radioRoom_isDJ = useMusicStore((state) => state.radioRoom_isDJ)
@@ -244,7 +242,7 @@ export const Play = ({ previousPage }) => {
             <Slider
                 style={{ width: 350, height: 40, marginBottom: -5 }}
                 minimumValue={0}
-                maximumValue={duration}
+                maximumValue={29749}
                 value={localPosition}
                 onValueChange={(value) => setLocalPosition(value)}
                 onSlidingComplete={(value) => handleSlider(value)}
@@ -256,7 +254,7 @@ export const Play = ({ previousPage }) => {
             {/* NUMBERS */}
             <View style={styles.progress}>
                 <Text style={styles.text}>{formatTime(localPosition)}</Text>
-                <Text style={styles.text}>{formatTime(duration)}</Text>
+                <Text style={styles.text}>{formatTime(29749)}</Text>
             </View>
 
             {/* CONTROLS */}

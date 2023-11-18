@@ -132,7 +132,10 @@ export const RoomQueue = ({ route, navigation }) => {
 
     const handleBackButton = () => {
         if (!soundObject) errorCloseQueueToast()
-        else navigation.navigate('Chatroom', { roomID: roomID })
+        else {
+            navigation.navigate('Chatroom', { roomID: roomID })
+            changeCurrentPage('Chatroom')
+        }
     }
 
     const delSongfromRoomQ = (item) => {

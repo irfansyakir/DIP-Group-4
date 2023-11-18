@@ -15,6 +15,7 @@ import {
     userQueue_getRoomQueue,
     userQueue_updatexQueue,
     userQueue_updateRoomQueue,
+    userQueue_updateQueue,
 } from '../../Utilities/Firebase/user_queue_functions'
 import { current_track_updateCurrentTrack } from '../../Utilities/Firebase/current_track_functions'
 import { emptyQueue } from './toaster'
@@ -56,8 +57,6 @@ export function CurrentlyPlaying() {
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const position = useMusicStore((state) => state.position)
     const changePosition = useMusicStore((state) => state.changePosition)
-    const duration = useMusicStore((state) => state.duration)
-    const changeDuration = useMusicStore((state) => state.changeDuration)
     const isRepeat = useMusicStore((state) => state.isRepeat)
 
     const radioRoom_isDJ = useMusicStore((state) => state.radioRoom_isDJ)
@@ -131,7 +130,6 @@ export function CurrentlyPlaying() {
         if (soundObject) {
             const status = await soundObject.getStatusAsync()
             changePosition(status.positionMillis)
-            changeDuration(status.durationMillis)
 
             // if currently playing song is completed
             if (status.positionMillis > status.durationMillis - 90) {
@@ -363,7 +361,7 @@ export function CurrentlyPlaying() {
                             </View>
                             <SongProgessBar
                                 currentTime={position}
-                                duration={duration - 39}
+                                duration={29749}
                                 currentPage={currentPage}
                             />
                         </View>
@@ -464,7 +462,7 @@ export function CurrentlyPlaying() {
                     </View>
                     <SongProgessBar
                         currentTime={position}
-                        duration={duration - 39}
+                        duration={29749}
                         currentPage={currentPage}
                     />
                 </View>

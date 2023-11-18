@@ -41,6 +41,7 @@ export const Home = () => {
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
+    const changePosition = useMusicStore((state) => state.changePosition)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const navigation = useNavigation()
@@ -195,6 +196,12 @@ export const Home = () => {
         getPlaylistData()
         getUserProfile()
         changeCurrentPage('Home')
+        if (soundObject) {
+            soundObject.pauseAsync().then()
+            soundObject.unloadAsync().then()
+            changeSoundObject(null)
+            changePosition(0)
+        }
     }, [])
 
     useEffect(() => {

@@ -112,7 +112,7 @@ export const Chatroom = ({ route, navigation }) => {
         setRoomName(roomDetails['room_name'])
         setImage(roomDetails['image_url'])
         // setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
-        if (roomDetails['dj'].includes(userId)) {
+        if (roomDetails['dj'] && roomDetails['dj'].includes(userId)) {
             changeIsDJ(true)
         } else {
             changeIsDJ(false)
@@ -344,14 +344,8 @@ export const Chatroom = ({ route, navigation }) => {
                             {
                                 text: 'OK',
                                 onPress: async () => {
-                                    if (soundObject) {
-                                        await soundObject.pauseAsync()
-                                        await soundObject.unloadAsync()
-                                        changeSoundObject(null)
-                                        changePosition(0)
-                                    }
-                                    changeIsBroadcasting(false)
                                     changeRole('personal')
+                                    changeIsBroadcasting(false)
                                     changeCurrentPage('Home')
                                     navigation.navigate('Home', { screen: 'HomeTab' })
                                 },
