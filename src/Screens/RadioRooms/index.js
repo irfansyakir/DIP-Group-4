@@ -77,7 +77,7 @@ export const RadioRooms = () => {
     }
     const goToChatroom = (roomId) => {
         changeIsPlaying(false)
-        resetPlayer()
+        changeRole('listener')
         navigation.navigate('Chatroom', {
             roomID: roomId,
         })
@@ -95,11 +95,8 @@ export const RadioRooms = () => {
         if (soundObject) {
             await soundObject.pauseAsync()
             await soundObject.unloadAsync()
-            resetPlayer()
         }
-        console.log({ roomID: room.id, userID: userId, username: username })
         room_addUser({ roomID: room.id, userID: userId, username: username })
-        changeRole('listener')
         goToChatroom(room.id)
     }
 

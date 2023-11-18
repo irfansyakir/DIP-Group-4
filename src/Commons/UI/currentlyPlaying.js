@@ -75,7 +75,7 @@ export function CurrentlyPlaying() {
 
     const play = async () => {
         try {
-            await soundObject.playAsync()
+            if (soundObject) await soundObject.playAsync()
         } catch (err) {
             console.log(err)
         }
@@ -83,7 +83,7 @@ export function CurrentlyPlaying() {
 
     const pause = async () => {
         try {
-            await soundObject.pauseAsync()
+            if (soundObject) await soundObject.pauseAsync()
         } catch (err) {
             console.log(err)
         }
@@ -93,11 +93,10 @@ export function CurrentlyPlaying() {
         // clear previous song
         if (soundObject) {
             changeIsPlaying(false)
-            soundObject.unloadAsync()
+            await soundObject.unloadAsync()
         }
         const { sound } = await Audio.Sound.createAsync({ uri: uri })
         changeSoundObject(sound)
-        changeIsPlaying(true)
     }
 
     const getTrackData = async (trackId) => {

@@ -219,7 +219,7 @@ export const Chatroom = ({ route, navigation }) => {
                     changeRole('personal')
                     changeIsBroadcasting(false)
                     const object = await room_checkIfOwner({ roomID: roomID, userID: userId })
-                    const isOwner = object.owner
+                    const isOwner = object ? object.owner : false
                     if (isOwner) room_removeRoom({ roomID: roomID })
                     else room_removeUser({ roomID: roomID, userID: userId })
                     changeCurrentPage('Home')
@@ -295,30 +295,34 @@ export const Chatroom = ({ route, navigation }) => {
     const createSoundObject = async (uri) => {
         // clear previous song
         if (soundObject) {
-            soundObject.pauseAsync()
-            soundObject.unloadAsync()
+            await soundObject.pauseAsync()
+            await soundObject.unloadAsync()
+            changeSoundObject(null)
         }
-        console.log('uri', uri)
         const { sound } = await Audio.Sound.createAsync({ uri: uri })
         changeSoundObject(sound)
+        console.log('afterCreateObject', roomIsCurrentTrackPlaying, roomTimeOfLastPlayed)
         // changeIsPlaying(true)
     }
 
     useEffect(() => {
+        console.log('isPlaying listener')
+        if (!soundObject) return
         if (role === 'listener') {
             changeIsPlaying(roomIsCurrentTrackPlaying)
         }
-    }, [roomIsCurrentTrackPlaying])
+    }, [roomIsCurrentTrackPlaying, soundObject])
 
     useEffect(() => {
+        console.log('url listener')
         if (role === 'listener') {
             if (roomCurrentTrackURL) createSoundObject(roomCurrentTrackURL).then()
             else {
-                if (soundObject) {
-                    soundObject.pauseAsync()
+                if (!soundObject) return
+                soundObject.pauseAsync().then(() => {
                     soundObject.unloadAsync()
-                    changeSoundObject(null)
-                }
+                })
+                changeSoundObject(null)
             }
         }
     }, [roomCurrentTrackURL])
@@ -333,17 +337,19 @@ export const Chatroom = ({ route, navigation }) => {
     }, [roomSongInfo])
 
     useEffect(() => {
+        console.log('time listener')
         if (role === 'listener') {
-            console.log(position, roomTimeOfLastPlayed)
+            console.log('position', position, roomTimeOfLastPlayed)
             if (Math.abs(position - roomTimeOfLastPlayed) > 500) {
                 if (roomTimeOfLastPlayed !== null) {
                     console.log('updating to', roomTimeOfLastPlayed)
+                    if (!soundObject) return
                     changePosition(roomTimeOfLastPlayed)
-                    if (soundObject) soundObject.setPositionAsync(roomTimeOfLastPlayed).then()
+                    soundObject.setPositionAsync(roomTimeOfLastPlayed)
                 }
             }
         }
-    }, [roomTimeOfLastPlayed])
+    }, [roomTimeOfLastPlayed, soundObject])
 
     return (
         <BackgroundImage
