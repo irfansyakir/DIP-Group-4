@@ -202,6 +202,7 @@ export const Play = ({ previousPage }) => {
                         roomID: roomId,
                         trackURL: null,
                         isCurrentTrackPlaying: false,
+                        songInfo: null,
                     })
                     changePosition(0)
                     soundObject.unloadAsync()

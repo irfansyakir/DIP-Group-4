@@ -218,21 +218,20 @@ export const RoomQueue = ({ route, navigation }) => {
             <View
                 style={{
                     flexDirection: 'row',
-                    justifyContent: soundObject ? 'space-between' : 'center',
+                    justifyContent: 'space-between',
                     paddingLeft: 16,
                     paddingRight: 16,
                     marginBottom: 16,
                     paddingTop: 16,
                 }}
             >
-                {soundObject && (
-                    <TouchableOpacity
-                        style={{ justifyContent: 'center' }}
-                        onPress={handleBackButton}
-                    >
-                        <Icon style={styles.icon} name='down' />
-                    </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                    style={{ justifyContent: 'center', opacity: !soundObject ? 0 : '' }}
+                    onPress={handleBackButton}
+                >
+                    <Icon style={styles.icon} name='down' />
+                </TouchableOpacity>
+
                 <Text style={styles.headerTxt}> {roomName} </Text>
                 <View style={{ height: 20, width: 20 }}></View>
             </View>

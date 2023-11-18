@@ -192,16 +192,16 @@ export const Home = () => {
     }
 
     useEffect(() => {
-        getRecentlyPlayed()
-        getPlaylistData()
-        getUserProfile()
-        changeCurrentPage('Home')
         if (soundObject) {
             soundObject.pauseAsync().then()
             soundObject.unloadAsync().then()
             changeSoundObject(null)
             changePosition(0)
         }
+        getRecentlyPlayed()
+        getPlaylistData()
+        getUserProfile()
+        changeCurrentPage('Home')
     }, [])
 
     useEffect(() => {

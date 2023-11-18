@@ -47,7 +47,7 @@ export const Queue = ({ navigation }) => {
 
     // Generating list of songs from store
     const generateSongs = () => {
-        const orderQ = []
+        let orderQ = []
         if (Array.isArray(storeQueue)) {
             orderQ = storeQueue.map((item, index) => {
                 return { ...item, orderId: index + 1 }

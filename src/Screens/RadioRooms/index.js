@@ -12,16 +12,17 @@ import {
 import { useNavigation } from '@react-navigation/native'
 import { useAuthStore } from '../../Store/useAuthStore'
 import { useQueueStore } from '../../Store/useQueueStore'
-import { userQueue_updateQueue } from '../../Utilities/Firebase/user_queue_functions'
-import { room_getAllRooms } from '../../Utilities/Firebase/room_functions'
+import {
+    room_addUser,
+    room_getAllRooms,
+    room_removeRoom,
+} from '../../Utilities/Firebase/room_functions'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BoldText } from '../../Commons/UI/styledText'
 import { COLORS, SIZES } from '../../Constants'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useMusicStore } from '../../Store/useMusicStore'
-import { userQueue_getRoomQueue } from '../../Utilities/Firebase/user_queue_functions'
-import { current_track_getCurrentTrack } from '../../Utilities/Firebase/current_track_functions'
-import { Audio } from 'expo-av'
+import { useProfileStore } from '../../Store/useProfileStore'
 
 export const RadioRooms = () => {
     const insets = useSafeAreaInsets()
@@ -32,6 +33,9 @@ export const RadioRooms = () => {
     const navigation = useNavigation() // Initialize navigation
 
     const [shuffledRooms, setShuffledRooms] = useState([])
+
+    const username = useProfileStore((state) => state.displayName)
+    const userId = useAuthStore((state) => state.userId)
 
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const resetPlayer = useMusicStore((state) => state.resetPlayer)
@@ -93,12 +97,18 @@ export const RadioRooms = () => {
             await soundObject.unloadAsync()
             resetPlayer()
         }
+        console.log({ roomID: room.id, userID: userId, username: username })
+        room_addUser({ roomID: room.id, userID: userId, username: username })
         changeRole('listener')
         goToChatroom(room.id)
     }
 
     const roomItems = shuffledRooms.map((room) => {
         let owner = 'Loading...'
+        if (!room.users) {
+            room_removeRoom({ roomID: room.id })
+            return
+        }
         for (const value of Object.values(room.users)) {
             if (value.owner === true) {
                 owner = value.username

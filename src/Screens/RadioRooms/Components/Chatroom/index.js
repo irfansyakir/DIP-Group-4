@@ -28,7 +28,12 @@ import {
     useTimeOfLastPlayedListener,
 } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { room_getRoom } from '../../../../Utilities/Firebase/room_functions'
+import {
+    room_getRoom,
+    room_removeUser,
+    room_checkIfOwner,
+    room_removeRoom,
+} from '../../../../Utilities/Firebase/room_functions'
 import { BoldText } from '../../../../Commons/UI/styledText'
 import { useMusicStore } from '../../../../Store/useMusicStore'
 
@@ -200,6 +205,30 @@ export const Chatroom = ({ route, navigation }) => {
         }
     }
 
+    const handleLeaveRoom = () => {
+        // Prompt the user with an alert
+        Alert.alert('Leaving Room', 'Are you sure you want to leave this room?', [
+            {
+                text: 'Cancel',
+                onPress: () => {},
+                style: 'cancel',
+            },
+            {
+                text: 'OK',
+                onPress: async () => {
+                    changeRole('personal')
+                    changeIsBroadcasting(false)
+                    const object = await room_checkIfOwner({ roomID: roomID, userID: userId })
+                    const isOwner = object.owner
+                    if (isOwner) room_removeRoom({ roomID: roomID })
+                    else room_removeUser({ roomID: roomID, userID: userId })
+                    changeCurrentPage('Home')
+                    navigation.navigate('Home', { screen: 'HomeTab' })
+                },
+            },
+        ])
+    }
+
     // -------------------------------------------------------------------------------------------------Use Effects
 
     // -------------------------------------------------------------------------------------------------Legacy code pre merge w/ xinzhen's dont know if gonna use or not
@@ -333,25 +362,7 @@ export const Chatroom = ({ route, navigation }) => {
             >
                 {/* back button */}
                 <TouchableOpacity
-                    onPress={() => {
-                        // Prompt the user with an alert
-                        Alert.alert('Leaving Room', 'Are you sure you want to leave this room?', [
-                            {
-                                text: 'Cancel',
-                                onPress: () => {},
-                                style: 'cancel',
-                            },
-                            {
-                                text: 'OK',
-                                onPress: async () => {
-                                    changeRole('personal')
-                                    changeIsBroadcasting(false)
-                                    changeCurrentPage('Home')
-                                    navigation.navigate('Home', { screen: 'HomeTab' })
-                                },
-                            },
-                        ])
-                    }}
+                    onPress={handleLeaveRoom}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                 >
                     <Ionicons name='chevron-back' size={30} color={COLORS.light} />

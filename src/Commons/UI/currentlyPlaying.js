@@ -177,6 +177,7 @@ export function CurrentlyPlaying() {
                 roomID: roomId,
                 trackURL: null,
                 isCurrentTrackPlaying: false,
+                songInfo: null,
             })
             changePosition(0)
             soundObject.unloadAsync()
