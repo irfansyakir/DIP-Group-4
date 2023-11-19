@@ -1,25 +1,40 @@
 
 import React, { useEffect, useState } from "react";
 import { Image, Text, View, FlatList, Switch,
-    StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView,} from 'react-native';
+    StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Alert} from 'react-native';
 // import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useNavigation, StackActions } from '@react-navigation/native'; // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient';
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions';
-import clouds from  '../../../../../assets/clouds.png'
-import raindrops from '../../../../../assets/raindrops.png'
-import palmTrees from '../../../../../assets/palmtrees.png'
+import clouds from  '../../../../../assets/themes/clouds.png'
+import raindrops from '../../../../../assets/themes/raindrops.png'
+import palmTrees from '../../../../../assets/themes/palmtrees.png'
+
 
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, SIZES } from "../../../../Constants";
 import { BoldText } from "../../../../Commons/UI/styledText";
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { room_getRoom } from '../../../../Utilities/Firebase/room_functions';
+import { room_removeUser } from "../../../../Utilities/Firebase/room_functions";
+import { room_removeRoom } from "../../../../Utilities/Firebase/room_functions";
+import {useAuthStore} from '../../../../Store/useAuthStore'
+import {
+  current_track_getCurrentTrack, current_track_removeFromRoom,
+  current_track_updateCurrentTrack
+} from "../../../../Utilities/Firebase/current_track_functions";
+import {message_removeAllMessageInRoom} from "../../../../Utilities/Firebase/messages_functions";
+import palmtrees from "../../../../../assets/themes/palmtrees.png";
 
-export const RoomDetails = ({route, navigation}) => {
+
+export const RoomDetails = ({route}) => {
+    const navigation = useNavigation(); // Initialize navigation
     //can just make this page look like the telegram room details
     const { roomID } = route.params;
+    const userID = useAuthStore((state) => state.userId)
+    const [isOwner, setIsOwner] = useState(false);
+
     // const { roomName, roomUserIDList, roomDJIDList } = route.params;
     const [roomName, setRoomName] = useState('')
     const [roomDescription, setRoomDescription] = useState('')
@@ -42,14 +57,38 @@ export const RoomDetails = ({route, navigation}) => {
         console.log('roomDJProfileUrls: ', roomDJProfileUrlList)
     }, []);
 
+    const deleteRoom = async () => {
+      await room_removeRoom({roomID:roomID});
+      await current_track_removeFromRoom({roomID: roomID})
+      await message_removeAllMessageInRoom({roomID: roomID})
+
+      const popAction = StackActions.pop(2);
+      navigation.dispatch(popAction);
+    }
+    
+    // leave room
     const handleButtonClick = () => {
-      navigation.goBack()
+      if (!isOwner) {
+        room_removeUser({
+          roomID: roomID,
+          userID: userID,
+          
+        })
+        navigation.navigate('RadioRoom');
+      } else {
+        Alert.alert('Alert', 'You are currently the owner of this room, leaving the room will delete this room.',
+                  [
+                    {text: 'Leave and Delete', onPress: () => deleteRoom()},
+                    {text: 'Cancel', onPress: () => console.log('Canceled')},
+                  ]
+        )
+      }
+      
+      
     }
 
     const handleBackClick = () => {
-      navigation.navigate('Chatroom', {
-        roomID: roomID,
-      })
+      navigation.dispatch(StackActions.pop(1));
     }
 
     const getRoomDetails = async () => {
@@ -57,15 +96,17 @@ export const RoomDetails = ({route, navigation}) => {
       console.log(roomDetails)
       setRoomName(roomDetails["room_name"]);
       setRoomDescription(roomDetails["room_description"]);
-      themeImageUrl = roomDetails["themeImageUrl"]
-      if (themeImageUrl == 'clouds') {
-        setRoomThemeImgURL(clouds);
-      } else if (themeImageUrl == 'raindrops') {
-        setRoomThemeImgURL(raindrops);
-      } else if (themeImageUrl == 'palmTrees') {
-        setRoomThemeImgURL(palmTrees);
-      } else {
-        setRoomThemeImgURL(themeImageUrl);
+      let tempImg = roomDetails["themeImageUrl"].toLowerCase()
+      switch(tempImg){
+        case 'clouds':
+          setRoomThemeImgURL(clouds)
+          break;
+        case 'palmtrees':
+          setRoomThemeImgURL(palmtrees)
+          break;
+        case 'raindrops':
+          setRoomThemeImgURL(raindrops)
+          break;
       }
       //every room MUST have a minimum of 1 user (that is the creator)
       //setRoomUserIDList(roomDetails["users"] ? roomDetails["users"] : [])
@@ -74,6 +115,12 @@ export const RoomDetails = ({route, navigation}) => {
       // console.log(roomUserIDList)
       setRoomDJIDList(roomDetails["dj"]["username"] ? roomDetails["dj"]["username"] : [])
       setRoomDJProfileUrlList(roomDetails["dj"]["profileUrl"] ? roomDetails["dj"]["profileUrl"] : [])
+
+      // ownership testing
+      console.log(typeof roomDetails["users"][userID]["owner"])
+      setIsOwner(roomDetails["users"][userID]["owner"]);
+      console.log("isOwner: " + roomDetails["users"][userID]["owner"]);
+      console.log("isOwnerState: " + isOwner);
     }
 
     return (

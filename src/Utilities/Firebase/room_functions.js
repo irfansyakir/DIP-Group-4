@@ -157,7 +157,7 @@ export async function room_checkIfOwner({ roomID, userID }) {
         return await snapshot.val()
         // return { username: "", owner: true }
     } catch (e) {
-        console.log('error in room_checkIfOwner')
+        console.error('error in room_checkIfOwner')
         throw e
     }
 }

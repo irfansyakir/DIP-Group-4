@@ -12,12 +12,9 @@ import {
 } from 'react-native'
 // import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker'
-import { useNavigation } from '@react-navigation/native' // Import useNavigation
+import { useNavigation, StackActions } from '@react-navigation/native' // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient'
 import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions'
-import clouds from '../../../../../assets/clouds.png'
-import raindrops from '../../../../../assets/raindrops.png'
-import palmTrees from '../../../../../assets/palmtrees.png'
 
 import { Ionicons } from '@expo/vector-icons'
 import { COLORS, SIZES } from '../../../../Constants'
@@ -28,6 +25,10 @@ import { useQueueStore } from '../../../../Store/useQueueStore'
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import { useProfileStore } from '../../../../Store/useProfileStore'
 import { useMusicStore } from '../../../../Store/useMusicStore'
+
+import clouds from '../../../../../assets/themes/clouds.png'
+import raindrops from '../../../../../assets/themes/raindrops.png'
+import palmTrees from '../../../../../assets/themes/palmtrees.png'
 
 export const CreateRoom = () => {
     const insets = useSafeAreaInsets()
@@ -60,15 +61,14 @@ export const CreateRoom = () => {
     const handleChoiceClick = (choice) => {
         setSelectedChoice(choice)
         if (choice === 1) {
-            setThemeImageUrl('clouds.png')
+            setThemeImageUrl('clouds')
         } else if (choice === 2) {
-            setThemeImageUrl('palmTrees.png')
+            setThemeImageUrl('raindrops')
         } else if (choice === 3) {
-            setThemeImageUrl('raindrops.png')
+            setThemeImageUrl('palmtrees')
         } else {
             setThemeImageUrl(uploadedImageUrl)
         }
-        // console.log(themeImageUrl);
     }
 
     //TODO: don't forget to implement this for the front end
@@ -103,7 +103,6 @@ export const CreateRoom = () => {
                 await soundObject.unloadAsync()
                 resetPlayer()
             }
-
             room_updateRoom({
                 roomName: roomName,
                 roomDescription: roomDescription,
@@ -118,8 +117,9 @@ export const CreateRoom = () => {
                     },
                 },
             }).then((roomID) => {
-                changeRole('personal')
-                navigation.navigate('RoomQueue', { roomID: roomID, roomName: roomName })
+                navigation.dispatch(
+                    StackActions.replace('RoomQueue', { roomID: roomID, roomName: roomName })
+                )
             })
         } else {
             console.log('no room name!')
@@ -192,24 +192,35 @@ export const CreateRoom = () => {
                     <ScrollView horizontal={true} style={{ paddingBottom: 20 }}>
                         <TouchableOpacity
                             onPress={() => {
-                                setThemeImageUrl('clouds')
+                                handleChoiceClick(1)
                             }}
                         >
-                            <Image style={styles.image} source={clouds} />
+                            <Image
+                                style={selectedChoice === 1 ? styles.imagesel : styles.image}
+                                source={clouds}
+                            />
                         </TouchableOpacity>
+
                         <TouchableOpacity
                             onPress={() => {
-                                setThemeImageUrl('raindrops')
+                                handleChoiceClick(2)
                             }}
                         >
-                            <Image style={styles.image} source={raindrops} />
+                            <Image
+                                style={selectedChoice === 2 ? styles.imagesel : styles.image}
+                                source={raindrops}
+                            />
                         </TouchableOpacity>
+
                         <TouchableOpacity
                             onPress={() => {
-                                setThemeImageUrl('palmTrees')
+                                handleChoiceClick(3)
                             }}
                         >
-                            <Image style={styles.image} source={palmTrees} />
+                            <Image
+                                style={selectedChoice === 3 ? styles.imagesel : styles.image}
+                                source={palmTrees}
+                            />
                         </TouchableOpacity>
                     </ScrollView>
 
@@ -273,26 +284,26 @@ export const CreateRoom = () => {
                             </View>
                         </TouchableOpacity>
                     </View>
-
-                    {/* Create Playlist Button */}
-                    <TouchableOpacity
-                        style={{
-                            marginTop: 30,
-                            backgroundColor: COLORS.primary,
-                            borderRadius: 50,
-                            width: '75%',
-                            height: 45,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            alignSelf: 'center',
-                        }}
-                        onPress={handleStartListening}
-                    >
-                        <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium }}>
-                            Create Playlist
-                        </BoldText>
-                    </TouchableOpacity>
                 </ScrollView>
+                {/* Create Playlist Button */}
+                <TouchableOpacity
+                    style={{
+                        marginTop: 30,
+                        marginBottom: 30,
+                        backgroundColor: COLORS.primary,
+                        borderRadius: 50,
+                        width: '75%',
+                        height: 45,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                    }}
+                    onPress={handleStartListening}
+                >
+                    <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium }}>
+                        Create Playlist
+                    </BoldText>
+                </TouchableOpacity>
             </KeyboardAvoidingView>
         </View>
     )
@@ -310,6 +321,14 @@ export const styles = StyleSheet.create({
         height: 120,
         borderRadius: 20,
         marginRight: 10,
+    },
+    imagesel: {
+        width: 120,
+        height: 120,
+        borderRadius: 20,
+        marginRight: 10,
+        borderColor: COLORS.primary,
+        borderWidth: 5,
     },
     input: {
         color: COLORS.light,

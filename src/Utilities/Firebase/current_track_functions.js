@@ -34,6 +34,21 @@ export async function current_track_updateCurrentTrack({
     }
 }
 
+export async function current_track_removeFromRoom({ roomID }) {
+    if (roomID === null) {
+        throw new Error('roomId is missing in current track remove func.')
+    }
+    const updates = {}
+    updates[`/current_track/${roomID}`] = null
+    try {
+        await update(dbRef, updates)
+        // await console.log("room deleted successfully")
+    } catch (e) {
+        console.log(e)
+        throw e
+    }
+}
+
 export async function current_track_getCurrentTrack({ roomID }) {
     if (roomID === null) {
         throw new Error('roomID is missing in current_track_getCurrentTrack.')

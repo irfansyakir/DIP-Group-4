@@ -320,7 +320,10 @@ export function CurrentlyPlaying() {
                                         style={{
                                             color: 'white',
                                             fontSize: SIZES.medium,
+                                            width: 200,
                                         }}
+                                        numberOfLines={1}
+                                        ellipsizeMode='tail'
                                     >
                                         {songInfo.songTitle}
                                     </BoldText>

@@ -1,5 +1,6 @@
 import { AppContainer } from './src/App'
 import { useFonts } from 'expo-font'
+import {AutocompleteDropdownContextProvider} from "react-native-autocomplete-dropdown";
 // Blue, green, red and yellow is the default color for the container element and the container element itself is black because it is
 
 export default function App() {
@@ -13,5 +14,9 @@ export default function App() {
     return null
   }
 
-  return <AppContainer />
+  return (
+    <AutocompleteDropdownContextProvider>
+      <AppContainer />
+    </AutocompleteDropdownContextProvider>
+  )
 }

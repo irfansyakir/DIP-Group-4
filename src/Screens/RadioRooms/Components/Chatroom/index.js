@@ -12,7 +12,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { BackgroundImage } from '@rneui/base'
 import * as Clipboard from 'expo-clipboard'
 
-import chatroomBackground from '../../../../../assets/RadioRoomBackground.jpg'
+import goodvibes from '../../../../../assets/themes/goodvibes.jpg'
+import clouds from '../../../../../assets/themes/clouds.png'
+import palmtrees from '../../../../../assets/themes/palmtrees.png'
+import raindrops from '../../../../../assets/themes/raindrops.png'
 
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import MessageBubble from './Components/MessageBubble'
@@ -56,8 +59,7 @@ export const Chatroom = ({ route, navigation }) => {
     const [message, setMessage] = useState('') // State to store the message text
     const [chatMessages, setChatMessages] = useState([]) // State to store chat messages
     const [roomName, setRoomName] = useState('Loading...')
-    const [roomImage, setImage] = useState('')
-
+    const [roomImage, setRoomImage] = useState(goodvibes)
     const [numOfListeners, setNumOfListeners] = useState(0)
 
     const scrollViewRef = useRef() // Create a ref for the ScrollView
@@ -115,7 +117,19 @@ export const Chatroom = ({ route, navigation }) => {
         const roomDetails = await room_getRoom({ roomID: roomID })
         // console.log('Room Name: '+ roomDetails["room_name"]);
         setRoomName(roomDetails['room_name'])
-        setImage(roomDetails['image_url'])
+        let tempImg = roomDetails['themeImageUrl'].toLowerCase()
+        switch (tempImg) {
+            case 'clouds':
+                setRoomImage(clouds)
+                break
+            case 'palmtrees':
+                setRoomImage(palmtrees)
+                break
+            case 'raindrops':
+                setRoomImage(raindrops)
+                break
+        }
+
         // setRoomUserIDList(...roomUserIDList, Object.keys(roomDetails.users))
         if (roomDetails['dj'] && roomDetails['dj'].includes(userId)) {
             changeIsDJ(true)
@@ -123,7 +137,7 @@ export const Chatroom = ({ route, navigation }) => {
             changeIsDJ(false)
         }
         setNumOfListeners(Object.keys(roomDetails.users).length)
-        // console.log(roomUserIDList)
+        console.log('users: ' + Object.keys(roomDetails.users))
         // setRoomDJIDList(roomDetails["dj"] ? roomDetails["dj"] : [])
         // roomDetails["dj"].includes()
     }
@@ -345,7 +359,7 @@ export const Chatroom = ({ route, navigation }) => {
 
     return (
         <BackgroundImage
-            source={chatroomBackground}
+            source={roomImage}
             blurRadius={5}
             style={{
                 flex: 1,
@@ -363,8 +377,20 @@ export const Chatroom = ({ route, navigation }) => {
                     onPress={handleLeaveRoom}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                 >
-                    <Ionicons name='chevron-back' size={30} color={COLORS.light} />
-                    <BoldText style={{ color: COLORS.light, fontSize: SIZES.medium }}>
+                    <Ionicons
+                        name='chevron-back'
+                        size={30}
+                        color={COLORS.light}
+                        style={{ textShadowColor: COLORS.dark, textShadowRadius: 3 }}
+                    />
+                    <BoldText
+                        style={{
+                            color: COLORS.light,
+                            fontSize: SIZES.medium,
+                            textShadowColor: COLORS.dark,
+                            textShadowRadius: 3,
+                        }}
+                    >
                         Leave Room
                     </BoldText>
                 </TouchableOpacity>
@@ -390,7 +416,13 @@ export const Chatroom = ({ route, navigation }) => {
                                 })
                             }}
                         >
-                            <BoldText style={{ fontSize: 25, color: 'white' }}>{roomName}</BoldText>
+                            <BoldText
+                                style={{ fontSize: 25, color: 'white', width: 200 }}
+                                numberOfLines={1}
+                                ellipsizeMode='tail'
+                            >
+                                {roomName}
+                            </BoldText>
                         </TouchableOpacity>
 
                         <TouchableOpacity

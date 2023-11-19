@@ -81,6 +81,21 @@ export function useRoomListener(roomID) {
     return [room]
 }
 
+export function useRoomListenerAll() {
+    const [room, setRoom] = useState()
+    const roomRef = ref(db, '/rooms')
+
+    useEffect(() => {
+        return onValue(roomRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setRoom(data)
+        })
+    }, [])
+
+    return [room]
+}
+
 export function useUserListener(userID) {
     const [user, setUser] = useState()
     const userRef = ref(db, `/users/${userID}`)
