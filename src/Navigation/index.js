@@ -50,7 +50,7 @@ function HomeTabs() {
                         iconName = 'ios-home'
                     } else if (route.name === 'Search') {
                         iconName = 'ios-search'
-                    } else if (route.name === 'RadioRooms') {
+                    } else if (route.name === 'JamRooms') {
                         iconName = 'ios-folder'
                     } else if (route.name === 'Profile') {
                         iconName = 'ios-person'
@@ -88,7 +88,7 @@ function HomeTabs() {
             />
             {/*Really dont know if radioRoom can be unmounted or not. For now unmount*/}
             <Tab.Screen
-                name='RadioRooms'
+                name='JamRooms'
                 component={RadioRoomStackNavigator}
                 options={{ unmountOnBlur: true }}
             />

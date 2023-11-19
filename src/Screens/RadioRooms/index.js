@@ -212,7 +212,7 @@ export const RadioRooms = (currentPage) => {
         changeIsPlaying(false)
         changeRole('listener')
         navigation.navigate('Chatroom', {
-            roomID: roomId,
+            roomID: roomID,
         })
     }
 
@@ -230,7 +230,7 @@ export const RadioRooms = (currentPage) => {
             >
                 <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
                     <BoldText style={{ color: COLORS.light, fontSize: 25, marginTop: 20 }}>
-                        RadioRooms
+                        JamRooms
                     </BoldText>
                     {/* CREATE ROOM BUTTON */}
                     <TouchableOpacity
