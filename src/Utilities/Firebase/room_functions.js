@@ -89,6 +89,90 @@ export async function room_getRoom({ roomID }) {
     }
 }
 
+export async function room_fetchDJList({roomID}){
+  if (roomID === null) {
+    throw new Error("roomId is missing in room_fetchDJList.");
+  }
+  try {
+    const snapshot = await get(child(dbRef, `/rooms/${roomID}/dj`));
+    const djItems = snapshot.val();
+
+    if (djItems) {
+      const names = Object.values(djItems).map(item => item.username);
+      return names;
+    } else {
+      console.log('No data found under "dj"');
+      return [];
+    }
+  } catch (e) {
+    console.log(e)
+    throw e
+  }
+};
+
+export async function room_fetchDJUrlList({roomID}){
+  if (roomID === null) {
+    throw new Error("roomId is missing in room_fetchDJList.");
+  }
+  try {
+    const snapshot = await get(child(dbRef, `/rooms/${roomID}/dj`));
+    const djItems = snapshot.val();
+
+    if (djItems) {
+      const names = Object.values(djItems).map(item => item.profileUrl);
+      return names;
+    } else {
+      console.log('No data found under "dj"');
+      return [];
+    }
+  } catch (e) {
+    console.log(e)
+    throw e
+  }
+};
+
+export async function room_fetchUserList({roomID}){
+  if (roomID === null) {
+    throw new Error("roomId is missing in room_fetchDJList.");
+  }
+  try {
+    const snapshot = await get(child(dbRef, `/rooms/${roomID}/users`));
+    const djItems = snapshot.val();
+
+    if (djItems) {
+      const names = Object.values(djItems).map(item => item.username);
+      return names;
+    } else {
+      console.log('No data found under "dj"');
+      return [];
+    }
+  } catch (e) {
+    console.log(e)
+    throw e
+  }
+};
+
+export async function room_fetchUserUrlList({roomID}){
+  if (roomID === null) {
+    throw new Error("roomId is missing in room_fetchDJList.");
+  }
+  try {
+    const snapshot = await get(child(dbRef, `/rooms/${roomID}/users`));
+    const djItems = snapshot.val();
+
+    if (djItems) {
+      const names = Object.values(djItems).map(item => item.profileUrl);
+      return names;
+    } else {
+      console.log('No data found under "dj"');
+      return [];
+    }
+  } catch (e) {
+    console.log(e)
+    throw e
+  }
+};
+
 export async function room_removeRoom({ roomID }) {
     if (roomID === null) {
         throw new Error('roomId is missing in room_removeRoom.')
