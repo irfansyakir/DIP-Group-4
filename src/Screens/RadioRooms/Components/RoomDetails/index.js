@@ -15,14 +15,14 @@ import {
 import * as ImagePicker from 'expo-image-picker'
 import { useNavigation, StackActions } from '@react-navigation/native' // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient'
-import {room_updateDJ, room_updateRoom} from '../../../../Utilities/Firebase/room_functions'
+import { room_updateDJ, room_updateRoom } from '../../../../Utilities/Firebase/room_functions'
 import clouds from '../../../../../assets/themes/clouds.png'
 import raindrops from '../../../../../assets/themes/raindrops.png'
 import palmTrees from '../../../../../assets/themes/palmtrees.png'
 
 import { Ionicons } from '@expo/vector-icons'
 import { COLORS, SIZES } from '../../../../Constants'
-import { BoldText } from '../../../../Commons/UI/styledText'
+import { BoldText, MediumText } from '../../../../Commons/UI/styledText'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { room_getRoom } from '../../../../Utilities/Firebase/room_functions'
 import { room_removeUser } from '../../../../Utilities/Firebase/room_functions'
@@ -35,7 +35,7 @@ import {
 } from '../../../../Utilities/Firebase/current_track_functions'
 import { message_removeAllMessageInRoom } from '../../../../Utilities/Firebase/messages_functions'
 import { useMusicStore } from '../../../../Store/useMusicStore'
-import {CheckBox, Overlay} from "@rneui/base";
+import { CheckBox, Overlay } from '@rneui/base'
 
 export const RoomDetails = ({ route }) => {
     const navigation = useNavigation() // Initialize navigation
@@ -65,8 +65,7 @@ export const RoomDetails = ({ route }) => {
         await current_track_removeFromRoom({ roomID: roomID })
         await message_removeAllMessageInRoom({ roomID: roomID })
 
-        const popAction = StackActions.pop(2)
-        navigation.dispatch(popAction)
+        navigation.navigate('Home', { screen: 'HomeTab' })
     }
 
     // leave room
@@ -76,7 +75,7 @@ export const RoomDetails = ({ route }) => {
                 roomID: roomID,
                 userID: userID,
             })
-            navigation.navigate('RadioRoom')
+            navigation.navigate('Home', { screen: 'HomeTab' })
         } else {
             Alert.alert(
                 'Alert',
@@ -97,7 +96,7 @@ export const RoomDetails = ({ route }) => {
     const getRoomDetails = async () => {
         const roomDetails = await room_getRoom({ roomID: roomID })
         // console.log(roomDetails)
-        if(!roomDetails) return
+        if (!roomDetails) return
         setRoomName(roomDetails['room_name'])
         setRoomUserList(roomDetails['users'])
         setRoomDescription(roomDetails['room_description'])
@@ -136,8 +135,8 @@ export const RoomDetails = ({ route }) => {
     const [overlayVisible, setoverlayVisible] = useState(false)
 
     const toggleOverlay = () => {
-        setoverlayVisible(prevState => !prevState)
-        room_updateDJ({roomID: roomID, djArray: roomDJIDList})
+        setoverlayVisible((prevState) => !prevState)
+        room_updateDJ({ roomID: roomID, djArray: roomDJIDList })
     }
 
     const handleAddDJButton = () => {
@@ -159,7 +158,6 @@ export const RoomDetails = ({ route }) => {
                 style={{ flex: 1 }}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
             >
-
                 <TouchableOpacity
                     onPress={handleBackClick}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
@@ -179,7 +177,7 @@ export const RoomDetails = ({ route }) => {
                     </Text>
 
                     <View>
-                        <Text
+                        <BoldText
                             style={{
                                 color: COLORS.light,
                                 fontSize: 15,
@@ -188,44 +186,65 @@ export const RoomDetails = ({ route }) => {
                             }}
                         >
                             DJs:
-                        </Text>
+                        </BoldText>
                     </View>
-                    {roomDJIDList && roomDJIDList.map(djid => {
-                        if(!roomUserList) return
-                        for (const [key, value] of Object.entries(roomUserList)) {
-                            // console.log(key)
-                            if(key === djid) return (
-                              <View style={styles.header}>
-                                  <Text>{value['username']}</Text>
-                              </View>
-                            )
-                        }
-                        return null
-                    })}
+                    {roomDJIDList &&
+                        roomDJIDList.map((djid) => {
+                            if (!roomUserList) return
+                            for (const [key, value] of Object.entries(roomUserList)) {
+                                // console.log(key)
+                                if (key === djid)
+                                    return (
+                                        <MediumText
+                                            style={{
+                                                color: COLORS.light,
+                                                fontSize: 15,
+                                                paddingVertical: 6,
+                                                marginLeft: 10,
+                                                paddingLeft: 2,
+                                            }}
+                                        >
+                                            - {value['username']}
+                                        </MediumText>
+                                    )
+                            }
+                            return null
+                        })}
 
                     <View>
-                        <Text
+                        <BoldText
                             style={{
                                 color: COLORS.light,
                                 fontSize: 15,
                                 paddingVertical: 6,
                                 marginLeft: 10,
+                                marginTop: 40,
                             }}
                         >
                             Users:
-                        </Text>
+                        </BoldText>
                     </View>
 
-                    {roomUserList && Object.keys(roomUserList).map((id) => {
-                        for (const [key, value] of Object.entries(roomUserList)) {
-                            if(key === id) return (
-                              <View style={styles.header1}>
-                                  <Text>{value['username']}</Text>
-                              </View>
-                            )
-                        }
-                        return null
-                    })}
+                    {roomUserList &&
+                        Object.keys(roomUserList).map((id) => {
+                            for (const [key, value] of Object.entries(roomUserList)) {
+                                if (key === id)
+                                    return (
+                                        <MediumText
+                                            style={{
+                                                color: COLORS.light,
+                                                fontSize: 15,
+                                                paddingVertical: 6,
+                                                marginLeft: 10,
+                                                paddingLeft: 2,
+                                            }}
+                                        >
+                                            - {value['username']}
+                                        </MediumText>
+                                    )
+                            }
+                            return null
+                        })}
 
                     <TouchableOpacity
                         style={{
@@ -246,54 +265,98 @@ export const RoomDetails = ({ route }) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      style={{
-                          marginTop: 30,
-                          backgroundColor: COLORS.primary,
-                          borderRadius: 50,
-                          width: '75%',
-                          height: 45,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          alignSelf: 'center',
-                      }}
-                      onPress={handleAddDJButton}
+                        style={{
+                            marginTop: 30,
+                            backgroundColor: COLORS.primary,
+                            borderRadius: 50,
+                            width: '75%',
+                            height: 45,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            alignSelf: 'center',
+                        }}
+                        onPress={handleAddDJButton}
                     >
                         <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium }}>
                             Edit DJ
                         </BoldText>
                     </TouchableOpacity>
 
-                    <Overlay isVisible={overlayVisible} onBackdropPress={toggleOverlay}>
-                        <ScrollView>
-                            {
-                                roomUserList && Object.keys(roomUserList).map((id) => {
+                    <Overlay
+                        isVisible={overlayVisible}
+                        onBackdropPress={toggleOverlay}
+                        overlayStyle={{
+                            height: 500,
+                            width: 350,
+                            backgroundColor: COLORS.dark,
+                            display: 'flex',
+                            alignItems: 'center',
+                            borderRadius: 20,
+                        }}
+                    >
+                        <ScrollView
+                            style={{
+                                marginVertical: 50,
+                            }}
+                        >
+                            <BoldText
+                                style={{
+                                    color: COLORS.light,
+                                    fontSize: 18,
+                                    marginBottom: 20,
+                                }}
+                            >
+                                Update DJ access to the room:
+                            </BoldText>
+                            {roomUserList &&
+                                Object.keys(roomUserList).map((id) => {
                                     //map over all roomUserList objects
-                                    for (const [currUserID, value] of Object.entries(roomUserList)) {
-                                        if(currUserID === id && value['owner'] !== true) return (
-                                          <View style={styles.header1}>
-                                              <CheckBox
-                                                title='Click Here'
-                                                checked={roomDJIDList.includes(currUserID)}
-                                                onPress={() => {
-                                                    if(roomDJIDList.includes(currUserID)) {
-                                                        let temp = roomDJIDList
-                                                        temp = temp.filter(i => i !== currUserID)
-                                                        setRoomDJIDList(temp)
-                                                    } else {
-                                                        setRoomDJIDList(prevState => [...prevState, currUserID])
-                                                    }
-                                                }}
-                                              />
-                                              <Text>{value['username']}</Text>
-                                          </View>
-                                        )
+                                    for (const [currUserID, value] of Object.entries(
+                                        roomUserList
+                                    )) {
+                                        if (currUserID === id && value['owner'] !== true)
+                                            return (
+                                                <View
+                                                    style={{
+                                                        display: 'flex',
+                                                        backgroundColor: COLORS.dark,
+                                                        flexDirection: 'row',
+                                                        // justifyContent: 'center',
+                                                        alignItems: 'center',
+                                                        paddingRight: 20,
+                                                    }}
+                                                >
+                                                    <CheckBox
+                                                        checked={roomDJIDList.includes(currUserID)}
+                                                        onPress={() => {
+                                                            if (roomDJIDList.includes(currUserID)) {
+                                                                let temp = roomDJIDList
+                                                                temp = temp.filter(
+                                                                    (i) => i !== currUserID
+                                                                )
+                                                                setRoomDJIDList(temp)
+                                                            } else {
+                                                                setRoomDJIDList((prevState) => [
+                                                                    ...prevState,
+                                                                    currUserID,
+                                                                ])
+                                                            }
+                                                        }}
+                                                        containerStyle={{
+                                                            backgroundColor: COLORS.dark,
+                                                        }}
+                                                        checkedColor={COLORS.primary}
+                                                    />
+                                                    <MediumText style={{ color: 'white' }}>
+                                                        {value['username']}
+                                                    </MediumText>
+                                                </View>
+                                            )
                                     }
                                     return null
-                                })
-                            }
+                                })}
                         </ScrollView>
                     </Overlay>
-
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>
