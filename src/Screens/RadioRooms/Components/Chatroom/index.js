@@ -234,18 +234,13 @@ export const Chatroom = ({ route, navigation }) => {
                 text: 'OK',
                 onPress: async () => {
                     changeIsBroadcasting(false)
-                    const object = await room_checkIfOwner({ roomID: roomID, userID: userId })
-                    const isOwner = object ? object.owner : false
-                    if (isOwner) room_removeRoom({ roomID: roomID })
-                    else {
-                        room_removeUser({ roomID: roomID, userID: userId })
-                        const roomDetails = await room_getRoom({ roomID: roomID })
-                        const currDJ = roomDetails.dj
-                        const updatedDJ = currDJ.filter((id) => id !== userId)
-                        console.log(updatedDJ)
-                        room_updateDJ({ roomID: roomID, djArray: updatedDJ })
-                    }
+                    const roomDetails = await room_getRoom({ roomID: roomID })
+                    const currDJ = roomDetails.dj || []
+                    const updatedDJ = currDJ.filter((id) => id !== userId)
+                    console.log(updatedDJ)
+                    room_updateDJ({ roomID: roomID, djArray: updatedDJ })
                     changeCurrentPage('Home')
+                    changeRole('personal')
                     navigation.navigate('Home', { screen: 'HomeTab' })
                 },
             },
@@ -429,6 +424,7 @@ export const Chatroom = ({ route, navigation }) => {
                     >
                         <TouchableOpacity
                             onPress={() => {
+                                changeCurrentPage('RoomDetails')
                                 navigation.navigate('RoomDetails', {
                                     // roomName: roomName,
                                     // roomUserIDList: roomUserIDList,

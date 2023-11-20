@@ -99,11 +99,7 @@ export const Track = ({ navigation }) => {
                                 {songInfo.songAlbum}
                             </Text>
 
-                            <TouchableOpacity
-                                onPress={() => {
-                                    changeCurrentPage(navigation.navigate('SearchClick'))
-                                }}
-                            >
+                            <TouchableOpacity>
                                 <Icon style={{ color: '#FFF' }} name='more' size={25} />
                             </TouchableOpacity>
                         </View>

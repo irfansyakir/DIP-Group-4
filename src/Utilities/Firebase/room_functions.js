@@ -111,10 +111,7 @@ export async function room_addUser({ roomID, userID, username }) {
         throw new Error('One or more required parameters are missing or empty in room_addUser.')
     }
     const updates = {}
-    updates[`/rooms/${roomID}/users/${userID}`] = {
-        username: username,
-        owner: false,
-    }
+    updates[`/rooms/${roomID}/users/${userID}/username`] = username
 
     try {
         await update(dbRef, updates)

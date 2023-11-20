@@ -100,6 +100,7 @@ export const Play = ({ previousPage }) => {
     }
 
     const handleSlider = async (value) => {
+        console.log('from slider', role)
         if (role === 'broadcaster' || role === 'personal') {
             changePosition(value)
             await soundObject.setPositionAsync(value)
@@ -121,6 +122,7 @@ export const Play = ({ previousPage }) => {
     }
 
     const checkIfDJ = () => {
+        if (role === 'personal' || role === 'broadcaster') return
         if (!radioRoom_isDJ) {
             Alert.alert('Dj permissions', 'Not a DJ', [
                 { text: 'OK :(', onPress: () => console.log('OK Pressed') },
@@ -291,7 +293,7 @@ export const Play = ({ previousPage }) => {
                 minimumTrackTintColor='#FFFFFF'
                 maximumTrackTintColor='#777777'
                 thumbTintColor='#FFF'
-                // onSlidingStart={checkIfDJ}
+                onSlidingStart={checkIfDJ}
                 onTouchStart={checkIfDJ}
             />
 

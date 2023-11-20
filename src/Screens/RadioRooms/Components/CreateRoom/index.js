@@ -52,6 +52,7 @@ export const CreateRoom = () => {
     const resetPlayer = useMusicStore((state) => state.resetPlayer)
 
     const changeRadioRoom_roomId = useMusicStore((state) => state.changeRadioRoom_roomId)
+    const changeRadioRoom_isDJ = useMusicStore((state) => state.changeRadioRoom_isDJ)
 
     //have no idea what this is meant to do but its in the original code soo ill just recreate it
     //use: toggleSwitch(setIsEnabled2) or toggleSwitch(setIsEnabled)
@@ -114,6 +115,7 @@ export const CreateRoom = () => {
                 navigation.dispatch(
                     StackActions.replace('RoomQueue', { roomID: roomID, roomName: roomName })
                 )
+                changeRadioRoom_isDJ(true)
             })
         } else {
             console.log('no room name!')
