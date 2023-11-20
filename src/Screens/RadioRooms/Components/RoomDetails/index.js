@@ -15,7 +15,7 @@ import {
 import * as ImagePicker from 'expo-image-picker'
 import { useNavigation, StackActions } from '@react-navigation/native' // Import useNavigation
 import { LinearGradient } from 'expo-linear-gradient'
-import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions'
+import {room_updateDJ, room_updateRoom} from '../../../../Utilities/Firebase/room_functions'
 import clouds from '../../../../../assets/themes/clouds.png'
 import raindrops from '../../../../../assets/themes/raindrops.png'
 import palmTrees from '../../../../../assets/themes/palmtrees.png'
@@ -36,6 +36,7 @@ import {
 import { message_removeAllMessageInRoom } from '../../../../Utilities/Firebase/messages_functions'
 import palmtrees from '../../../../../assets/themes/palmtrees.png'
 import { useMusicStore } from '../../../../Store/useMusicStore'
+import {CheckBox, Overlay} from "@rneui/base";
 
 export const RoomDetails = ({ route }) => {
     const navigation = useNavigation() // Initialize navigation
@@ -49,22 +50,15 @@ export const RoomDetails = ({ route }) => {
     const [roomName, setRoomName] = useState('')
     const [roomDescription, setRoomDescription] = useState('')
     const [roomThemeImgURL, setRoomThemeImgURL] = useState('')
-    const [roomUserIDList, setRoomUserIDList] = useState([])
+    const [roomUserList, setRoomUserList] = useState({})
+
     const [roomProfileUrlList, setRoomProfileUrlList] = useState([])
     const [roomDJIDList, setRoomDJIDList] = useState([])
     const [roomDJProfileUrlList, setRoomDJProfileUrlList] = useState([])
     const insets = useSafeAreaInsets()
 
     useEffect(() => {
-        getRoomDetails().then()
-        console.log('roomID: ', roomID)
-        console.log('roomname: ', roomName)
-        console.log('roomdescription: ', roomDescription)
-        console.log('roomthemeURL: ', roomThemeImgURL)
-        console.log('roomUserIDs: ', roomUserIDList)
-        console.log('roomProfileUrls: ', roomProfileUrlList)
-        console.log('roomDJs: ', roomDJIDList)
-        console.log('roomDJProfileUrls: ', roomDJProfileUrlList)
+        getRoomDetails()
     }, [])
 
     const deleteRoom = async () => {
@@ -103,8 +97,10 @@ export const RoomDetails = ({ route }) => {
 
     const getRoomDetails = async () => {
         const roomDetails = await room_getRoom({ roomID: roomID })
-        console.log(roomDetails)
+        // console.log(roomDetails)
+        if(!roomDetails) return
         setRoomName(roomDetails['room_name'])
+        setRoomUserList(roomDetails['users'])
         setRoomDescription(roomDetails['room_description'])
         let tempImg = roomDetails['themeImageUrl'].toLowerCase()
         switch (tempImg) {
@@ -120,21 +116,41 @@ export const RoomDetails = ({ route }) => {
         }
         //every room MUST have a minimum of 1 user (that is the creator)
         //setRoomUserIDList(roomDetails["users"] ? roomDetails["users"] : [])
-        setRoomUserIDList(roomDetails['users']['username'] ? roomDetails['users']['username'] : [])
-        setRoomProfileUrlList(
-            roomDetails['users']['profileUrl'] ? roomDetails['users']['profileUrl'] : []
-        )
-        // console.log(roomUserIDList)
-        setRoomDJIDList(roomDetails['dj']['username'] ? roomDetails['dj']['username'] : [])
-        setRoomDJProfileUrlList(
-            roomDetails['dj']['profileUrl'] ? roomDetails['dj']['profileUrl'] : []
-        )
 
-        // ownership testing
-        console.log(typeof roomDetails['users'][userID]['owner'])
+        //roomUserIDList
+        //ignore
+
+        //setRoomProfileURL
+        //ignore this one
+
+        //setRoomDJIDList
+        // console.log(roomUserIDList)
+        setRoomDJIDList(roomDetails['dj'] ? roomDetails['dj'] : [])
+
+        //setRoomDJProfileURLList
+        //ignore this one
+
+        // setIsOwner
         setIsOwner(roomDetails['users'][userID]['owner'])
-        console.log('isOwner: ' + roomDetails['users'][userID]['owner'])
-        console.log('isOwnerState: ' + isOwner)
+    }
+
+    const [overlayVisible, setoverlayVisible] = useState(false)
+
+    const toggleOverlay = () => {
+        setoverlayVisible(prevState => !prevState)
+        room_updateDJ({roomID: roomID, djArray: roomDJIDList})
+    }
+
+    const handleAddDJButton = () => {
+        toggleOverlay()
+    }
+
+    const renderUsers = () => {
+        for (const [key, value] of Object.entries(roomUserList)) {
+            // console.log(key)
+            return (<Text>{value['username']}</Text>)
+        }
+        return null
     }
 
     return (
@@ -152,6 +168,7 @@ export const RoomDetails = ({ route }) => {
                 style={{ flex: 1 }}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} // Adjust the offset as needed
             >
+
                 <TouchableOpacity
                     onPress={handleBackClick}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
@@ -182,21 +199,19 @@ export const RoomDetails = ({ route }) => {
                             DJs:
                         </Text>
                     </View>
-                    <View style={styles.header}>
-                        <FlatList
-                            data={roomDJIDList}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item, index }) => (
-                                <View style={styles.row} key={index}>
-                                    <Image
-                                        source={{ uri: roomDJProfileUrlList[index] }}
-                                        style={styles.profileImage}
-                                    />
-                                    <Text style={styles.text}>{`${item}`}</Text>
-                                </View>
-                            )}
-                        />
-                    </View>
+                    {roomDJIDList && roomDJIDList.map(djid => {
+                        if(!roomUserList) return
+                        for (const [key, value] of Object.entries(roomUserList)) {
+                            // console.log(key)
+                            if(key === djid) return (
+                              <View style={styles.header}>
+                                  <Text>{value['username']}</Text>
+                              </View>
+                            )
+                        }
+                        return null
+                    })}
+
                     <View>
                         <Text
                             style={{
@@ -209,21 +224,17 @@ export const RoomDetails = ({ route }) => {
                             Users:
                         </Text>
                     </View>
-                    <View style={styles.header1}>
-                        <FlatList
-                            data={roomUserIDList}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item, index }) => (
-                                <View style={styles.row} key={index}>
-                                    <Image
-                                        source={{ uri: roomProfileUrlList[index] }}
-                                        style={styles.profileImage}
-                                    />
-                                    <Text style={styles.text}>{`${item}`}</Text>
-                                </View>
-                            )}
-                        />
-                    </View>
+
+                    {roomUserList && Object.keys(roomUserList).map((id) => {
+                        for (const [key, value] of Object.entries(roomUserList)) {
+                            if(key === id) return (
+                              <View style={styles.header1}>
+                                  <Text>{value['username']}</Text>
+                              </View>
+                            )
+                        }
+                        return null
+                    })}
 
                     <TouchableOpacity
                         style={{
@@ -242,6 +253,56 @@ export const RoomDetails = ({ route }) => {
                             Leave Group
                         </BoldText>
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={{
+                          marginTop: 30,
+                          backgroundColor: COLORS.primary,
+                          borderRadius: 50,
+                          width: '75%',
+                          height: 45,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          alignSelf: 'center',
+                      }}
+                      onPress={handleAddDJButton}
+                    >
+                        <BoldText style={{ color: COLORS.darkbluesat, fontSize: SIZES.medium }}>
+                            Edit DJ
+                        </BoldText>
+                    </TouchableOpacity>
+
+                    <Overlay isVisible={overlayVisible} onBackdropPress={toggleOverlay}>
+                        <ScrollView>
+                            {
+                                roomUserList && Object.keys(roomUserList).map((id) => {
+                                    //map over all roomUserList objects
+                                    for (const [currUserID, value] of Object.entries(roomUserList)) {
+                                        if(currUserID === id && value['owner'] !== true) return (
+                                          <View style={styles.header1}>
+                                              <CheckBox
+                                                title='Click Here'
+                                                checked={roomDJIDList.includes(currUserID)}
+                                                onPress={() => {
+                                                    if(roomDJIDList.includes(currUserID)) {
+                                                        let temp = roomDJIDList
+                                                        temp = temp.filter(i => i !== currUserID)
+                                                        setRoomDJIDList(temp)
+                                                    } else {
+                                                        setRoomDJIDList(prevState => [...prevState, currUserID])
+                                                    }
+                                                }}
+                                              />
+                                              <Text>{value['username']}</Text>
+                                          </View>
+                                        )
+                                    }
+                                    return null
+                                })
+                            }
+                        </ScrollView>
+                    </Overlay>
+
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>
@@ -257,18 +318,17 @@ export const styles = StyleSheet.create({
     },
     header: {
         backgroundColor: 'white',
-        borderTopRightRadius: 30,
-        borderTopLeftRadius: 30,
+        borderRadius: 30,
         padding: 10,
-        marginTop: 25,
+        marginVertical: 5,
         justifyContent: 'left',
         flexDirection: 'row',
     },
     header1: {
         backgroundColor: 'white',
-        borderBottomRightRadius: 30,
-        borderBottomLeftRadius: 30,
+        borderRadius: 30,
         padding: 10,
+        marginVertical: 5,
         justifyContent: 'left',
         flexDirection: 'row',
     },
