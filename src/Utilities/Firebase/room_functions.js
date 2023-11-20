@@ -12,6 +12,7 @@ export async function room_updateRoom({
     isPublic,
     users,
     isOthersAddSongs,
+    broadcaster,
 }) {
     if (
         roomID === null &&
@@ -60,6 +61,9 @@ export async function room_updateRoom({
     if (isOthersAddSongs !== undefined) {
         updates[`/rooms/${roomID}/isOthersAddSongs`] = isOthersAddSongs
     }
+    if (broadcaster !== undefined) {
+        updates[`/rooms/${roomID}/broadcaster`] = broadcaster
+    }
 
     try {
         await update(dbRef, updates)
@@ -92,6 +96,7 @@ export async function room_removeRoom({ roomID }) {
     const updates = {}
     updates[`/rooms/${roomID}`] = null
     updates[`/current_track/${roomID}`] = null
+    updates[`/room_queue/${roomID}`] = null
     try {
         await update(dbRef, updates)
         // await console.log("room deleted successfully")
@@ -106,15 +111,27 @@ export async function room_addUser({ roomID, userID, username }) {
         throw new Error('One or more required parameters are missing or empty in room_addUser.')
     }
     const updates = {}
-    updates[`/rooms/${roomID}/users/${userID}`] = {
-        username: username,
-        owner: false,
-    }
+    updates[`/rooms/${roomID}/users/${userID}/username`] = username
 
     try {
         await update(dbRef, updates)
     } catch (e) {
         console.log('error in room_addUser')
+        throw e
+    }
+}
+
+export async function room_updateDJ({ roomID, djArray }) {
+    if (roomID === null || djArray === null) {
+        throw new Error('One or more required parameters are missing or empty in room_addUser.')
+    }
+    const updates = {}
+    updates[`/rooms/${roomID}/dj`] = djArray
+
+    try {
+        await update(dbRef, updates)
+    } catch (e) {
+        console.log('error in room_updateDJ')
         throw e
     }
 }
@@ -158,6 +175,21 @@ export async function room_checkIfOwner({ roomID, userID }) {
         // return { username: "", owner: true }
     } catch (e) {
         console.error('error in room_checkIfOwner')
+        throw e
+    }
+}
+
+export async function room_changeBroadcaster({ roomID, userID }) {
+    if (roomID === null || userID === null) {
+        throw new Error('One or more required parameters are missing or empty in room_addUser.')
+    }
+    const updates = {}
+    updates[`/rooms/${roomID}/broadcaster`] = userID
+
+    try {
+        await update(dbRef, updates)
+    } catch (e) {
+        console.log('error in room_addUser')
         throw e
     }
 }

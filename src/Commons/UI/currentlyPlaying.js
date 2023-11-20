@@ -19,6 +19,8 @@ import {
 } from '../../Utilities/Firebase/user_queue_functions'
 import { current_track_updateCurrentTrack } from '../../Utilities/Firebase/current_track_functions'
 import { emptyQueue } from './toaster'
+import { useRoomBroadcasterListener } from '../../Utilities/Firebase/useFirebaseListener'
+import { room_changeBroadcaster } from '../../Utilities/Firebase/room_functions'
 
 const SongProgessBar = ({ currentTime, duration, currentPage }) => {
     return (
@@ -45,6 +47,8 @@ export function CurrentlyPlaying() {
     const screenWidth = Dimensions.get('window').width
     const accessToken = useAuthStore((state) => state.accessToken)
     const userId = useAuthStore((state) => state.userId)
+    const navigation = useNavigation()
+    const insets = useSafeAreaInsets()
 
     // music store
     const songInfo = useMusicStore((state) => state.songInfo)
@@ -68,10 +72,6 @@ export function CurrentlyPlaying() {
     const queue = useQueueStore((state) => state.queue)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const role = useQueueStore((state) => state.role)
-
-    // listener
-    const navigation = useNavigation()
-    const insets = useSafeAreaInsets()
 
     const play = async () => {
         try {
@@ -97,6 +97,7 @@ export function CurrentlyPlaying() {
         }
         const { sound } = await Audio.Sound.createAsync({ uri: uri })
         changeSoundObject(sound)
+        changeIsPlaying(true)
     }
 
     const getTrackData = async (trackId) => {
@@ -212,7 +213,7 @@ export function CurrentlyPlaying() {
                 timeOfLastPlayed: position,
             }).then()
         }
-    }, [position])
+    }, [position, role])
 
     useEffect(() => {
         if (soundObject && isPlaying) {
@@ -340,9 +341,12 @@ export function CurrentlyPlaying() {
                                 <TouchableOpacity
                                     onPress={() => {
                                         if (radioRoom_isDJ) {
-                                            changeIsPlaying(!isPlaying)
-                                            //since isPlaying does not update instantaneously, use !isPlaying as workaround
-                                            changeRadioRoom_isBroadcasting(!isPlaying)
+                                            room_changeBroadcaster({
+                                                roomID: roomId,
+                                                userID: userId,
+                                            }).then(() => {
+                                                changeIsPlaying(!isPlaying)
+                                            })
                                         } else {
                                             Alert.alert('Dj permissions', 'Not a DJ', [
                                                 {

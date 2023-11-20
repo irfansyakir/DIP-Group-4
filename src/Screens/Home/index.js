@@ -194,13 +194,13 @@ export const Home = () => {
     }
 
     useEffect(() => {
-        if (role === 'broadcaster' || (role === 'listener' && soundObject)) {
+        if (soundObject && (role === 'broadcaster' || role === 'listener')) {
             soundObject.pauseAsync().then()
             soundObject.unloadAsync().then()
             changeSoundObject(null)
             changePosition(0)
-            changeRole('personal')
         }
+        changeRole('personal')
         getRecentlyPlayed()
         getPlaylistData()
         getUserProfile()

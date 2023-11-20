@@ -165,3 +165,17 @@ export function useRoomCurrentQueue(roomID) {
 
     return currentQueue
 }
+
+export function useRoomBroadcasterListener(roomID) {
+    const [broadcasterId, setBroadcasterId] = useState()
+    const broadcasterRef = ref(db, `/rooms/${roomID}/broadcaster`)
+
+    useEffect(() => {
+        return onValue(broadcasterRef, (snapshot) => {
+            const data = snapshot.val()
+            setBroadcasterId(data)
+        })
+    }, [])
+
+    return broadcasterId
+}

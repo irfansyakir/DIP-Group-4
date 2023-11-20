@@ -14,7 +14,6 @@ import { useMusicStore } from '../../../../Store/useMusicStore'
 import { useAuthStore } from '../../../../Store/useAuthStore'
 import { useQueueStore } from '../../../../Store/useQueueStore'
 // Firebase
-import { useRoomTrackURLListener } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { useRoomCurrentQueue } from '../../../../Utilities/Firebase/useFirebaseListener'
 import {
     userQueue_getRoomQueue,
@@ -25,6 +24,8 @@ import { GetTrack } from '../../../../Utilities/SpotifyApi/Utils'
 import { useEffect, useState } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { current_track_updateCurrentTrack } from '../../../../Utilities/Firebase/current_track_functions'
+import { room_updateRoom } from '../../../../Utilities/Firebase/room_functions'
+import { notDJAlert } from '../../../../Commons/UI/toaster.js'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../../../assets/icomoon/selection.json'),
@@ -35,6 +36,7 @@ const Icon = createIconSetFromIcoMoon(
 export const RoomQueue = ({ route, navigation }) => {
     const { roomID, roomName } = route.params || {}
     const accessToken = useAuthStore((state) => state.accessToken)
+    const userId = useAuthStore((state) => state.userId)
     const changeQueue = useQueueStore((state) => state.changeQueue)
     const storeCurrTrack = useMusicStore((state) => state.songInfo)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
@@ -49,6 +51,7 @@ export const RoomQueue = ({ route, navigation }) => {
     const changeRoomId = useMusicStore((state) => state.changeRadioRoom_roomId)
     const changeRole = useQueueStore((state) => state.changeRole)
     const storeQueue = useRoomCurrentQueue(roomID) || []
+    const radioRoom_isDJ = useMusicStore((state) => state.radioRoom_isDJ)
 
     useEffect(() => {
         changeCurrentPage('RoomQueue')
@@ -124,6 +127,11 @@ export const RoomQueue = ({ route, navigation }) => {
             userRoomQueueList: roomQueue.length === 1 ? [] : roomQueue.slice(1),
         })
 
+        await room_updateRoom({
+            roomID: roomID,
+            broadcaster: userId,
+        })
+
         changeRoomId(roomID)
         changeCurrentPage('Chatroom')
         changeRole('broadcaster')
@@ -131,11 +139,9 @@ export const RoomQueue = ({ route, navigation }) => {
     }
 
     const handleBackButton = () => {
-        if (!soundObject) errorCloseQueueToast()
-        else {
-            navigation.navigate('Chatroom', { roomID: roomID })
-            changeCurrentPage('Chatroom')
-        }
+        if (!soundObject && radioRoom_isDJ) errorCloseQueueToast()
+        navigation.navigate('Chatroom', { roomID: roomID })
+        changeCurrentPage('Chatroom')
     }
 
     const delSongfromRoomQ = (item) => {
@@ -225,10 +231,7 @@ export const RoomQueue = ({ route, navigation }) => {
                     paddingTop: 16,
                 }}
             >
-                <TouchableOpacity
-                    style={{ justifyContent: 'center', opacity: !soundObject ? 0 : '' }}
-                    onPress={handleBackButton}
-                >
+                <TouchableOpacity style={{ justifyContent: 'center' }} onPress={handleBackButton}>
                     <Icon style={styles.icon} name='down' />
                 </TouchableOpacity>
 
@@ -264,7 +267,10 @@ export const RoomQueue = ({ route, navigation }) => {
                     <TouchableOpacity
                         style={styles.secButtons}
                         onPress={() => {
-                            navigation.navigate('AddSong', { roomID: roomID })
+                            if (radioRoom_isDJ) navigation.navigate('AddSong', { roomID: roomID })
+                            else {
+                                notDJAlert()
+                            }
                         }}
                     >
                         <Text
@@ -277,7 +283,7 @@ export const RoomQueue = ({ route, navigation }) => {
                         </Text>
                     </TouchableOpacity>
                 </View>
-                {!soundObject && (
+                {!soundObject && radioRoom_isDJ && (
                     <View style={styles.butContainer}>
                         <TouchableOpacity
                             style={[styles.secButtons, { backgroundColor: COLORS.primary }]}

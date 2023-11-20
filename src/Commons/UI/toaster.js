@@ -30,4 +30,14 @@ const emptyQueue = () => {
     })
 }
 
-export { errorCloseQueueToast, addQueue, emptyQueue }
+const notDJAlert = () => {
+    Toast.show({
+        type: 'info',
+        text1: 'Sorry!',
+        text2: 'Only DJ can add songs to queue!🎧',
+        visibilityTime: 2000,
+        topOffset: 70,
+    })
+}
+
+export { errorCloseQueueToast, addQueue, emptyQueue, notDJAlert }

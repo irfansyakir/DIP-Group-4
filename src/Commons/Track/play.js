@@ -19,6 +19,7 @@ import {
 import { current_track_updateCurrentTrack } from '../../Utilities/Firebase/current_track_functions'
 import { emptyQueue } from '../UI/toaster'
 import { useNavigation } from '@react-navigation/native'
+import { room_changeBroadcaster } from '../../Utilities/Firebase/room_functions'
 
 const Icon = createIconSetFromIcoMoon(
     require('../../../assets/icomoon/selection.json'),
@@ -84,7 +85,12 @@ export const Play = ({ previousPage }) => {
             changeIsPlaying(!isPlaying)
         } else {
             if (radioRoom_isDJ) {
-                changeIsPlaying(!isPlaying)
+                room_changeBroadcaster({
+                    roomID: roomId,
+                    userID: userId,
+                }).then(() => {
+                    changeIsPlaying(!isPlaying)
+                })
             } else {
                 Alert.alert('Dj permissions', 'Not a DJ', [
                     { text: 'OK :(', onPress: () => console.log('OK Pressed') },
@@ -99,13 +105,27 @@ export const Play = ({ previousPage }) => {
             await soundObject.setPositionAsync(value)
         } else {
             if (radioRoom_isDJ) {
-                changePosition(value)
-                await soundObject.setPositionAsync(value)
+                room_changeBroadcaster({
+                    roomID: roomId,
+                    userID: userId,
+                }).then(() => {
+                    changePosition(value)
+                    soundObject.setPositionAsync(value)
+                })
             } else {
                 Alert.alert('Dj permissions', 'Not a DJ', [
                     { text: 'OK :(', onPress: () => console.log('OK Pressed') },
                 ])
             }
+        }
+    }
+
+    const checkIfDJ = () => {
+        if (role === 'personal' || role === 'broadcaster') return
+        if (!radioRoom_isDJ) {
+            Alert.alert('Dj permissions', 'Not a DJ', [
+                { text: 'OK :(', onPress: () => console.log('OK Pressed') },
+            ])
         }
     }
 
@@ -115,17 +135,21 @@ export const Play = ({ previousPage }) => {
             await soundObject.setPositionAsync(0)
             changePosition(0)
             changeIsPlaying(true)
-        } else {
-            if (radioRoom_isDJ) {
+        } else if (radioRoom_isDJ) {
+            room_changeBroadcaster({
+                roomID: roomId,
+                userID: userId,
+            }).then(() => {
                 changeIsPlaying(false)
-                await soundObject.setPositionAsync(0)
-                changePosition(0)
-                changeIsPlaying(true)
-            } else {
-                Alert.alert('Dj permissions', 'Not a DJ', [
-                    { text: 'OK :(', onPress: () => console.log('OK Pressed') },
-                ])
-            }
+                soundObject.setPositionAsync(0).then(() => {
+                    changePosition(0)
+                    changeIsPlaying(true)
+                })
+            })
+        } else {
+            Alert.alert('Dj permissions', 'Not a DJ', [
+                { text: 'OK :(', onPress: () => console.log('OK Pressed') },
+            ])
         }
     }
 
@@ -167,6 +191,43 @@ export const Play = ({ previousPage }) => {
         }
     }
 
+    const nextSongRoom = async () => {
+        const roomQueue = await userQueue_getRoomQueue({ roomID: roomId })
+        if (!roomQueue || roomQueue.length === 0) {
+            await soundObject.setPositionAsync(0)
+            await current_track_updateCurrentTrack({
+                roomID: roomId,
+                trackURL: null,
+                isCurrentTrackPlaying: false,
+                songInfo: null,
+            })
+            changePosition(0)
+            soundObject.unloadAsync()
+            changeSoundObject(null)
+            changeCurrentPage('RoomQueue')
+            navigation.navigate('RoomQueue', { roomID: roomId })
+            emptyQueue()
+        } else {
+            const { coverUrl, songAlbum, songArtist, songTitle, songId, preview_url } =
+                await getTrackData(roomQueue[0].id)
+            await current_track_updateCurrentTrack({
+                roomID: roomId,
+                trackURL: preview_url,
+                songInfo: {
+                    coverUrl: coverUrl,
+                    songAlbum: songAlbum,
+                    songArtist: songArtist,
+                    songTitle: songTitle,
+                    songId: songId,
+                },
+            })
+            await userQueue_updateRoomQueue({
+                roomID: roomId,
+                userRoomQueueList: roomQueue.length === 1 ? [] : roomQueue.slice(1),
+            })
+        }
+    }
+
     const handleNext = async () => {
         if (role === 'personal') {
             console.log('personal queue next')
@@ -202,40 +263,14 @@ export const Play = ({ previousPage }) => {
             }
         } else {
             if (role === 'broadcaster') {
-                const roomQueue = await userQueue_getRoomQueue({ roomID: roomId })
-                if (!roomQueue || roomQueue.length === 0) {
-                    await soundObject.setPositionAsync(0)
-                    await current_track_updateCurrentTrack({
-                        roomID: roomId,
-                        trackURL: null,
-                        isCurrentTrackPlaying: false,
-                        songInfo: null,
-                    })
-                    changePosition(0)
-                    soundObject.unloadAsync()
-                    changeSoundObject(null)
-                    changeCurrentPage('RoomQueue')
-                    navigation.navigate('RoomQueue', { roomID: roomId })
-                    emptyQueue()
-                } else {
-                    const { coverUrl, songAlbum, songArtist, songTitle, songId, preview_url } =
-                        await getTrackData(roomQueue[0].id)
-                    await current_track_updateCurrentTrack({
-                        roomID: roomId,
-                        trackURL: preview_url,
-                        songInfo: {
-                            coverUrl: coverUrl,
-                            songAlbum: songAlbum,
-                            songArtist: songArtist,
-                            songTitle: songTitle,
-                            songId: songId,
-                        },
-                    })
-                    await userQueue_updateRoomQueue({
-                        roomID: roomId,
-                        userRoomQueueList: roomQueue.length === 1 ? [] : roomQueue.slice(1),
-                    })
-                }
+                nextSongRoom()
+            } else if (radioRoom_isDJ) {
+                room_changeBroadcaster({
+                    roomID: roomId,
+                    userID: userId,
+                }).then(() => {
+                    nextSongRoom()
+                })
             } else {
                 Alert.alert('Dj permissions', 'Not a DJ', [
                     { text: 'OK :(', onPress: () => console.log('OK Pressed') },
@@ -257,6 +292,8 @@ export const Play = ({ previousPage }) => {
                 minimumTrackTintColor='#FFFFFF'
                 maximumTrackTintColor='#777777'
                 thumbTintColor='#FFF'
+                onSlidingStart={checkIfDJ}
+                onTouchStart={checkIfDJ}
             />
 
             {/* NUMBERS */}

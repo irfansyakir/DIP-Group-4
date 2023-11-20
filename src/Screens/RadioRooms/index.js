@@ -15,7 +15,9 @@ import { useQueueStore } from '../../Store/useQueueStore'
 import {
     room_addUser,
     room_getAllRooms,
+    room_getRoom,
     room_removeRoom,
+    room_updateDJ,
 } from '../../Utilities/Firebase/room_functions'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BoldText } from '../../Commons/UI/styledText'
@@ -53,6 +55,7 @@ export const RadioRooms = (currentPage) => {
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeRole = useQueueStore((state) => state.changeRole)
+    const changeRadioRoom_roomId = useMusicStore((state) => state.changeRadioRoom_roomId)
 
     useEffect(() => {
         //Flatlist wont update no matter what. Improv using focus blur to update every time.
@@ -207,7 +210,13 @@ export const RadioRooms = (currentPage) => {
                 console.error(err)
             }
         }
+        const roomDetails = await room_getRoom({ roomID: roomID })
+        if (roomDetails && roomDetails.isOthersAddSongs) {
+            const currDJ = roomDetails.dj || []
+            await room_updateDJ({ roomID: roomID, djArray: [...currDJ, userID] })
+        }
         await room_addUser({ roomID: roomID, userID: userID, username: username })
+        changeRadioRoom_roomId(roomID)
         changeCurrentPage('Chatroom')
         changeIsPlaying(false)
         changeRole('listener')
@@ -332,15 +341,17 @@ export const RadioRooms = (currentPage) => {
                     }}
                 />
 
-                <BoldText
-                    style={{
-                        fontSize: SIZES.large,
-                        color: COLORS.primary,
-                        marginTop: 20,
-                    }}
-                >
-                    Your Rooms
-                </BoldText>
+                {joinedRooms.length !== 0 && (
+                    <BoldText
+                        style={{
+                            fontSize: SIZES.large,
+                            color: COLORS.primary,
+                            marginTop: 20,
+                        }}
+                    >
+                        Your Rooms
+                    </BoldText>
+                )}
                 <FlatList
                     data={joinedRooms}
                     extraData={toggleFlatlistReRender}

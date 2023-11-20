@@ -26,6 +26,7 @@ import {
 import {
     useIsCurrentTrackPlayingListener,
     useMessageListener,
+    useRoomBroadcasterListener,
     useRoomSongInfoListener,
     useRoomTrackURLListener,
     useTimeOfLastPlayedListener,
@@ -36,6 +37,7 @@ import {
     room_removeUser,
     room_checkIfOwner,
     room_removeRoom,
+    room_updateDJ,
 } from '../../../../Utilities/Firebase/room_functions'
 import { BoldText } from '../../../../Commons/UI/styledText'
 import { useMusicStore } from '../../../../Store/useMusicStore'
@@ -99,6 +101,7 @@ export const Chatroom = ({ route, navigation }) => {
     const roomTimeOfLastPlayed = useTimeOfLastPlayedListener(roomID)
     const roomCurrentTrackURL = useRoomTrackURLListener(roomID)
     const roomSongInfo = useRoomSongInfoListener(roomID)
+    const broadcasterId = useRoomBroadcasterListener(roomID)
 
     // ------------------------------------------------------------------------------------------------- Room Queue Initializations
 
@@ -231,10 +234,10 @@ export const Chatroom = ({ route, navigation }) => {
                 text: 'OK',
                 onPress: async () => {
                     changeIsBroadcasting(false)
-                    const object = await room_checkIfOwner({ roomID: roomID, userID: userId })
-                    const isOwner = object ? object.owner : false
-                    if (isOwner) room_removeRoom({ roomID: roomID })
-                    else room_removeUser({ roomID: roomID, userID: userId })
+                    const roomDetails = await room_getRoom({ roomID: roomID })
+                    const currDJ = roomDetails.dj || []
+                    const updatedDJ = currDJ.filter((id) => id !== userId)
+                    room_updateDJ({ roomID: roomID, djArray: updatedDJ })
                     changeCurrentPage('Home')
                     navigation.navigate('Home', { screen: 'HomeTab' })
                 },
@@ -348,7 +351,7 @@ export const Chatroom = ({ route, navigation }) => {
     useEffect(() => {
         if (roomTimeOfLastPlayed === null) return
         if (role === 'listener') {
-            if (Math.abs(position - roomTimeOfLastPlayed) > 500) {
+            if (Math.abs(position - roomTimeOfLastPlayed) > 2000) {
                 if (!soundObject) return
                 console.log('updating to', roomTimeOfLastPlayed)
                 changePosition(roomTimeOfLastPlayed)
@@ -356,6 +359,17 @@ export const Chatroom = ({ route, navigation }) => {
             }
         }
     }, [roomTimeOfLastPlayed, soundObject])
+
+    useEffect(() => {
+        if (!broadcasterId) return
+        console.log(role, broadcasterId)
+        if (role === 'broadcaster' && broadcasterId !== userId) {
+            changeRole('listener')
+        }
+        if (role === 'listener' && broadcasterId === userId) {
+            changeRole('broadcaster')
+        }
+    }, [broadcasterId])
 
     return (
         <BackgroundImage
@@ -408,6 +422,7 @@ export const Chatroom = ({ route, navigation }) => {
                     >
                         <TouchableOpacity
                             onPress={() => {
+                                changeCurrentPage('RoomDetails')
                                 navigation.navigate('RoomDetails', {
                                     // roomName: roomName,
                                     // roomUserIDList: roomUserIDList,

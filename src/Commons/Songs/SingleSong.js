@@ -80,7 +80,7 @@ export default function SingleSong({ item }) {
             id: item.id,
             title: item.title,
             artist: item.artist,
-            img: item.img,
+            img: item.coverUrl,
         }
         const newQueue = [addedSong, ...storeQueue]
 

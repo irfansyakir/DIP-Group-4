@@ -48,7 +48,10 @@ export const useMusicStore = create((set) => ({
     changeRadioRoom_isDJ: (isDJ) => set(() => ({ radioRoom_isDJ: isDJ })),
     changeRadioRoom_isBroadcasting: (isBroadcasting) =>
         set(() => ({ radioRoom_isBroadcasting: isBroadcasting })),
-    changeRadioRoom_roomId: (roomId) => set(() => ({ radioRoom_roomId: roomId })),
+    changeRadioRoom_roomId: (roomId) => {
+        console.log('changeRoomId', roomId)
+        set(() => ({ radioRoom_roomId: roomId }))
+    },
 
     resetPlayer: () => {
         set(() => ({
