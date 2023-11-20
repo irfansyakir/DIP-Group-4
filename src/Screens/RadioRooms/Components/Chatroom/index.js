@@ -237,10 +237,8 @@ export const Chatroom = ({ route, navigation }) => {
                     const roomDetails = await room_getRoom({ roomID: roomID })
                     const currDJ = roomDetails.dj || []
                     const updatedDJ = currDJ.filter((id) => id !== userId)
-                    console.log(updatedDJ)
                     room_updateDJ({ roomID: roomID, djArray: updatedDJ })
                     changeCurrentPage('Home')
-                    changeRole('personal')
                     navigation.navigate('Home', { screen: 'HomeTab' })
                 },
             },
@@ -353,7 +351,7 @@ export const Chatroom = ({ route, navigation }) => {
     useEffect(() => {
         if (roomTimeOfLastPlayed === null) return
         if (role === 'listener') {
-            if (Math.abs(position - roomTimeOfLastPlayed) > 500) {
+            if (Math.abs(position - roomTimeOfLastPlayed) > 2000) {
                 if (!soundObject) return
                 console.log('updating to', roomTimeOfLastPlayed)
                 changePosition(roomTimeOfLastPlayed)

@@ -100,7 +100,6 @@ export const Play = ({ previousPage }) => {
     }
 
     const handleSlider = async (value) => {
-        console.log('from slider', role)
         if (role === 'broadcaster' || role === 'personal') {
             changePosition(value)
             await soundObject.setPositionAsync(value)

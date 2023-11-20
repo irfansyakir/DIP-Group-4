@@ -218,7 +218,7 @@ export function CurrentlyPlaying() {
     useEffect(() => {
         if (soundObject && isPlaying) {
             // Periodically update the playback position
-            const intervalId = setInterval(() => updatePosition(intervalId), 2000)
+            const intervalId = setInterval(() => updatePosition(intervalId), 500)
             // Clean up the interval when the component unmounts
             return () => clearInterval(intervalId)
         }

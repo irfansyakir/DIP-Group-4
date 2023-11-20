@@ -199,8 +199,8 @@ export const Home = () => {
             soundObject.unloadAsync().then()
             changeSoundObject(null)
             changePosition(0)
-            changeRole('personal')
         }
+        changeRole('personal')
         getRecentlyPlayed()
         getPlaylistData()
         getUserProfile()
