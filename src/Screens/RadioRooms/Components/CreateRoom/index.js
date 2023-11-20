@@ -51,6 +51,8 @@ export const CreateRoom = () => {
     const soundObject = useMusicStore((state) => state.soundObject)
     const resetPlayer = useMusicStore((state) => state.resetPlayer)
 
+    const changeRadioRoom_roomId = useMusicStore((state) => state.changeRadioRoom_roomId)
+
     //have no idea what this is meant to do but its in the original code soo ill just recreate it
     //use: toggleSwitch(setIsEnabled2) or toggleSwitch(setIsEnabled)
     const toggleSwitch = (callbackFunction) => {
@@ -89,15 +91,6 @@ export const CreateRoom = () => {
     const handleStartListening = async () => {
         // console.log(roomName)
         if (roomName) {
-            console.log('creating room: ' + roomName)
-            console.log(
-                'room details: ',
-                roomDescription,
-                themeImageUrl,
-                isPublic,
-                isOthersAddSongs
-            )
-
             if (soundObject) {
                 await soundObject.pauseAsync()
                 await soundObject.unloadAsync()
@@ -117,6 +110,7 @@ export const CreateRoom = () => {
                     },
                 },
             }).then((roomID) => {
+                changeRadioRoom_roomId(roomID)
                 navigation.dispatch(
                     StackActions.replace('RoomQueue', { roomID: roomID, roomName: roomName })
                 )

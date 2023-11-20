@@ -1,6 +1,11 @@
 import { useRoomListener } from '../../../../Utilities/Firebase/useFirebaseListener'
 import { useEffect, useState } from 'react'
-import { room_addUser, room_removeRoom } from '../../../../Utilities/Firebase/room_functions'
+import {
+    room_addUser,
+    room_removeRoom,
+    room_updateDJ,
+    room_getRoom,
+} from '../../../../Utilities/Firebase/room_functions'
 import { useMusicStore } from '../../../../Store/useMusicStore'
 import { useNavigation } from '@react-navigation/native'
 import { userQueue_getRoomQueue } from '../../../../Utilities/Firebase/user_queue_functions'
@@ -28,6 +33,7 @@ export function FlatlistRenderItem({
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeRole = useQueueStore((state) => state.changeRole)
+    const changeRadioRoom_roomId = useMusicStore((state) => state.changeRadioRoom_roomId)
 
     useEffect(() => {
         if (!roomListener) return
@@ -56,7 +62,13 @@ export function FlatlistRenderItem({
                 console.error(err)
             }
         }
+        const roomDetails = await room_getRoom({ roomID: roomID })
+        if (roomDetails && roomDetails.isOthersAddSongs) {
+            const currDJ = roomDetails.dj || []
+            await room_updateDJ({ roomID: roomID, djArray: [...currDJ, userID] })
+        }
         await room_addUser({ roomID: roomID, userID: userID, username: username })
+        changeRadioRoom_roomId(roomID)
         changeCurrentPage('Chatroom')
         changeIsPlaying(false)
         changeRole('listener')

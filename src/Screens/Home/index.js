@@ -194,7 +194,7 @@ export const Home = () => {
     }
 
     useEffect(() => {
-        if (role === 'broadcaster' || (role === 'listener' && soundObject)) {
+        if (soundObject && (role === 'broadcaster' || role === 'listener')) {
             soundObject.pauseAsync().then()
             soundObject.unloadAsync().then()
             changeSoundObject(null)
