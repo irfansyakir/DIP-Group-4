@@ -1,124 +1,181 @@
-import {onValue, ref} from "firebase/database";
-import {db} from "../../../firebaseConfig"
-import {useEffect, useState} from "react";
+import { onValue, ref } from 'firebase/database'
+import { db } from '../../../firebaseConfig'
+import { useEffect, useState } from 'react'
+import { current_track_getCurrentTrack } from './current_track_functions'
 
-export function useRoomTrackIDListener(roomID){
-  const [trackID, setTrackID] = useState()
-  const trackIDRef = ref(db, `/current_track/${roomID}/track_id`)
+export function useRoomTrackURLListener(roomID) {
+    const [trackURL, setTrackURL] = useState()
+    const trackURLRef = ref(db, `/current_track/${roomID}/track_url`)
+    current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
+        if (currentTrack) {
+            setTrackURL(currentTrack.track_url)
+        }
+    })
 
-  useEffect(() => {
-    return onValue(trackIDRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setTrackID(data)
-    });
-  }, []);
+    useEffect(() => {
+        return onValue(trackURLRef, (snapshot) => {
+            const data = snapshot.val()
+            setTrackURL(data)
+        })
+    }, [])
 
-  return [trackID]
+    return trackURL
 }
 
-export function useUserCurrentQueue(userID){
-  const [userQueue, setUserQueue] = useState()
-  const userQueueRef = ref(db, `/user_queue/${userID}`)
+export function useRoomSongInfoListener(roomID) {
+    const [songInfo, setSongInfo] = useState()
+    const songInfoRef = ref(db, `/current_track/${roomID}/song_info`)
 
-  useEffect(() => {
-    return onValue(userQueueRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setUserQueue(data)
-    });
-  }, []);
+    useEffect(() => {
+        return onValue(songInfoRef, (snapshot) => {
+            const data = snapshot.val()
+            setSongInfo(data)
+        })
+    }, [])
 
-  return [userQueue]
+    return songInfo
 }
 
-export function useMessageListener(roomID){
-  const [messages, setMessages] = useState()
-  const messagesRef = ref(db, `/messages/${roomID}`)
+export function useUserCurrentQueue(userID) {
+    const [userQueue, setUserQueue] = useState()
+    const userQueueRef = ref(db, `/user_queue/${userID}`)
 
-  useEffect(() => {
-    return onValue(messagesRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setMessages(data)
-    });
-  }, []);
+    useEffect(() => {
+        return onValue(userQueueRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setUserQueue(data)
+        })
+    }, [])
 
-  return [messages]
+    return [userQueue]
 }
 
-export function useRoomListener(roomID){
-  const [room, setRoom] = useState()
-  const roomRef = ref(db, `/rooms/${roomID}`)
+export function useMessageListener(roomID) {
+    const [messages, setMessages] = useState()
+    const messagesRef = ref(db, `/messages/${roomID}`)
 
-  useEffect(() => {
-    return onValue(roomRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setRoom(data)
-    });
-  }, []);
+    useEffect(() => {
+        return onValue(messagesRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setMessages(data)
+        })
+    }, [])
 
-  return [room]
+    return [messages]
 }
 
-export function useUserListener(userID){
-  const [user, setUser] = useState()
-  const userRef = ref(db, `/users/${userID}`)
+export function useRoomListener(roomID) {
+    const [room, setRoom] = useState()
+    const roomRef = ref(db, `/rooms/${roomID}`)
 
-  useEffect(() => {
-    return onValue(userRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setUser(data)
-    });
-  }, []);
+    useEffect(() => {
+        return onValue(roomRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setRoom(data)
+        })
+    }, [])
 
-  return [user]
+    return [room]
 }
 
-export function useTimeOfLastPlayedListener(roomID){
-  const [timeOfLastPlayed, setTimeOfLastPlayed] = useState(0)
+export function useRoomListenerAll() {
+    const [room, setRoom] = useState()
+    const roomRef = ref(db, '/rooms')
 
-  const timeOfLastPlayedRef = ref(db, `/current_track/${roomID}/time_of_last_played`)
+    useEffect(() => {
+        return onValue(roomRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setRoom(data)
+        })
+    }, [])
 
-  useEffect(() => {
-    return onValue(timeOfLastPlayedRef, (snapshot) => {
-      const data = snapshot.val();
-      setTimeOfLastPlayed(data)
-    });
-  }, []);
-
-  return [timeOfLastPlayed]
-}
-export function useIsCurrentTrackPlayingListener(roomID){
-  const [isCurrentTrackPlaying, setIsCurrentTrackPlaying] = useState(false)
-
-  const isCurrentTrackPlayingRef = ref(db, `/current_track/${roomID}/is_current_track_playing`)
-
-  useEffect(() => {
-    return onValue(isCurrentTrackPlayingRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setIsCurrentTrackPlaying(data)
-    });
-  }, []);
-
-  return [isCurrentTrackPlaying]
+    return [room]
 }
 
-export function useRoomCurrentQueue(roomID){
-  const [currentQueue, setCurrentQueue] = useState()
-  const currentQueueRef = ref(db, `/queue/${roomID}`)
+export function useUserListener(userID) {
+    const [user, setUser] = useState()
+    const userRef = ref(db, `/users/${userID}`)
 
-  useEffect(() => {
-    return onValue(currentQueueRef, (snapshot) => {
-      const data = snapshot.val();
-      // console.log(data)
-      setCurrentQueue(data)
-    });
-  }, []);
+    useEffect(() => {
+        return onValue(userRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setUser(data)
+        })
+    }, [])
 
-  return [currentQueue]
+    return [user]
 }
 
+export function useTimeOfLastPlayedListener(roomID) {
+    const [timeOfLastPlayed, setTimeOfLastPlayed] = useState(null)
+
+    const timeOfLastPlayedRef = ref(db, `/current_track/${roomID}/time_of_last_played`)
+
+    useEffect(() => {
+        current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
+            if (currentTrack) {
+                setTimeOfLastPlayed(currentTrack.time_of_last_played)
+            }
+        })
+        return onValue(timeOfLastPlayedRef, (snapshot) => {
+            const data = snapshot.val()
+            setTimeOfLastPlayed(data)
+        })
+    }, [])
+
+    return timeOfLastPlayed
+}
+export function useIsCurrentTrackPlayingListener(roomID) {
+    const [isCurrentTrackPlaying, setIsCurrentTrackPlaying] = useState(false)
+
+    const isCurrentTrackPlayingRef = ref(db, `/current_track/${roomID}/is_current_track_playing`)
+    current_track_getCurrentTrack({ roomID: roomID }).then((currentTrack) => {
+        if (currentTrack) {
+            setIsCurrentTrackPlaying(currentTrack.is_current_track_playing)
+        }
+    })
+
+    useEffect(() => {
+        return onValue(isCurrentTrackPlayingRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setIsCurrentTrackPlaying(data)
+        })
+    }, [])
+
+    return isCurrentTrackPlaying
+}
+
+export function useRoomCurrentQueue(roomID) {
+    const [currentQueue, setCurrentQueue] = useState()
+    const currentQueueRef = ref(db, `/room_queue/${roomID}`)
+
+    useEffect(() => {
+        return onValue(currentQueueRef, (snapshot) => {
+            const data = snapshot.val()
+            // console.log(data)
+            setCurrentQueue(data)
+        })
+    }, [])
+
+    return currentQueue
+}
+
+export function useRoomBroadcasterListener(roomID) {
+    const [broadcasterId, setBroadcasterId] = useState()
+    const broadcasterRef = ref(db, `/rooms/${roomID}/broadcaster`)
+
+    useEffect(() => {
+        return onValue(broadcasterRef, (snapshot) => {
+            const data = snapshot.val()
+            setBroadcasterId(data)
+        })
+    }, [])
+
+    return broadcasterId
+}

@@ -18,10 +18,16 @@ export const useMusicStore = create((set) => ({
 
     radioRoom_isDJ: false,
     radioRoom_isBroadcasting: false,
-    radioRoom_roomID: '',
+    radioRoom_roomId: '',
 
-    changeCurrentPage: (page) => set(() => ({ currentPage: page })),
-    changeSoundObject: (sound) => set(() => ({ soundObject: sound })),
+    changeCurrentPage: (page) => {
+        console.log('changePage', page)
+        set(() => ({ currentPage: page }))
+    },
+    changeSoundObject: (sound) => {
+        set(() => ({ soundObject: sound }))
+        // console.log('created sound object', sound)
+    },
     addToPlaylist: (track) => set(() => ({ playlist: [...playlist, track] })),
     clearPlaylist: () => set(() => ({ playlist: [] })),
     changeIsPlaying: (isPlaying) => set(() => ({ isPlaying: isPlaying })),
@@ -40,5 +46,27 @@ export const useMusicStore = create((set) => ({
     changeIsRepeat: (isRepeat) => set(() => ({ isRepeat: isRepeat })),
 
     changeRadioRoom_isDJ: (isDJ) => set(() => ({ radioRoom_isDJ: isDJ })),
-    changeRadioRoom_isBroadcasting: (isDJ) => set(() => ({ radioRoom_isBroadcasting: isDJ })),
+    changeRadioRoom_isBroadcasting: (isBroadcasting) =>
+        set(() => ({ radioRoom_isBroadcasting: isBroadcasting })),
+    changeRadioRoom_roomId: (roomId) => {
+        console.log('changeRoomId', roomId)
+        set(() => ({ radioRoom_roomId: roomId }))
+    },
+
+    resetPlayer: () => {
+        set(() => ({
+            soundObject: null,
+            isPlaying: false,
+            songInfo: {
+                coverUrl: '',
+                songTitle: '',
+                songArtist: '',
+                songAlbum: '',
+                songId: '',
+            },
+            position: 0,
+            duration: 0,
+            isRepeat: false,
+        }))
+    },
 }))

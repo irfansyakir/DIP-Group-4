@@ -3,14 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { COLORS } from '../../Constants'
-import {
-    FlatList,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-} from 'react-native'
+import { FlatList, Image, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { AntDesign } from '@expo/vector-icons'
 import { GetRecentlyPlayed } from '../../Utilities/SpotifyApi/Utils'
 import { GetUserPlaylists } from '../../Utilities/SpotifyApi/Utils'
@@ -24,10 +17,10 @@ import { GetTrack } from '../../Utilities/SpotifyApi/Utils'
 import { Audio } from 'expo-av'
 import { debounce } from '../../Utilities/Functions/debounce'
 import {
-  userQueue_getQueue,
-  userQueue_updateQueue,
+    userQueue_getQueue,
+    userQueue_updateQueue,
 } from '../../Utilities/Firebase/user_queue_functions'
-import {useProfileStore} from "../../Store/useProfileStore";
+import { useProfileStore } from '../../Store/useProfileStore'
 
 //Danish's Home Page
 //Needs testing first
@@ -48,6 +41,7 @@ export const Home = () => {
     const soundObject = useMusicStore((state) => state.soundObject)
     const changeSongInfo = useMusicStore((state) => state.changeSongInfo)
     const changeSoundObject = useMusicStore((state) => state.changeSoundObject)
+    const changePosition = useMusicStore((state) => state.changePosition)
     const changeIsPlaying = useMusicStore((state) => state.changeIsPlaying)
     const changeCurrentPage = useMusicStore((state) => state.changeCurrentPage)
     const navigation = useNavigation()
@@ -59,6 +53,8 @@ export const Home = () => {
     const changeProfileURL = useProfileStore((state) => state.changeProfileUrl)
 
     const changeQueue = useQueueStore((state) => state.changeQueue)
+    const role = useQueueStore((state) => state.role)
+    const changeRole = useQueueStore((state) => state.changeRole)
 
     const handleTrackClick = (trackId) => {
         const createSoundObject = async (uri) => {
@@ -139,82 +135,84 @@ export const Home = () => {
     }
 
     const getUserProfile = async () => {
-      try {
-          const userProfileData = await GetCurrentUserProfile({
-              accessToken: accessToken,
-          })
+        try {
+            const userProfileData = await GetCurrentUserProfile({
+                accessToken: accessToken,
+            })
+            const currUserId = userProfileData.id
+            changeUserId(currUserId)
+            setUserId(currUserId)
 
-          console.log(userProfileData)
-
-          const currUserId = userProfileData.id
-          changeUserId(currUserId)
-          setUserId(currUserId)
-
-          changeDisplayName(userProfileData.display_name)
-          changeProfileURL(userProfileData.images[1].url)
-
-      } catch (error) {
-          console.error(error)   
-      }
+            changeDisplayName(userProfileData.display_name)
+            changeProfileURL(userProfileData.images[1].url)
+        } catch (error) {
+            console.error(error)
+        }
     }
 
-      // Getting queue from API and saving in queueStore
+    // Getting queue from API and saving in queueStore
     const getQueue = async () => {
-      const currQueue = []
+        const currQueue = []
 
-      try {
-          const queueData = await GetQueue({
-              accessToken: accessToken,
-          })
+        try {
+            const queueData = await GetQueue({
+                accessToken: accessToken,
+            })
 
-          console.log(queueData)
+            if (queueData.currently_playing) {
+                const artistNames = queueData.currently_playing.artists
+                    .map((artist) => artist.name)
+                    .join(', ')
+                const currPlaying = {
+                    id: queueData.currently_playing.id,
+                    title: queueData.currently_playing.name,
+                    artist: artistNames,
+                    img: queueData.currently_playing.album.images[0].url,
+                }
 
-          if(queueData.currently_playing){
-              const artistNames = queueData.currently_playing.artists.map(artist => artist.name).join(', ');
-              const currPlaying = {
-                  id: queueData.currently_playing.id,
-                  title: queueData.currently_playing.name,
-                  artist: artistNames,
-                  img: queueData.currently_playing.album.images[0].url
-              };
+                await queueData.queue.map((curr) => {
+                    const queueArtistNames = curr.artists.map((artist) => artist.name).join(', ')
 
-              await queueData.queue.map((curr) => {
-                const queueArtistNames = curr.artists.map(artist => artist.name).join(', ');
-
-                currQueue.push({
-                    id: curr.id,
-                    title: curr.name,
-                    artist: queueArtistNames,
-                    img: curr.album.images[0].url
+                    currQueue.push({
+                        id: curr.id,
+                        title: curr.name,
+                        artist: queueArtistNames,
+                        img: curr.album.images[0].url,
                     })
-              })
-          }
+                })
+            }
 
-          changeQueue(currQueue)
+            changeQueue(currQueue)
 
-          userQueue_updateQueue({
-              userID: userId,
-              userQueueList: currQueue,
-          })
-
-      } catch (error) {
-        console.error(error)
-      }
+            userQueue_updateQueue({
+                userID: userId,
+                userQueueList: currQueue,
+            })
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     useEffect(() => {
+        if (soundObject && (role === 'broadcaster' || role === 'listener')) {
+            soundObject.pauseAsync().then()
+            soundObject.unloadAsync().then()
+            changeSoundObject(null)
+            changePosition(0)
+        }
+        changeRole('personal')
         getRecentlyPlayed()
         getPlaylistData()
         getUserProfile()
+        changeCurrentPage('Home')
     }, [])
 
     useEffect(() => {
-      if (userId) {
-        userQueue_getQueue({userID: userId}).then(checkQueue => {
-          console.log(checkQueue)
-          checkQueue ? changeQueue(checkQueue) : getQueue()
-        });
-      }
+        if (userId) {
+            userQueue_getQueue({ userID: userId }).then((checkQueue) => {
+                checkQueue ? changeQueue(checkQueue) : getQueue()
+            })
+        }
     }, [userId])
 
     return (
@@ -339,11 +337,7 @@ export const Home = () => {
                                     navigation.navigate('Playlist', playlist.id)
                                 }}
                             >
-                                {renderTableRow(
-                                    playlist.photoUrl,
-                                    playlist.name,
-                                    playlist.owner
-                                )}
+                                {renderTableRow(playlist.photoUrl, playlist.name, playlist.owner)}
                             </TouchableOpacity>
                         )
                     })}
@@ -363,9 +357,7 @@ const styles = StyleSheet.create({
 })
 
 const renderTableRow = (imageSource, title, description) => (
-    <View
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
-    >
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
         <Image
             style={{
                 width: 50,
@@ -389,9 +381,7 @@ const renderTableRow = (imageSource, title, description) => (
             >
                 {title}
             </Text>
-            <Text style={{ fontSize: 13, color: '#B3B3B3' }}>
-                {description}
-            </Text>
+            <Text style={{ fontSize: 13, color: '#B3B3B3' }}>{description}</Text>
         </View>
     </View>
 )
