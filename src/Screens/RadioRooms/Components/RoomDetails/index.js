@@ -34,7 +34,6 @@ import {
     current_track_updateCurrentTrack,
 } from '../../../../Utilities/Firebase/current_track_functions'
 import { message_removeAllMessageInRoom } from '../../../../Utilities/Firebase/messages_functions'
-import palmtrees from '../../../../../assets/themes/palmtrees.png'
 import { useMusicStore } from '../../../../Store/useMusicStore'
 import {CheckBox, Overlay} from "@rneui/base";
 
@@ -108,7 +107,7 @@ export const RoomDetails = ({ route }) => {
                 setRoomThemeImgURL(clouds)
                 break
             case 'palmtrees':
-                setRoomThemeImgURL(palmtrees)
+                setRoomThemeImgURL(palmTrees)
                 break
             case 'raindrops':
                 setRoomThemeImgURL(raindrops)
@@ -143,14 +142,6 @@ export const RoomDetails = ({ route }) => {
 
     const handleAddDJButton = () => {
         toggleOverlay()
-    }
-
-    const renderUsers = () => {
-        for (const [key, value] of Object.entries(roomUserList)) {
-            // console.log(key)
-            return (<Text>{value['username']}</Text>)
-        }
-        return null
     }
 
     return (
