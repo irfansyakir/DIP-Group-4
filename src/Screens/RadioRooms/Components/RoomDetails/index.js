@@ -65,8 +65,7 @@ export const RoomDetails = ({ route }) => {
         await current_track_removeFromRoom({ roomID: roomID })
         await message_removeAllMessageInRoom({ roomID: roomID })
 
-        const popAction = StackActions.pop(2)
-        navigation.dispatch(popAction)
+        navigation.navigate('Home', { screen: 'HomeTab' })
     }
 
     // leave room
@@ -76,7 +75,7 @@ export const RoomDetails = ({ route }) => {
                 roomID: roomID,
                 userID: userID,
             })
-            navigation.navigate('RadioRoom')
+            navigation.navigate('Home', { screen: 'HomeTab' })
         } else {
             Alert.alert(
                 'Alert',
