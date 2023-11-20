@@ -65,7 +65,9 @@ export function FlatlistRenderItem({
         const roomDetails = await room_getRoom({ roomID: roomID })
         if (roomDetails && roomDetails.isOthersAddSongs) {
             const currDJ = roomDetails.dj || []
-            await room_updateDJ({ roomID: roomID, djArray: [...currDJ, userID] })
+            if (!currDJ.find(i => i === userID)) {
+                await room_updateDJ({roomID: roomID, djArray: [...currDJ, userID]})
+            }
         }
         await room_addUser({ roomID: roomID, userID: userID, username: username })
         changeRadioRoom_roomId(roomID)

@@ -56,7 +56,7 @@ export const RoomDetails = ({ route }) => {
     const insets = useSafeAreaInsets()
 
     useEffect(() => {
-        getRoomDetails()
+        getRoomDetails().then()
         console.log('roomID: ', roomID)
         console.log('roomname: ', roomName)
         console.log('roomdescription: ', roomDescription)
