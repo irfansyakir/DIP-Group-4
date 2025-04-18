@@ -1,36 +1,117 @@
-# RadioRoom App
+# JamStream (RadioRoom)
 
-## Abstract
+![JamStream Logo](./assets/icon.png)
 
-Embark on a dynamic musical journey with our innovate music streaming app. Dive into a personalised experience by creating and exploring
-custom rooms, each uniquely themed to cater to diverse tastes. With a focus on user autonomy, the app allows individuals to actively share their music
-preferences with the community. Explore a diverse array of music, and enjoy a memorable musical adventure with our innovative streaming platform.
+## Overview
 
-EXTENSIVE LIBRARY
+JamStream is a music streaming mobile application that enhances the music listening experience by adding robust social features. The app combines high-quality music streaming capabilities with interactive social elements that allow users to connect over shared musical interests.
 
-Discover a wide range of music, embracing various genres and artists
+## Features
 
-CHAT WITH FRIENDS!
+- **Genre-specific Music Chatrooms**: Discover new music through themed discussion rooms
+- **Collaborative Playlists**: Create and edit playlists with friends in real-time
+- **Live "Listening Parties"**: Listen to the same music in sync with other users
+- **Profile Customization**: Showcase your music taste highlights and preferences
+- **Friend Recommendation System**: Connect with users based on musical compatibility
+- **Spotify Integration**: Seamless integration with Spotify's extensive music library
 
-Enjoy chatting with friends in private rooms or join the online community for lively discussions on music in public rooms
+## Technologies
 
-PERSONALISED ROOMS
+- **Frontend**: React Native, Expo
+- **Backend**: Firebase Realtime Database
+- **Authentication**: Firebase Authentication
+- **Music API**: Spotify API
+- **State Management**: Zustand
+- **UI Components**: React Navigation, React Native Elements
 
-Craft your own personalised rooms or explore themed spaces created by others.
-Whether you seek tranquility or energy, our diverse range of rooms cater to every taste.
+## Prerequisites
 
-## Installation
-Use node version **18.17.1**
+- Node.js 14.x or newer
+- Expo CLI
+- Firebase account
+- Spotify Developer API credentials
 
-Use the Expo Cli
-## Setting Up
-Using console:
+## Getting Started
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/irfansyakir/DIP-Group-4.git
+   cd DIP-Group-4
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Environment Setup:
+   - Create a `.env` file in the root directory with the following variables:
+   ```
+   EXPO_PUBLIC_SPOTIFY_API_CLIENT_ID='your_spotify_client_id'
+   EXPO_PUBLIC_SPOTIFY_API_CLIENT_SECRET='your_spotify_client_secret'
+   ```
+
+4. Start the development server:
+   ```bash
+   npm start
+   ```
+
+### Firebase Configuration
+
+The application uses Firebase for backend services. To configure your own Firebase instance:
+
+1. Create a project in Firebase Console
+2. Enable Authentication and Realtime Database
+3. Update the `firebaseConfig.js` file with your Firebase credentials
+
+## Usage
+
+- Start the application using Expo:
+  ```bash
+  expo start --port 8081
+  ```
+- Connect with your Expo Go app on your mobile device or use an emulator
+
+## Challenges and Solutions
+
+### Challenges:
+- Integrating Spotify's API with custom social features while maintaining a seamless user experience
+- Ensuring real-time chat and collaborative features worked smoothly
+
+### Solutions:
+- Used Firebase Realtime Database for handling all social interactions
+- Created a custom wrapper around Spotify's Web Playback SDK that integrated with our social features
+
+## Project Structure
+
 ```
-  git clone https://github.com/aftanza/DIP-Group-4
+DIP-Group-4/
+├── assets/              # Images, fonts, and other static assets
+├── src/                 # Source code
+│   ├── components/      # Reusable UI components
+│   ├── screens/         # Application screens
+│   ├── navigation/      # Navigation configuration
+│   ├── services/        # API and service integrations
+│   ├── utils/           # Utility functions
+│   ├── hooks/           # Custom React hooks
+│   ├── store/           # State management (Zustand)
+│   └── App.js           # Main application component
+├── firebaseConfig.js    # Firebase configuration
+├── app.json             # Expo configuration
+└── package.json         # Project dependencies
 ```
 
-Then do `npm install` inside the project
-## Adding Features
-create a new branch from `development`
+## Contributors
 
-rename the branch to `[name]/[feature]`
+- [List of contributors]
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- Spotify API for providing music streaming capabilities
+- Firebase for backend services
