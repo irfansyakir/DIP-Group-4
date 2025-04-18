@@ -1,6 +1,6 @@
 # JamStream (RadioRoom)
 
-![JamStream Logo](./assets/icon.png)
+
 
 ## Overview
 
